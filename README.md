@@ -171,9 +171,23 @@ Clase2/evidencias/MER_ERP.png
 
 Las evidencias correspondientes a la Clase 2 se encuentran en:
 
-```text
-Clase2/evidencias/
-```
+## Evidencias Clase 2
+
+### Validación de PHP y Composer
+
+![PHP y Composer](Clase2/evidencias/01_php_composer.png)
+
+### Estructura del proyecto Laravel
+
+![Estructura Laravel](Clase2/evidencias/02_estructura_laravel.png)
+
+### Laravel funcionando
+
+![Página Laravel](Clase2/evidencias/03_paginalaravel.png)
+
+### Modelo Entidad-Relación del ERP
+
+![MER ERP](Clase2/evidencias/MER_ERP.png)
 
 Incluyen:
 
