@@ -56,3 +56,128 @@ Base de datos: conectarse desde phpMyAdmin o desde su código PHP usando:
    Contraseña: root_password (o dev_password)
    Base de datos: seminario_db
 ```
+---
+
+# Clase 2 - Framework Laravel
+
+Durante la Clase 2 se realizó la instalación y configuración inicial de **Laravel** como framework para el desarrollo del sistema ERP.
+
+El proyecto propuesto corresponde a un **ERP para la Administración de Propiedad Horizontal**, orientado a organizaciones que administran una o varias copropiedades.
+
+Inicialmente, el ERP contempla tres módulos principales:
+
+- Gestión de PQRS.
+- Gestión de mantenimiento.
+- Gestión documental.
+
+La estructura se plantea de forma modular para permitir la incorporación de nuevos módulos en futuras etapas del proyecto.
+
+## Instalación de Laravel
+
+### Requisitos
+
+Para el desarrollo se utilizaron las siguientes herramientas:
+
+- PHP 8.5
+- Composer 2
+- Laravel 13
+- Git
+- Visual Studio Code
+
+### Crear el proyecto Laravel
+
+El proyecto fue creado mediante Composer:
+
+```bash
+composer create-project laravel/laravel sge
+```
+
+Ingresar al proyecto:
+
+```bash
+cd sge
+```
+
+### Verificar la estructura
+
+Para comprobar la estructura generada por Laravel:
+
+```bash
+ls -la
+```
+
+Entre los principales directorios creados se encuentran:
+
+```text
+app/
+bootstrap/
+config/
+database/
+public/
+resources/
+routes/
+storage/
+```
+
+### Ejecutar Laravel
+
+El servidor de desarrollo de Laravel se inicia mediante Artisan:
+
+```bash
+php artisan serve
+```
+
+Por defecto, la aplicación queda disponible en:
+
+```text
+http://127.0.0.1:8000
+```
+
+Para detener el servidor:
+
+```text
+Ctrl + C
+```
+
+## Análisis del ERP
+
+El análisis inicial del proyecto se encuentra en:
+
+```text
+Clase2/ANALISIS_EMPRESA.md
+```
+
+La estructura general propuesta es:
+
+```text
+Organización
+    │
+    └── Copropiedad
+            │
+            ├── Gestión de PQRS
+            ├── Gestión de Mantenimiento
+            └── Gestión Documental
+```
+
+## Modelo Entidad-Relación
+
+El primer Modelo Entidad-Relación (MER) del ERP se encuentra en:
+
+```text
+Clase2/evidencias/MER_ERP.png
+```
+
+## Evidencias
+
+Las evidencias correspondientes a la Clase 2 se encuentran en:
+
+```text
+Clase2/evidencias/
+```
+
+Incluyen:
+
+- Validación de PHP y Composer.
+- Estructura del proyecto Laravel.
+- Página inicial de Laravel funcionando.
+- Primer Modelo Entidad-Relación del ERP.
