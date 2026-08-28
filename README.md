@@ -195,3 +195,154 @@ Incluyen:
 - Estructura del proyecto Laravel.
 - Página inicial de Laravel funcionando.
 - Primer Modelo Entidad-Relación del ERP.
+
+# Clase 3 - Laravel Sail, MVC y Artisan
+
+En esta clase se profundizó en la estructura de Laravel, el patrón MVC, el uso de Artisan y la ejecución del proyecto mediante Laravel Sail y Docker.
+
+## Estructura principal de Laravel
+
+Laravel organiza el proyecto en diferentes directorios, cada uno con una responsabilidad específica:
+
+- `app/`: contiene la lógica principal de la aplicación, incluyendo modelos y controladores.
+- `bootstrap/`: contiene los archivos necesarios para iniciar Laravel.
+- `config/`: almacena los archivos de configuración.
+- `database/`: contiene migraciones, seeders y factories.
+- `public/`: punto de entrada público de la aplicación mediante `index.php`.
+- `resources/`: contiene vistas Blade y recursos del frontend.
+- `routes/`: contiene la definición de las rutas de la aplicación.
+- `storage/`: almacena logs, caché y archivos generados.
+- `vendor/`: contiene las dependencias instaladas mediante Composer.
+- `.env`: contiene las variables de configuración del entorno local.
+
+## Patrón MVC
+
+Laravel utiliza el patrón Modelo - Vista - Controlador (MVC):
+
+- **Modelo:** representa y gestiona los datos de la aplicación.
+- **Vista:** presenta la información al usuario.
+- **Controlador:** recibe las solicitudes y coordina la comunicación entre modelos y vistas.
+
+## Flujo de una petición
+
+El flujo básico de una petición en Laravel es:
+
+```text
+Usuario
+   │
+   ▼
+public/index.php
+   │
+   ▼
+routes/web.php
+   │
+   ▼
+Controlador
+   │
+   ▼
+Modelo / Base de datos
+   │
+   ▼
+Controlador
+   │
+   ▼
+Vista Blade
+   │
+   ▼
+Respuesta HTML
+   │
+   ▼
+Usuario
+```
+
+## Artisan
+
+Artisan es la interfaz de línea de comandos de Laravel. Permite realizar tareas como crear controladores, ejecutar migraciones y administrar diferentes componentes del framework.
+
+Durante la práctica se utilizaron, entre otros:
+
+```bash
+php artisan list
+php artisan help make:controller
+php artisan make:controller PruebaController
+```
+
+## Laravel Sail
+
+Laravel Sail proporciona un entorno de desarrollo basado en Docker.
+
+Para este proyecto se configuraron los servicios de Laravel y MySQL. Debido a que otros proyectos locales utilizan algunos de los puertos predeterminados, se configuraron puertos alternativos para evitar conflictos.
+
+El entorno se inicia mediante:
+
+```bash
+./vendor/bin/sail up -d
+```
+
+Y puede detenerse mediante:
+
+```bash
+./vendor/bin/sail down
+```
+
+## Variables de entorno
+
+El archivo `.env` permite configurar el comportamiento de la aplicación según el entorno sin modificar directamente el código fuente.
+
+Para la conexión de Laravel con MySQL mediante Sail se utilizan variables como:
+
+```text
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=sail
+DB_PASSWORD=password
+```
+
+También se configuraron puertos alternativos para el entorno local:
+
+```text
+APP_PORT=8082
+FORWARD_DB_PORT=3307
+VITE_PORT=5174
+```
+
+El archivo `.env` contiene configuración local y no debe almacenarse en el repositorio Git.
+
+## Migraciones
+
+Las migraciones fueron ejecutadas dentro del entorno de Sail mediante:
+
+```bash
+./vendor/bin/sail php artisan migrate
+```
+
+Se verificó posteriormente la creación de las tablas en la base de datos `laravel`.
+
+## Evidencias Clase 3
+
+### PHP y Composer
+
+![PHP y Composer](Clase3/evidencias/01_php_composer.png)
+
+### Estructura del proyecto
+
+![Estructura del proyecto](Clase3/evidencias/02_estructura_proyecto.png)
+
+### Artisan
+
+![Artisan](Clase3/evidencias/03_artisan_list.png)
+
+### Laravel Sail y Docker
+
+![Laravel Sail](Clase3/evidencias/04_docker_sail.png)
+
+### Configuración del entorno
+
+![Configuración ENV](Clase3/evidencias/05_configuracion_env.png)
+
+### Laravel modificado
+
+![Laravel modificado](Clase3/evidencias/06_laravel_modificado.png)
+
