@@ -346,3 +346,14 @@ Se verificó posteriormente la creación de las tablas en la base de datos `lara
 
 ![Laravel modificado](Clase3/evidencias/06_laravel_modificado.png)
 
+
+
+## Proyecto académico: Resuelve ERP
+
+El proyecto de trabajo se encuentra en `resuelve-erp/`, incorporado como archivos
+del repositorio académico a partir de Resuelve, commit `5e6996f`. Incluye la
+adaptación de datos de demostración para Gestión Urbana de Copropiedades S.A.S.
+y el Conjunto Residencial Altos del Parque.
+
+Consultar `resuelve-erp/README.md` para la aplicación y
+`resuelve-erp/docs/integracion-academica.md` para las notas del entorno académico.

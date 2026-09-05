@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      APP_ENV: testing
+      APP_DEBUG: "false"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f
+        with:
+          php-version: "8.3"
+          extensions: mbstring, dom, fileinfo, pdo_sqlite, sqlite3, gd, zip, intl
+          coverage: none
+
+      - name: Generar APP_KEY temporal
+        shell: bash
+        run: |
+          generated_key="$(openssl rand -base64 32)"
+          printf '::add-mask::base64:%s\n' "$generated_key"
+          printf 'APP_KEY=base64:%s\n' "$generated_key" >> "$GITHUB_ENV"
+
+      - name: Validar APP_KEY temporal
+        shell: bash
+        run: |
+          [[ "$APP_KEY" == base64:* ]]
+          decoded_length="$(printf '%s' "${APP_KEY#base64:}" | openssl base64 -d -A | wc -c | tr -d ' ')"
+          [[ "$decoded_length" == 32 ]]
+
+      - name: Localizar caché de Composer
+        id: composer-cache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Restaurar caché de Composer
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-php-8.3-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-8.3-composer-
+
+      - name: Instalar dependencias PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Configurar Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar dependencias frontend
+        run: npm ci
+
+      - name: Compilar frontend
+        run: npm run build
+
+      - name: Comprobar formato del diff
+        run: git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
+
+      - name: Compilar vistas Blade
+        run: php artisan view:cache
+
+      - name: Limpiar vistas compiladas
+        run: php artisan view:clear
+
+      - name: Ejecutar pruebas
+        run: php artisan test
