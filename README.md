@@ -357,3 +357,74 @@ y el Conjunto Residencial Altos del Parque.
 
 Consultar `resuelve-erp/README.md` para la aplicación y
 `resuelve-erp/docs/integracion-academica.md` para las notas del entorno académico.
+
+# Clase 4 - Autenticación, navegación e interfaz de Resuelve ERP
+
+Durante la Clase 4 se trabajó sobre el proyecto académico **Resuelve ERP**, ubicado en la carpeta `resuelve-erp/`, adaptando los requerimientos de la guía al nivel de desarrollo actual de la aplicación.
+
+## Autenticación y control de acceso
+
+Resuelve ERP ya contaba con un sistema de autenticación propio, por lo que se conservó su arquitectura existente en lugar de incorporar Laravel Breeze.
+
+La aplicación dispone de:
+
+- Inicio y cierre de sesión.
+- Recuperación de contraseña.
+- Protección de rutas para usuarios autenticados.
+- Roles y permisos.
+- Administración controlada de usuarios.
+- Contexto de organización y copropiedad.
+- Redirección al panel de Inicio después de la autenticación.
+
+El registro público no se habilita, debido a que los usuarios deben estar asociados de forma controlada a una organización, copropiedad y rol.
+
+## Navegación e interfaz
+
+Se revisó y adaptó la interfaz autenticada de Resuelve ERP para cumplir los objetivos visuales y funcionales de la clase.
+
+Entre los elementos trabajados se encuentran:
+
+- Barra superior de navegación.
+- Acceso a Inicio, PQRS, Personas, Documentos y Administración.
+- Visualización de la copropiedad activa.
+- Panel principal con indicadores y visualizaciones.
+- Formulario funcional de radicación de PQRS.
+- Listado operativo de PQRS.
+- Área administrativa.
+- Ajustes generales de legibilidad.
+- Diseño adaptable.
+- Modo claro y oscuro.
+- Pie de página con nombre del sistema, organización, año y versión.
+
+Como parte de la adaptación, el panel de Inicio se estableció como destino predeterminado para los usuarios después de iniciar sesión.
+
+## Adaptación de la guía
+
+Debido a que Resuelve ERP parte de una aplicación previamente desarrollada, algunos requerimientos de la guía se implementaron mediante funcionalidades equivalentes ya existentes.
+
+No se incorporó Laravel Breeze ni se habilitó registro público de usuarios. Tampoco se creó una página pública adicional de inicio, ya que la aplicación está orientada a un entorno administrativo autenticado.
+
+El formulario de radicación de PQRS se utilizó como evidencia de formulario funcional dentro del dominio real del ERP.
+
+## Evidencias Clase 4
+
+Las evidencias visuales se encuentran en:
+
+```text
+resuelve-erp/docs/evidencias/
+```
+
+Incluyen:
+
+- Inicio de sesión.
+- Panel de Inicio.
+- Navegación principal.
+- Radicación de PQRS.
+- Listado de PQRS.
+- Administración.
+
+La documentación detallada de la implementación, requisitos, instalación y decisiones de adaptación se encuentra en:
+
+```text
+resuelve-erp/README.md
+```
