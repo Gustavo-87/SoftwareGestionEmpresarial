@@ -44,7 +44,7 @@ class BrandLogoPresentationTest extends TestCase
         $this->post(route('logout'));
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('Logo institucional de '.$settings->nombre_conjunto, false)
+            ->assertSee('Logo institucional de '.$settings->organizacion->nombre, false)
             ->assertSee('brand-logo-image', false);
 
         $this->assertSame('branding/institucional-horizontal.png', $settings->fresh()->logo_path);

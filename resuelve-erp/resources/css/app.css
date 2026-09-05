@@ -889,3 +889,123 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,s
         height: 128px;
     }
 }
+
+.app-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
+    background: var(--paper);
+}
+
+.app-footer-version {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .app-footer {
+    background: #0c1222;
+}
+
+@media (max-width: 600px) {
+    .app-footer {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        gap: 5px;
+        padding: 14px 18px;
+    }
+}
+
+/* Legibilidad general del módulo autenticado */
+.app-shell {
+    font-size: 17px;
+}
+
+.top-navbar .nav-item,
+.top-navbar .nav-dropdown-item {
+    font-size: 14px;
+}
+
+.top-navbar .navbar-context-label {
+    font-size: 13px;
+    max-width: 260px;
+}
+
+.top-navbar .contexto-selector-form select,
+.top-navbar .logout-text {
+    font-size: 13px;
+}
+
+.page-heading p,
+.panel-header p,
+.form-intro p {
+    font-size: 14px;
+}
+
+.button {
+    font-size: 14px;
+}
+
+.metric-card small {
+    font-size: 13px;
+}
+
+.metric-note {
+    font-size: 12px;
+}
+
+th {
+    font-size: 11px;
+}
+
+td,
+.subject {
+    font-size: 14px;
+}
+
+td small {
+    font-size: 12px;
+}
+
+.status,
+.type-label {
+    font-size: 12px;
+}
+
+.filters select,
+.search-box input,
+.field input,
+.field select,
+.field textarea,
+.user-create-panel select,
+.user-create-panel input {
+    font-size: 14px;
+}
+
+.field label {
+    font-size: 13px;
+}
+
+.field-hint,
+.field-error {
+    font-size: 12px;
+}
+
+.panel-footer {
+    font-size: 12px;
+}
+
+.app-footer {
+    font-size: 14px;
+}
+
+@media (min-width: 761px) and (max-width: 1024px) {
+    .top-navbar .navbar-context-label {
+        max-width: 180px;
+    }
+}

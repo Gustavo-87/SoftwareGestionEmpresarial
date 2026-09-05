@@ -96,6 +96,16 @@
                 @yield('contenido')
             </div>
         </main>
+
+        <footer class="app-footer">
+            <span>
+                © {{ now()->year }} {{ config('app.name') }} · {{ $siteSettings->organizacion?->nombre ?? 'Organización' }}
+            </span>
+
+            <span class="app-footer-version">
+                v1.0
+            </span>
+        </footer>
     </div>
     <dialog class="confirm-dialog" id="confirmDialog"><div><span class="confirm-icon">!</span><h2 id="confirmTitle">Confirmar acción</h2><p id="confirmMessage">¿Deseas continuar?</p><div><button class="button ghost" id="confirmCancel" type="button">Cancelar</button><button class="button danger" id="confirmAccept" type="button">Confirmar</button></div></div></dialog>
 </body>

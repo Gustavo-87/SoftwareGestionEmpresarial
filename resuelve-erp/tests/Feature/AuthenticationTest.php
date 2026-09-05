@@ -25,7 +25,7 @@ class AuthenticationTest extends TestCase
         $sessionId = session()->getId();
 
         $this->post(route('login.store'), ['email' => $user->email, 'password' => '12345'])
-            ->assertRedirect(route('pqrs.index'));
+            ->assertRedirect(route('panel'));
         $this->assertAuthenticatedAs($user);
         $this->assertNotSame($sessionId, session()->getId());
 
@@ -43,7 +43,7 @@ class AuthenticationTest extends TestCase
         $this->post(route('login.store'), [
             'email' => 'RESIDENTE@EXAMPLE.COM',
             'password' => '12345',
-        ])->assertRedirect(route('pqrs.index'));
+        ])->assertRedirect(route('panel'));
 
         $this->assertAuthenticatedAs($user);
     }
@@ -58,7 +58,7 @@ class AuthenticationTest extends TestCase
         $this->post(route('login.store'), [
             'email' => '  residente@example.com  ',
             'password' => '12345',
-        ])->assertRedirect(route('pqrs.index'));
+        ])->assertRedirect(route('panel'));
 
         $this->assertAuthenticatedAs($user);
     }
@@ -70,7 +70,7 @@ class AuthenticationTest extends TestCase
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => ' 12345 ',
-        ])->assertRedirect(route('pqrs.index'));
+        ])->assertRedirect(route('panel'));
 
         $this->assertAuthenticatedAs($user);
     }
@@ -139,7 +139,7 @@ class AuthenticationTest extends TestCase
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'clave-correcta',
-        ])->assertRedirect(route('pqrs.index'));
+        ])->assertRedirect(route('panel'));
         $this->post(route('logout'));
 
         foreach (range(1, 5) as $attempt) {

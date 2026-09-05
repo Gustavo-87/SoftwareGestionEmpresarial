@@ -62,7 +62,7 @@ class AuthController extends Controller
         RateLimiter::clear($rateLimitKey);
         $request->session()->regenerate();
 
-        $defaultRoute = Auth::user()->esAdministradorSistema() ? route('admin.index') : route('pqrs.index');
+        $defaultRoute = Auth::user()->esAdministradorSistema() ? route('admin.index') : route('panel');
 
         return redirect()->intended($defaultRoute);
     }
