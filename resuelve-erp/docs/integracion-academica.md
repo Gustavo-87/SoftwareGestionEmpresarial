@@ -26,3 +26,16 @@ no cambia la lógica funcional ni vuelve a ejecutar la suite completa.
 El historial Git del clon original se conserva exclusivamente en este equipo,
 en .resuelve-erp-git-backup dentro de la carpeta SoftwareGestionEmpresarial,
 excluida del repositorio. No es un submódulo.
+
+## Ajustes de presentación del login académico
+
+El acceso presenta Resuelve ERP con el logo y los textos ampliados. El bloque
+de marca se desplaza ligeramente hacia abajo; el título y el párrafo descriptivo
+se alinean a la izquierda con el mismo ancho disponible. Los beneficios
+permanecen centrados. En pantallas pequeñas se reduce el tamaño de la marca.
+Se conservan las rutas y el comportamiento de autenticación.
+
+La marca del login muestra el nombre de la organización asociada a la
+configuración institucional debajo de Resuelve ERP, en lugar de la copropiedad.
+El nombre se obtiene de la relación existente organizacion y se escapa al
+renderizar. Sin organización asociada se muestra Gestión empresarial.

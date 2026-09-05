@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 @php($brandFallback = asset('logo-resuelve.png'))
+@php($organizationName = $siteSettings->organizacion?->nombre ?? 'Gestión empresarial')
 @php($tabLogo = $siteSettings->logo_path ? Storage::url($siteSettings->logo_path) : $brandFallback)
 @php($logoTransform = 'scale(' . ($siteSettings->logo_scale ?? 1) . ') translate(' . ($siteSettings->logo_offset_x ?? 0) . 'px, ' . ($siteSettings->logo_offset_y ?? 0) . 'px)')
 <html lang="es">
@@ -9,24 +10,23 @@
     <meta name="theme-color" content="#1e3a5f">
     <link rel="icon" href="{{ $tabLogo }}?v={{ $siteSettings->updated_at?->timestamp ?? 1 }}">
     <link rel="apple-touch-icon" href="{{ $tabLogo }}?v={{ $siteSettings->updated_at?->timestamp ?? 1 }}">
-    <title>Iniciar sesión · {{ $siteSettings->nombre_conjunto }}</title>
+    <title>Resuelve ERP · {{ $organizationName }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="auth-page" style="--forest: #1e3a5f">
     <main class="auth-shell">
         <section class="auth-brand-panel">
-            <a class="brand auth-brand" href="/"><span class="brand-mark image-mark"><img class="brand-logo-image" src="{{ $tabLogo }}" data-brand-fallback="{{ $brandFallback }}" onerror="this.onerror=null;this.src=this.dataset.brandFallback" alt="Logo institucional de {{ $siteSettings->nombre_conjunto }}" style="transform:{{ $logoTransform }}"></span><span><strong>Resuelve</strong><small>{{ $siteSettings->nombre_conjunto }}</small></span></a>
+            <a class="brand auth-brand" href="/"><span class="brand-mark image-mark"><img class="brand-logo-image" src="{{ $tabLogo }}" data-brand-fallback="{{ $brandFallback }}" onerror="this.onerror=null;this.src=this.dataset.brandFallback" alt="Logo institucional de {{ $organizationName }}" style="transform:{{ $logoTransform }}"></span><span><strong>Resuelve ERP</strong><small>{{ $organizationName }}</small></span></a>
             <div class="auth-message">
-                <span class="eyebrow light">Plataforma institucional</span>
-                <h1>La gestión de tu Copropiedad, clara y en contexto.</h1>
-                <p>Accede a la operación autorizada de tu Copropiedad: solicitudes, Documentos, Notificaciones y gestión administrativa.</p>
+                <h1>La gestión de tu organización, en un solo lugar.</h1>
+                <p>Centraliza la administración de tus copropiedades, la atención de PQRS y la gestión documental en un mismo espacio de trabajo.</p>
             </div>
             <div class="auth-benefits"><span>✓ Operación contextual</span><span>✓ Información protegida</span><span>✓ Seguimiento trazable</span></div>
         </section>
         <section class="auth-form-panel">
             <div class="auth-form-wrap">
                 <span class="eyebrow">Acceso seguro</span>
-                <h2>Bienvenido de nuevo</h2>
+                <h2>Accede a Resuelve ERP</h2>
                 <p>Ingresa con el correo asignado a tu perfil.</p>
 
                 @if(session('success'))<x-notice variant="success">{{ session('success') }}</x-notice>@endif
