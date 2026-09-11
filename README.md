@@ -428,3 +428,111 @@ La documentación detallada de la implementación, requisitos, instalación y de
 ```text
 resuelve-erp/README.md
 ```
+
+# Clase 5 - Migraciones, modelos y seeders en Resuelve ERP
+
+Durante la Clase 5 se trabajó sobre el proyecto académico **Resuelve ERP**, ubicado en la carpeta `resuelve-erp/`, adaptando la guía de migraciones y modelos al dominio real de la aplicación.
+
+## Entidades seleccionadas
+
+Para el desarrollo de la actividad se utilizaron tres entidades existentes en Resuelve ERP:
+
+- **Organización:** representa la entidad encargada de administrar una o varias copropiedades.
+- **Copropiedad:** representa los conjuntos residenciales administrados dentro de una organización.
+- **Persona:** representa las personas naturales o jurídicas registradas dentro del contexto de una organización.
+
+Las tablas correspondientes son:
+
+```text
+organizaciones
+copropiedades
+personas
+```
+
+Debido a que Resuelve ERP ya contaba con las migraciones y modelos Eloquent de estas entidades, se conservaron las implementaciones existentes y se verificó su funcionamiento en lugar de crear estructuras duplicadas.
+
+## Relaciones entre entidades
+
+Las entidades implementan relaciones uno a muchos (1:N).
+
+Una organización puede tener múltiples copropiedades:
+
+```text
+Organizacion (1) ─────< Copropiedad (N)
+```
+
+Una organización también puede tener múltiples personas:
+
+```text
+Organizacion (1) ─────< Persona (N)
+```
+
+Estas relaciones se implementan mediante la llave foránea `organizacion_id` y las relaciones Eloquent `hasMany()` y `belongsTo()` existentes en los modelos.
+
+## Seeders y datos de prueba
+
+Se crearon los siguientes seeders:
+
+```text
+database/seeders/OrganizacionSeeder.php
+database/seeders/CopropiedadSeeder.php
+database/seeders/PersonaSeeder.php
+```
+
+Los seeders generan datos sintéticos pero realistas para simular el funcionamiento del sistema sin utilizar información personal real.
+
+También fueron integrados en `DatabaseSeeder.php` para permitir su ejecución mediante:
+
+```bash
+./vendor/bin/sail php artisan db:seed
+```
+
+Después de ejecutar los seeders se verificaron los siguientes registros:
+
+```text
+organizaciones  → 6 registros
+copropiedades   → 6 registros
+personas        → 5 registros
+```
+
+Los seeders utilizan mecanismos como `updateOrCreate()` y `firstOrNew()` para evitar la creación repetitiva de los mismos registros al ejecutar nuevamente el proceso de seeding.
+
+## Verificación con Laravel Tinker
+
+Se utilizó Laravel Tinker para comprobar la interacción directa con los modelos Eloquent:
+
+```bash
+./vendor/bin/sail php artisan tinker
+```
+
+Desde Tinker se insertó una organización de demostración mediante el modelo `Organizacion` y se verificó el registro generado. Posteriormente, el registro temporal fue eliminado para mantener limpia la base de datos.
+
+## Verificación en MySQL
+
+Se verificó la existencia de las tablas mediante:
+
+```sql
+SHOW TABLES;
+```
+
+También se comprobó la relación entre copropiedades y organizaciones mediante una consulta con `JOIN`, verificando que las copropiedades generadas estuvieran asociadas correctamente con su organización.
+
+## Evidencias Clase 5
+
+### Tablas creadas en MySQL
+
+![Tablas en MySQL](resuelve-erp/docs/evidencias/clase5_01_tablas_mysql.png)
+
+### Inserción de registro mediante Tinker
+
+![Registro insertado mediante Tinker](resuelve-erp/docs/evidencias/clase5_02_tinker_organizacion.png)
+
+### Relación entre copropiedades y organizaciones
+
+![Relación entre copropiedades y organizaciones](resuelve-erp/docs/evidencias/clase5_03_relacion_copropiedades.png)
+
+La documentación técnica de la aplicación se encuentra en:
+
+```text
+resuelve-erp/README.md
+```
