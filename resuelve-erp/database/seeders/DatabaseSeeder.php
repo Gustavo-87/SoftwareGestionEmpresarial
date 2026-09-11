@@ -155,5 +155,10 @@ class DatabaseSeeder extends Seeder
             $createdAt = now()->subMonths($case['month'])->subDays(($pqr->id % 18) + 1);
             $pqr->forceFill(['created_at' => $createdAt, 'updated_at' => $createdAt])->saveQuietly();
         }
+        $this->call([
+            OrganizacionSeeder::class,
+            CopropiedadSeeder::class,
+            PersonaSeeder::class,
+            ]);
     }
 }
