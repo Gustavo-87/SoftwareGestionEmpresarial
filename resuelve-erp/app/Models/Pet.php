@@ -20,4 +20,3 @@ class Pet extends Model
         return $this->belongsTo(Client::class);
     }
 }
-

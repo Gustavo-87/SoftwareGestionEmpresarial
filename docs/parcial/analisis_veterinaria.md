@@ -264,5 +264,3 @@ La implementación del ERP proporcionará a Veterinaria Huellitas los siguientes
 4. **Mejor atención al cliente:** el personal podrá consultar de manera organizada la información del cliente, sus mascotas y las citas asociadas, facilitando la prestación de los servicios.
 
 5. **Apoyo a la toma de decisiones:** los reportes e indicadores permitirán analizar información sobre ventas, servicios e inventario para apoyar la gestión administrativa de la veterinaria.
-
-
