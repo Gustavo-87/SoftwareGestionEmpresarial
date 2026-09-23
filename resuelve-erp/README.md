@@ -47,7 +47,7 @@ Módulo en construcción, orientado al registro y seguimiento de las actividades
 
 - [Análisis del negocio y entrega académica](docs/integracion-academica.md)
 - [Documentación funcional y técnica](docs/README.md)
-- [Evidencias de la Clase 4](../Clase4/docs.md
+- [Evidencias de la Clase 4](../Clase4/docs.md)
 
 ## Requisitos
 
