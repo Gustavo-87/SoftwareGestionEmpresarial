@@ -64,34 +64,36 @@ Las siguientes capturas documentan la implementación y adaptación de los reque
 
 Pantalla de autenticación personalizada de Resuelve ERP.
 
-![Inicio de sesión](docs/evidencias/login.png)
+![Inicio de sesión](../resuelve-erp/docs/evidencias/login.png)
 
 ### Panel de Inicio
 
 Panel principal mostrado al usuario después de autenticarse, con indicadores y visualizaciones de la operación.
 
-![Panel de Inicio](docs/evidencias/Panel.png)
+![Panel de Inicio](../resuelve-erp/docs/evidencias/Panel.png)
 
 ### Navegación principal
 
 Barra de navegación del módulo autenticado con acceso a los diferentes componentes del sistema y contexto de la copropiedad activa.
 
-![Navegación principal](docs/evidencias/Navegacion.png)
+![Navegación principal](../resuelve-erp/docs/evidencias/Navegacion.png)
+
 
 ### Radicación de PQRS
 
 Formulario funcional para registrar una nueva PQRS dentro de la copropiedad activa.
 
-![Radicación de PQRS](docs/evidencias/Radicar.png)
+![Radicación de PQRS](../resuelve-erp/docs/evidencias/Radicar.png)
 
 ### Listado de PQRS
 
 Bandeja operativa para consultar y gestionar las PQRS registradas.
 
-![Listado de PQRS](docs/evidencias/ListadoPQRS.png)
+![Listado de PQRS](../resuelve-erp/docs/evidencias/ListadoPQRS.png)
+
 
 ### Administración
 
 Interfaz correspondiente a las funcionalidades administrativas del sistema.
 
-![Administración](docs/evidencias/Administracion.png)
+![Administración](../resuelve-erp/docs/evidencias/Administracion.png)
