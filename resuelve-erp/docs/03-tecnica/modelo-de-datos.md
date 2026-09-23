@@ -20,54 +20,76 @@ seleccionan directamente un motor.
 
 ### 3.1 users
 
-| Columna | Definición relevante |
-| --- | --- |
-| `id` | Identificador bigint. |
-| `name` | Texto obligatorio. |
-| `email` | Texto obligatorio y único. |
-| `role` | Texto obligatorio, predeterminado `residente`. |
-| `email_verified_at` | Timestamp opcional. |
-| `password` | Texto obligatorio. |
-| `tower` | Texto opcional, máximo 50. |
-| `unit` | Texto opcional, máximo 50. |
-| `remember_token` | Token opcional de Laravel. |
-| `created_at`, `updated_at` | Timestamps. |
+Almacena las cuentas de acceso a Resuelve ERP.
 
-La base de datos no restringe `role` mediante enum o clave foránea. Los valores
-permitidos se validan en los controladores.
+| Campo | Tipo en MySQL | Descripción |
+| --- | --- | --- |
+| `id` | BIGINT UNSIGNED | Clave primaria autoincremental. |
+| `name` | VARCHAR(255) | Nombre obligatorio del usuario. |
+| `email` | VARCHAR(255) | Correo obligatorio y único. |
+| `role` | VARCHAR(255) | Rol general; valor predeterminado: `residente`. |
+| `estado` | VARCHAR(30) | Estado de la cuenta; valor predeterminado: `activo`. |
+| `es_administrador_sistema` | BOOLEAN | Indica si administra el sistema; predeterminado: falso. |
+| `email_verified_at` | TIMESTAMP, admite NULL | Fecha de verificación del correo. |
+| `password` | VARCHAR(255) | Contraseña almacenada mediante hash. |
+| `tower` | VARCHAR(50), admite NULL | Referencia de torre del usuario. |
+| `unit` | VARCHAR(50), admite NULL | Referencia de unidad del usuario. |
+| `desactivado_at` | TIMESTAMP, admite NULL | Fecha de desactivación de la cuenta. |
+| `remember_token` | VARCHAR(100), admite NULL | Token para recordar la sesión. |
+| `created_at` | TIMESTAMP, admite NULL | Fecha y hora de creación. |
+| `updated_at` | TIMESTAMP, admite NULL | Fecha y hora de la última actualización. |
+
+**Relaciones:** un usuario puede radicar varias PQRS y ser responsable de varias PQRS. Su participación en organizaciones y copropiedades se registra mediante membresías.
+
+**Restricciones:** el correo es único. El campo `role` no tiene una restricción ENUM ni una clave foránea; la autorización contextual utiliza membresías, roles y permisos.
 
 ### 3.2 tipo_pqrs
 
-| Columna | Definición relevante |
-| --- | --- |
-| `id` | Identificador. |
-| `nombre` | Texto obligatorio, máximo 100. |
-| `descripcion` | Texto opcional. |
-| `created_at`, `updated_at` | Timestamps. |
+Clasifica las PQRS registradas en el sistema.
 
-El nombre no tiene restricción única.
+| Campo | Tipo en MySQL | Descripción |
+| --- | --- | --- |
+| `id` | BIGINT UNSIGNED | Clave primaria autoincremental. |
+| `nombre` | VARCHAR(100) | Nombre obligatorio del tipo de PQRS. |
+| `descripcion` | TEXT, admite NULL | Descripción opcional del tipo. |
+| `created_at` | TIMESTAMP, admite NULL | Fecha y hora de creación. |
+| `updated_at` | TIMESTAMP, admite NULL | Fecha y hora de la última actualización. |
+
+**Relación:** un tipo puede estar asociado a muchas PQRS mediante `pqrs.tipo_pqr_id`.
+
+**Restricción:** el nombre no tiene una condición de unicidad en la base de datos.
 
 ### 3.3 pqrs
 
-| Columna | Definición relevante |
-| --- | --- |
-| `id` | Identificador. |
-| `asunto` | Texto obligatorio, máximo 150. |
-| `descripcion` | Texto obligatorio. |
-| `fecha_radicacion` | Fecha obligatoria. |
-| `fecha_limite_respuesta` | Fecha opcional. |
-| `estado` | Enum: `radicada`, `en_revision`, `respondida`, `cerrada`; predeterminado `radicada`. |
-| `user_id` | FK obligatoria al usuario radicador. |
-| `assigned_to_id` | FK opcional al usuario responsable. |
-| `tipo_pqr_id` | FK obligatoria al tipo. |
-| `last_reminder_at` | Timestamp opcional. |
-| `created_at`, `updated_at` | Timestamps. |
+Almacena las PQRS radicadas y su información de seguimiento.
 
-Integridad:
+| Campo | Tipo en MySQL | Descripción |
+| --- | --- | --- |
+| `id` | BIGINT UNSIGNED | Clave primaria autoincremental. |
+| `organizacion_id` | BIGINT UNSIGNED | Organización obligatoria a la que pertenece la PQRS. |
+| `copropiedad_id` | BIGINT UNSIGNED | Copropiedad obligatoria donde se radica la PQRS. |
+| `asunto` | VARCHAR(150) | Asunto obligatorio de la solicitud. |
+| `descripcion` | TEXT | Descripción obligatoria del caso. |
+| `fecha_radicacion` | DATE | Fecha obligatoria de radicación. |
+| `fecha_limite_respuesta` | DATE, admite NULL | Fecha límite para responder. |
+| `estado` | ENUM | `radicada`, `en_revision`, `respondida` o `cerrada`; predeterminado: `radicada`. |
+| `prioridad` | VARCHAR(10) | Prioridad de atención; predeterminado: `media`. |
+| `user_id` | BIGINT UNSIGNED | Clave foránea obligatoria al usuario radicador. |
+| `assigned_to_id` | BIGINT UNSIGNED, admite NULL | Clave foránea al usuario responsable. |
+| `tipo_pqr_id` | BIGINT UNSIGNED | Clave foránea obligatoria al tipo de PQRS. |
+| `last_reminder_at` | TIMESTAMP, admite NULL | Fecha y hora del último recordatorio. |
+| `created_at` | TIMESTAMP, admite NULL | Fecha y hora de creación. |
+| `updated_at` | TIMESTAMP, admite NULL | Fecha y hora de la última actualización. |
 
-- eliminar el radicador elimina sus PQR;
-- eliminar el responsable establece `assigned_to_id` en nulo;
-- eliminar el tipo elimina las PQR asociadas.
+**Relaciones e integridad:**
+
+- Cada PQRS pertenece a un usuario radicador, un tipo, una organización y una copropiedad.
+- La clave foránea compuesta exige que la copropiedad pertenezca a la organización indicada.
+- Las referencias a organización y copropiedad restringen su eliminación mientras existan PQRS asociadas.
+- Eliminar al responsable deja `assigned_to_id` en NULL.
+- Las claves foráneas del radicador y del tipo declaran eliminación en cascada, sujeta a otras restricciones de integridad.
+- La aplicación valida la prioridad como `alta`, `media` o `baja`; la columna no tiene una restricción ENUM.
+- La aplicación impide eliminar una PQRS que conserve actuaciones o comunicaciones.
 
 ### 3.4 pqr_attachments
 
@@ -345,6 +367,13 @@ Las migraciones reflejan esta evolución:
 8. promoción puntual de un usuario gestor a administrador;
 9. funciones complementarias: unidad, recordatorios, etiquetas, plantillas,
    encuestas, reglas y auditoría.
+10. organizaciones, copropiedades y configuración contextual;
+11. roles, permisos y membresías de usuarios;
+12. asociación obligatoria de las PQRS con organización y copropiedad;
+13. personas, unidades privadas y vínculos;
+14. documentos, versiones y actuaciones documentales;
+15. protección de respuestas, control de operaciones duplicadas y retiro lógico de borradores;
+16. prioridad de las PQRS y estado de las cuentas de usuario.
 
 La migración `2026_07_24_260000_promote_primary_manager_to_admin.php` modifica
 datos buscando el correo `gestionpqrs7@gmail.com`. No es una modificación
@@ -352,27 +381,38 @@ estructural.
 
 ## 6. Datos iniciales declarados
 
-`DatabaseSeeder`:
+`DatabaseSeeder` prepara la configuración institucional y el contexto de
+organización y copropiedad. También crea o actualiza:
 
-- crea la configuración predeterminada si no existe;
-- crea o actualiza una cuenta administradora;
-- crea o actualiza tres residentes;
-- crea cinco tipos de PQR;
-- elimina un lote de demostración heredado bajo condiciones específicas;
-- crea o actualiza doce casos de demostración;
-- asigna esos casos a la cuenta administradora.
+- una cuenta administradora y tres residentes;
+- cinco tipos de PQRS;
+- doce PQRS de demostración asignadas a la cuenta administradora.
 
-Las credenciales y registros del seeder son datos de demostración incluidos en
-el código. Este documento no recomienda su uso en un entorno expuesto.
+Además, ejecuta `OrganizacionSeeder`, `CopropiedadSeeder` y `PersonaSeeder`,
+cada uno con cinco registros definidos. Estas cantidades no representan
+necesariamente el total existente en la base de datos.
+
+La contraseña de las cuentas de demostración se obtiene de
+`RESUELVE_DEMO_PASSWORD` y debe tener al menos 12 caracteres.
+El seeder principal bloquea su ejecución en producción.
+
+**Pendiente para el primer corte:** los seeders actuales no garantizan
+el mínimo de diez registros por tabla solicitado en la guía.
 
 ## 7. Hallazgos del esquema
 
-1. No existe una tabla de copropiedades ni claves de partición por
-   copropiedad.
+1. Existen las tablas `organizaciones` y `copropiedades`. Las PQRS incluyen
+   `organizacion_id` y `copropiedad_id` obligatorios. Una clave foránea
+   compuesta garantiza que la copropiedad pertenezca a la organización indicada.
 2. `site_settings` admite múltiples filas, aunque la aplicación usa la primera.
 3. Los roles no están restringidos en la base de datos.
-4. Eliminar un tipo elimina sus PQR y reglas automáticas.
-5. Eliminar un radicador elimina sus PQR.
+4. La clave foránea del tipo de PQRS declara eliminación en cascada sobre
+   sus PQRS y reglas automáticas. Otras restricciones de integridad pueden
+   impedir la eliminación.
+5. La clave foránea del usuario radicador declara eliminación en cascada
+   sobre sus PQRS. La aplicación incorpora restricciones adicionales para
+   proteger usuarios con PQRS asociadas y expedientes con actuaciones
+   o comunicaciones.
 6. Los adjuntos de respuesta se almacenan como JSON y no tienen integridad
    referencial propia.
 7. `ResponseTemplate.created_by` y `SatisfactionSurvey.user_id` no tienen
@@ -413,9 +453,18 @@ el código. Este documento no recomienda su uso en un entorno expuesto.
 - `.env.example`
 - `config/database.php`
 - `compose.yaml`
+- `database/migrations/2026_07_31_110000_create_organizaciones_and_copropiedades_tables.php`
+- `database/migrations/2026_07_31_130000_add_context_to_pqrs_table.php`
+- `database/migrations/2026_07_31_130100_make_pqr_context_required.php`
+- `database/migrations/2026_08_20_180000_add_prioridad_to_pqrs_table.php`
+- `database/migrations/2026_08_21_180000_add_es_administrador_sistema_to_users_table.php`
+- `database/migrations/2026_08_22_140000_add_estado_to_users_table.php`
+- `database/seeders/OrganizacionSeeder.php`
+- `database/seeders/CopropiedadSeeder.php`
+- `database/seeders/PersonaSeeder.php`
 
 ## Control documental
 
-- **Versión:** v1.4
+- **Versión:** v1.5
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 20 de agosto de 2026
+- **Fecha de última actualización:** 23 de septiembre de 2026

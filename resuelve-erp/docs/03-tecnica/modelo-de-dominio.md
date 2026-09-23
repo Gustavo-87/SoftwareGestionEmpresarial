@@ -8,29 +8,21 @@ documenta por separado en el modelo de datos.
 
 ## 2. Vista general
 
-`Pqr` es la entidad central. Se relaciona con el usuario que radica, un tipo, un
-responsable opcional y los registros que componen su atención y trazabilidad.
+Resuelve ERP organiza la información por organizaciones y copropiedades. Los usuarios acceden según sus membresías, roles y permisos.
 
-```text
-User ──< Pqr >── TipoPqr
-  │        │
-  │        ├──< PqrAttachment
-  │        ├──< PqrActivity >── User
-  │        ├──< PqrReply >───── User
-  │        ├──< PqrInternalComment >── User
-  │        ├──< PqrTag
-  │        └── SatisfactionSurvey
-  │
-  ├──< Pqr (como responsable)
-  ├──< Notification
-  └──< AuditLog
+| Grupo | Entidades principales | Función |
+| --- | --- | --- |
+| Organización | `Organizacion`, `Copropiedad` | Identificar la organización administradora y sus copropiedades. |
+| Acceso | `User`, `MembresiaOrganizacion`, `MembresiaCopropiedad`, `Rol`, `Permiso` | Gestionar usuarios y autorización de acceso. |
+| Comunidad | `Persona`, `UnidadPrivada`, `VinculoUnidad` | Representar personas, unidades y sus vínculos. |
+| PQRS | `Pqr`, `TipoPqr` | Registrar y clasificar solicitudes dentro de una copropiedad. |
+| Seguimiento | `PqrActivity`, `PqrReply`, `PqrInternalComment`, `PqrAttachment` | Conservar actuaciones, respuestas, comentarios y adjuntos. |
+| Documentos | `Documento`, `DocumentoVersion`, `DocumentoActuacion` | Organizar documentos, sus versiones y su historial. |
+| Configuración | `SiteSetting`, `ConfiguracionOrganizacion`, `ConfiguracionCopropiedad` | Conservar parámetros institucionales y operativos. |
 
-AutomationRule >── TipoPqr
-AutomationRule >── User (responsable)
-```
+Una organización puede administrar varias copropiedades. Cada PQRS pertenece a una organización y una copropiedad, y se relaciona con un usuario radicador, un tipo y un responsable opcional.
 
-`SiteSetting` representa configuración global de la instancia y no tiene una
-relación Eloquent con las demás entidades.
+La gestión documental también utiliza el contexto de organización y copropiedad. Mantenimiento se encuentra en construcción y no se incluye aquí como dominio implementado.
 
 ## 3. Entidades
 
@@ -53,7 +45,10 @@ Relaciones declaradas:
 | `pqrs()` | Uno a muchos | PQR radicadas por el usuario. |
 | `assignedPqrs()` | Uno a muchos | PQR asignadas mediante `assigned_to_id`. |
 | Notificaciones | Polimórfica, provista por Laravel | Notificaciones de la cuenta. |
-
+| `membresiasOrganizacion()` | Uno a muchos | Membresías del usuario en organizaciones. |
+| `membresiasCopropiedad()` | Uno a muchos | Membresías del usuario en copropiedades. |
+| `personas()` | Uno a muchos | Registros de personas vinculados a la cuenta. |
+| `pqrCommunicationOperations()` | Uno a muchos | Operaciones de comunicación de PQRS realizadas por el usuario. |
 No se declaran en el modelo relaciones hacia actividades, respuestas,
 comentarios, encuestas, plantillas o auditorías, aunque sus tablas puedan
 referenciar usuarios.
@@ -71,6 +66,8 @@ Atributos funcionales principales:
 - responsable;
 - tipo;
 - última fecha de recordatorio.
+- prioridad;
+- organización y copropiedad.
 
 Relaciones:
 
@@ -85,6 +82,9 @@ Relaciones:
 | `internalComments()` | Uno a muchos | Comentarios internos, ordenados desde el más reciente. |
 | `tags()` | Muchos a muchos | Etiquetas. |
 | `satisfactionSurvey()` | Uno a uno | Encuesta de satisfacción. |
+| `organizacion()` | Muchos a uno | Organización a la que pertenece la PQRS. |
+| `copropiedad()` | Muchos a uno | Copropiedad donde se radicó la PQRS. |
+| `communicationOperations()` | Uno a muchos | Operaciones de comunicación que permiten evitar procesamientos duplicados. |
 
 Comportamiento derivado:
 
@@ -223,6 +223,42 @@ Incluye:
 con valores predeterminados. El modelo no garantiza por sí mismo que exista un
 único registro.
 
+Relaciones:
+
+| Relación | Tipo | Destino |
+| --- | --- | --- |
+| `organizacion()` | Muchos a uno | Organización asociada a la configuración institucional. |
+| `copropiedad()` | Muchos a uno | Copropiedad asociada a la configuración institucional. |
+
+### 3.14 Organización, comunidad y acceso
+
+| Entidad | Responsabilidad |
+| --- | --- |
+| `Organizacion` | Representar la organización que administra las copropiedades. |
+| `Copropiedad` | Representar cada copropiedad y su pertenencia a una organización. |
+| `Persona` | Registrar personas naturales o jurídicas dentro de una organización. |
+| `UnidadPrivada` | Representar las unidades privadas de una copropiedad. |
+| `VinculoUnidad` | Relacionar personas con unidades privadas e identificar su tipo de vínculo. |
+| `MembresiaOrganizacion` | Registrar la participación de un usuario en una organización. |
+| `MembresiaCopropiedad` | Registrar la participación de un usuario en una copropiedad. |
+| `Rol` | Agrupar responsabilidades de acceso. |
+| `Permiso` | Representar las acciones autorizables del sistema. |
+
+### 3.15 Gestión documental
+
+| Entidad | Responsabilidad |
+| --- | --- |
+| `Documento` | Registrar la clasificación, propietario, contexto y estado de un documento. |
+| `DocumentoVersion` | Conservar las versiones del archivo y su estado de revisión. |
+| `DocumentoActuacion` | Registrar las actuaciones realizadas sobre documentos y versiones. |
+
+### 3.16 Configuración contextual
+
+| Entidad | Responsabilidad |
+| --- | --- |
+| `ConfiguracionOrganizacion` | Conservar parámetros de configuración de una organización. |
+| `ConfiguracionCopropiedad` | Conservar parámetros de configuración de una copropiedad. |
+
 ## 4. Entidades de infraestructura de Laravel
 
 Las migraciones también definen:
@@ -245,7 +281,7 @@ negocio propias del namespace `App\Models`.
 | TipoPqr | 1:N | Pqr | Eliminar tipo elimina sus PQR. |
 | Pqr | 1:N | PqrAttachment | Cascada. |
 | Pqr | 1:N | PqrActivity | Cascada. |
-| Pqr | 1:N | PqrReply | Cascada. |
+| Pqr | 1:N | PqrReply | Restrictiva: impide eliminar una PQRS que tenga respuestas asociadas. |
 | Pqr | 1:N | PqrInternalComment | Cascada. |
 | Pqr | N:M | PqrTag | Cascada sobre registros de la tabla pivote. |
 | Pqr | 1:1 | SatisfactionSurvey | Cascada. |
@@ -264,14 +300,15 @@ y el resultado registrado.
 Las reglas anteriores corresponden a claves foráneas de migraciones. No todas
 se reflejan mediante relaciones inversas en modelos.
 
-## 6. Límites del dominio actual
+## 6. Alcance y límites del dominio actual
 
-- No existe entidad `Copropiedad`.
-- No existe entidad `UnidadPrivada`; torre y unidad son textos en `User`.
-- No existe entidad para conversaciones externas o canales de recepción.
-- No existe relación entre una PQR y una copropiedad.
-- No existe entidad de permiso granular.
-- No existe entidad propia para adjuntos de respuesta.
+- El sistema dispone de organizaciones, copropiedades, personas y unidades privadas.
+- Las PQRS están relacionadas con una organización y una copropiedad.
+- El acceso se administra mediante membresías, roles y permisos.
+- La gestión documental dispone de documentos, versiones y actuaciones.
+- El módulo de mantenimiento se encuentra en construcción.
+- La inteligencia artificial corresponde a una evolución prevista del producto.
+- Los adjuntos de respuesta se almacenan como datos JSON; no cuentan con una entidad propia.
 
 ### 6.1 Gestión Documental implementada
 
@@ -319,6 +356,6 @@ disco privado. No se implementan IA, fragmentos ni indexación documental.
 
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.3
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 20 de agosto de 2026
+- **Fecha de última actualización:** 23 de septiembre de 2026

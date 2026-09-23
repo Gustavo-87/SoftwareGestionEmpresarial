@@ -2,11 +2,11 @@
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Estado:** En construcción
 - **Fecha de creación:** 31 de julio de 2026
-- **Última actualización:** 31 de julio de 2026
-- **Responsable:** Product Owner de Resuelve
+- **Última actualización:** 23 de septiembre de 2026
+- **Responsable:** Gustavo Piedrahita, creador de Resuelve-ERP
 
 ## Fuente de las decisiones
 
@@ -14,6 +14,34 @@ Este documento desarrolla el modelo de negocio aprobado en la
 [Visión del Producto](vision-del-producto.md). Describe decisiones de producto y
 no representa el estado actual de la implementación técnica.
 
+## Empresa del caso de estudio
+
+- **Nombre:** Gestión Urbana de Copropiedades S.A.S.
+- **Giro del negocio:** Administración de copropiedades residenciales.
+- **Tamaño:** Pequeña empresa, definida para el caso de estudio académico.
+- **Plataforma utilizada en el proyecto:** Resuelve ERP.
+
+Para este caso académico, la empresa requiere centralizar la atención de PQRS, la gestión documental y el seguimiento del mantenimiento de las copropiedades que administra.
+
+Resuelve ERP dispone de funcionalidades de PQRS y gestión documental. El módulo de mantenimiento se encuentra en construcción. Las capacidades de inteligencia artificial y las aplicaciones móviles descritas en este documento corresponden a la evolución prevista del producto.
+
+## Procesos clave del caso de estudio
+
+### Gestión de PQRS
+
+El residente registra una PQRS. La administración revisa el caso, asigna un responsable y realiza seguimiento hasta emitir una respuesta y cerrar la solicitud. El proceso conserva los archivos adjuntos y el historial de actuaciones.
+
+### Gestión documental
+
+La administración registra y clasifica los documentos de la copropiedad. Las versiones pasan por revisión y aprobación o rechazo. Los usuarios autorizados pueden consultar y descargar los documentos disponibles.
+
+### Gestión de mantenimiento
+
+El proceso contempla identificar necesidades de mantenimiento, programar actividades, asignar responsables y registrar su ejecución sobre zonas comunes, equipos e instalaciones. Su implementación en Resuelve ERP se encuentra en construcción.
+
+### Relación entre los procesos
+
+Los procesos comparten la información de organizaciones, copropiedades y usuarios. Una PQRS puede evidenciar una necesidad de mantenimiento, y la gestión documental permite conservar información de apoyo para la administración. La integración automática con mantenimiento todavía no está implementada.
 ---
 
 # 1. Objetivo del producto
