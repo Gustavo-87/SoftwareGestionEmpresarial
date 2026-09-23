@@ -1,4 +1,5 @@
 # MER Resuelve ERP
+![MER Resuelve ERP](diagrama_mer.png)
 
 El modelo representa las entidades y relaciones de la plataforma para la administración de copropiedades. El avance de implementación se documenta por separado.
 
