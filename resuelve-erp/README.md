@@ -43,6 +43,11 @@ El proyecto cuenta con funcionalidades de gestión de PQRS y gestión documental
 
 Módulo en construcción, orientado al registro y seguimiento de las actividades de mantenimiento de las zonas comunes, equipos e instalaciones de las copropiedades.
 
+## Documentación
+
+- [Análisis del negocio y entrega académica](docs/integracion-academica.md)
+- [Documentación funcional y técnica](docs/README.md)
+- [Evidencias de la Clase 4](../Clase4/docs.md
 
 ## Requisitos
 
@@ -106,7 +111,7 @@ Ejecutar las pruebas automatizadas:
 
 ## Seguridad
 
-- No incluir el archivo `.env` ni credenciales en el repositorio.
-- Utilizar datos ficticios para las demostraciones académicas.
-- Mantener el acceso controlado mediante roles y permisos.
+- No se incluye el archivo `.env` ni credenciales en el repositorio.
+- Se utilizan datos sinteticos para las demostraciones académicas.
+- se mantiene el acceso controlado mediante roles y permisos.
 
