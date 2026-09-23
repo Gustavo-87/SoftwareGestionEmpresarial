@@ -39,3 +39,19 @@ La marca del login muestra el nombre de la organización asociada a la
 configuración institucional debajo de Resuelve ERP, en lugar de la copropiedad.
 El nombre se obtiene de la relación existente organizacion y se escapa al
 renderizar. Sin organización asociada se muestra Gestión empresarial.
+
+## Documentación del primer corte
+
+| Requisito | Documento |
+| --- | --- |
+| Datos generales y procesos clave | [Modelo de negocio](01-producto/modelo-de-negocio.md) |
+| Entidades y relaciones | [Modelo de dominio](03-tecnica/modelo-de-dominio.md) |
+| Diccionario de datos | [Modelo de datos](03-tecnica/modelo-de-datos.md) |
+| Diagrama entidad-relación | [MER Resuelve ERP](03-tecnica/mer-resuelve-erp.md) |
+| Imagen del diagrama | [Ver MER en PNG](03-tecnica/diagrama_mer.png) |
+| Fuente editable del diagrama | [Archivo Mermaid](03-tecnica/erDiagram.mmd) |
+
+El MER representa el diseño integral de Resuelve ERP, incluido mantenimiento.
+El modelo de datos describe las tablas implementadas y documenta los
+pendientes identificados. El módulo de mantenimiento se encuentra en
+construcción.
