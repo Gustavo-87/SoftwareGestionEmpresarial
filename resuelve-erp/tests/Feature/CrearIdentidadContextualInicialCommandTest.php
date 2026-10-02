@@ -17,7 +17,7 @@ class CrearIdentidadContextualInicialCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_creates_the_complete_compatibility_catalog_from_empty_tables(): void
+    public function test_creates_the_complete_compatibility_catalog_with_maintenance_permissions(): void
     {
         $this->createContext();
         User::factory()->create(['role' => 'admin']);
@@ -25,12 +25,12 @@ class CrearIdentidadContextualInicialCommandTest extends TestCase
         $this->artisan('resuelve:crear-identidad-contextual-inicial')
             ->expectsOutputToContain('Roles creados: 5')
             ->expectsOutputToContain('Permisos creados: 18')
-            ->expectsOutputToContain('Relaciones creadas: 50')
+            ->expectsOutputToContain('Relaciones creadas: 60')
             ->assertSuccessful();
 
         $this->assertDatabaseCount('roles', 5);
-        $this->assertDatabaseCount('permisos', 18);
-        $this->assertDatabaseCount('rol_permiso', 50);
+        $this->assertDatabaseCount('permisos', 22);
+        $this->assertDatabaseCount('rol_permiso', 60);
         $this->assertDatabaseHas('roles', [
             'clave' => 'admin',
             'ambito_aplicable' => 'copropiedad',
@@ -58,9 +58,9 @@ class CrearIdentidadContextualInicialCommandTest extends TestCase
             ->expectsOutputToContain('Roles creados: 0')
             ->expectsOutputToContain('Roles existentes: 5')
             ->expectsOutputToContain('Permisos creados: 0')
-            ->expectsOutputToContain('Permisos existentes: 18')
+            ->expectsOutputToContain('Permisos existentes: 22')
             ->expectsOutputToContain('Relaciones creadas: 0')
-            ->expectsOutputToContain('Relaciones existentes: 50')
+            ->expectsOutputToContain('Relaciones existentes: 60')
             ->expectsOutputToContain('Membresias creadas: 0')
             ->expectsOutputToContain('Membresias existentes: 1')
             ->expectsOutputToContain('Asignaciones creadas: 0')
@@ -182,7 +182,7 @@ class CrearIdentidadContextualInicialCommandTest extends TestCase
 
         $this->assertSame($before, $this->identityCounts());
         $this->assertSame('admin', $user->fresh()->role);
-        $this->assertDatabaseMissing('permisos', []);
+        $this->assertDatabaseCount('permisos', $before['permisos']);
         $this->assertSame($admin->id, Rol::query()->where('clave', 'admin')->value('id'));
     }
 
@@ -200,7 +200,7 @@ class CrearIdentidadContextualInicialCommandTest extends TestCase
             ->assertFailed();
 
         $this->assertDatabaseCount('roles', 0);
-        $this->assertDatabaseCount('permisos', 0);
+        $this->assertDatabaseCount('permisos', 4);
         $this->assertDatabaseCount('membresias_copropiedad', 0);
     }
 

@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
         return Storage::disk('local')->download($attachment->path, $attachment->original_name);
     })->name('attachments.download');
     Route::resource('pqrs', PqrController::class);
+    Route::resource('mantenimiento', \App\Http\Controllers\MantenimientoController::class)->only(['index', 'create', 'store', 'show', 'update']);
     Route::get('/documentos', [DocumentoController::class, 'index'])->name('documentos.index');
     Route::get('/documentos/crear', [DocumentoController::class, 'create'])->name('documentos.create');
     Route::post('/documentos', [DocumentoController::class, 'store'])->name('documentos.store');

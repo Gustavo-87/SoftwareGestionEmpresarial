@@ -30,6 +30,11 @@ class CrearIdentidadContextualInicial extends Command
     ];
 
     private const PERMISOS = [
+        'mantenimiento.crear' => ['modulo' => 'mantenimiento', 'accion' => 'crear', 'descripcion' => 'Acceso contextual de mantenimiento.'],
+        'mantenimiento.ver_propias' => ['modulo' => 'mantenimiento', 'accion' => 'ver_propias', 'descripcion' => 'Acceso contextual de mantenimiento.'],
+        'mantenimiento.ver_todas' => ['modulo' => 'mantenimiento', 'accion' => 'ver_todas', 'descripcion' => 'Acceso contextual de mantenimiento.'],
+        'mantenimiento.gestionar' => ['modulo' => 'mantenimiento', 'accion' => 'gestionar', 'descripcion' => 'Acceso contextual de mantenimiento.'],
+
         'pqrs.listar' => ['modulo' => 'pqrs', 'accion' => 'listar', 'descripcion' => 'Acceder al listado de PQRS.'],
         'pqrs.crear' => ['modulo' => 'pqrs', 'accion' => 'crear', 'descripcion' => 'Crear una PQRS.'],
         'pqrs.ver_propias' => ['modulo' => 'pqrs', 'accion' => 'ver_propias', 'descripcion' => 'Consultar las PQRS propias.'],
@@ -52,6 +57,7 @@ class CrearIdentidadContextualInicial extends Command
 
     private const PERMISOS_POR_ROL = [
         'admin' => [
+            'mantenimiento.crear', 'mantenimiento.ver_propias', 'mantenimiento.ver_todas', 'mantenimiento.gestionar',
             'pqrs.listar', 'pqrs.crear', 'pqrs.ver_propias', 'pqrs.ver_todas',
             'pqrs.gestionar', 'pqrs.eliminar', 'informes.exportar',
             'configuracion.gestionar', 'gestion.carga_ver',
@@ -60,6 +66,7 @@ class CrearIdentidadContextualInicial extends Command
             'documentos.consultar', 'documentos.gestionar', 'documentos.aprobar', 'documentos.archivar', 'notificaciones.consultar',
         ],
         'gestor' => [
+            'mantenimiento.crear', 'mantenimiento.ver_propias', 'mantenimiento.ver_todas', 'mantenimiento.gestionar',
             'pqrs.listar', 'pqrs.crear', 'pqrs.ver_propias', 'pqrs.ver_todas',
             'pqrs.gestionar', 'pqrs.eliminar', 'informes.exportar',
             'configuracion.gestionar', 'gestion.carga_ver',
@@ -75,6 +82,7 @@ class CrearIdentidadContextualInicial extends Command
             'informes.exportar', 'notificaciones.consultar',
         ],
         'residente' => [
+            'mantenimiento.crear', 'mantenimiento.ver_propias',
             'pqrs.listar', 'pqrs.crear', 'pqrs.ver_propias', 'informes.exportar',
             'documentos.consultar', 'notificaciones.consultar',
         ],

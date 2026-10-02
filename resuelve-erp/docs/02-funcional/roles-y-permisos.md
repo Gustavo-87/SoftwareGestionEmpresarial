@@ -281,3 +281,19 @@ deseado.
 - **Versión:** v1.2
 - **Fecha de creación:** 30 de julio de 2026
 - **Fecha de última actualización:** 14 de agosto de 2026
+
+## Gestión de mantenimiento — Sprint 14
+
+| Rol contextual | Registrar | Consultar propias | Consultar todas | Gestionar |
+| --- | --- | --- | --- | --- |
+| Administrador | Sí | Sí | Sí | Sí |
+| Gestor | Sí | Sí | Sí | Sí |
+| Residente | Sí | Sí | No | No |
+| Apoyo | No | No | No | No |
+| Auditor | No | No | No | No |
+
+Cada operación exige membresía vigente y pertenencia al contexto activo.
+Los permisos son `mantenimiento.crear`, `mantenimiento.ver_propias`,
+`mantenimiento.ver_todas` y `mantenimiento.gestionar`.
+Evidencia: MantenimientoPolicy, ConsultaMantenimientos, migración de
+mantenimientos y CrearIdentidadContextualInicial.

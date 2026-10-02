@@ -48,6 +48,9 @@
                             <a class="nav-dropdown-item {{ request()->routeIs('profile.*') ? 'active' : '' }}" @if(request()->routeIs('profile.*')) aria-current="page" @endif href="{{ route('profile.edit') }}" role="menuitem">Mi perfil</a>
                         </div>
                     </div>
+                    @if($navegacion['mantenimiento'] ?? false)
+                        <a class="nav-item {{ request()->routeIs('mantenimiento.*') ? 'active' : '' }}" @if(request()->routeIs('mantenimiento.*')) aria-current="page" @endif href="{{ route('mantenimiento.index') }}">Mantenimiento</a>
+                    @endif
                     @if($navegacion['documentos'] ?? false)
                         <a class="nav-item {{ request()->routeIs('documentos.*') ? 'active' : '' }}" @if(request()->routeIs('documentos.*')) aria-current="page" @endif href="{{ route('documentos.index') }}">Documentos</a>
                     @endif

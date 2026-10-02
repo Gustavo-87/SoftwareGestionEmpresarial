@@ -55,6 +55,8 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Pagination\AbstractPaginator::defaultView('vendor.pagination.default');
         Gate::policy(Documento::class, DocumentoPolicy::class);
+        Gate::policy(\App\Models\Mantenimiento::class, \App\Policies\MantenimientoPolicy::class);
+        Route::bind('mantenimiento', fn (string $value) => app(\App\Application\Mantenimiento\ConsultaMantenimientos::class)->resolver(app(ContextoOperativo::class), $value));
         Gate::define('administrar-sistema', fn ($user) => $user->esAdministradorSistema());
         Route::bind('pqr', fn (string $value) => app(ConsultaPqrsContextuales::class)
             ->resolver(app(ContextoOperativo::class), $value));
@@ -91,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
                         'gestionarPqrs' => $autorizacion->tienePermiso($contexto, 'pqrs.gestionar'),
                         'exportarInformes' => $autorizacion->tienePermiso($contexto, 'informes.exportar'),
                         'documentos' => Auth::user()->can('viewAny', Documento::class),
+                        'mantenimiento' => Auth::user()->can('viewAny', \App\Models\Mantenimiento::class),
                         'notificaciones' => $autorizacion->tienePermiso($contexto, 'notificaciones.consultar'),
                         'configuracion' => $autorizacion->tienePermiso($contexto, 'configuracion.gestionar'),
                         'usuarios' => $autorizacion->tienePermiso($contexto, 'usuarios.gestionar'),

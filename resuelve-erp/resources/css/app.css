@@ -1009,3 +1009,20 @@ td small {
         max-width: 180px;
     }
 }
+
+/* Presentación del módulo de mantenimiento */
+.maintenance-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:24px;align-items:start;max-width:1200px}
+.maintenance-summary,.maintenance-management,.maintenance-create{padding:26px;min-width:0}
+.maintenance-summary h2,.maintenance-management h2{margin:0 0 16px;font-size:18px}
+.maintenance-description{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 24px;line-height:1.7}
+.maintenance-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:0;padding-top:22px;border-top:1px solid var(--line)}
+.maintenance-facts dt{font-size:12px;color:var(--muted);margin-bottom:6px}
+.maintenance-facts dd{margin:0;font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.maintenance-help{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 22px}
+.maintenance-management form,.maintenance-create form{display:grid;gap:20px}
+.maintenance-management .button,.maintenance-create .button{justify-self:start;margin-top:4px}
+.maintenance-create{max-width:760px}
+.maintenance-create textarea{min-height:150px}
+[data-theme="dark"] .maintenance-management input[type="date"]{color-scheme:dark}
+@media(max-width:900px){.maintenance-layout{grid-template-columns:1fr}}
+@media(max-width:540px){.maintenance-summary,.maintenance-management,.maintenance-create{padding:20px}.maintenance-facts{grid-template-columns:1fr;gap:16px}.maintenance-management .button,.maintenance-create .button{width:100%}}

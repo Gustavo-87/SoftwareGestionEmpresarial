@@ -320,6 +320,40 @@ Para contar con trazabilidad sobre la operación de las Copropiedades.
 
 # Evolución del Product Backlog
 
+## Incorporación aprobada — Gestión de mantenimiento
+
+El Product Owner aprobó el 1 de octubre de 2026 incorporar Gestión de
+mantenimiento para la entrega académica del ERP. El alcance inicial comprende:
+
+- registrar solicitudes de mantenimiento;
+- asignar un responsable;
+- programar una fecha;
+- consultar el listado;
+- actualizar el estado entre pendiente, en proceso y finalizado.
+
+### HU-MAN-01 — Registro y consulta
+
+Como Usuario autorizado de una Copropiedad
+Quiero registrar y consultar solicitudes de mantenimiento
+Para organizar las necesidades de mantenimiento de la Copropiedad activa.
+
+### HU-MAN-02 — Programación y seguimiento
+
+Como Usuario autorizado de una Copropiedad
+Quiero asignar un responsable, programar una fecha y actualizar el estado
+Para hacer seguimiento hasta la finalización del mantenimiento.
+
+La experiencia visible incluirá acceso desde la navegación, listado y
+formularios para las operaciones aprobadas, con estados vacíos, errores de
+validación y confirmaciones de éxito. La autorización y la pertenencia al
+contexto se comprobarán en el backend, siguiendo las capas existentes.
+
+Actores aprobados: administrador y gestor registran, consultan y gestionan
+todas las solicitudes de la Copropiedad activa. Los residentes registran y
+consultan únicamente las propias. El responsable debe ser un Usuario activo
+con membresía vigente en esa Copropiedad. Esta aprobación no incorpora
+funcionalidades adicionales ni modifica la arquitectura.
+
 Este Product Backlog evolucionará durante el desarrollo de Resuelve. Las
 Épicas y las Historias de Usuario podrán ser refinadas, ampliadas o ajustadas
 únicamente a partir de decisiones de producto aprobadas por el Product Owner.

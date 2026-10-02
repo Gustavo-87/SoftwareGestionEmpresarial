@@ -59,6 +59,7 @@ Los estados utilizados en este índice son:
 | --- | --- | --- |
 | [Catálogo funcional](02-funcional/catalogo-funcional.md) | Completado | Presentar los módulos, actores y capacidades existentes. |
 | [Gestión de PQR](02-funcional/gestion-pqr.md) | Completado | Describir la radicación, consulta, gestión, respuesta, cierre, adjuntos e historial. |
+| [Gestión de mantenimiento](02-funcional/gestion-mantenimiento.md) | Completado | Registrar solicitudes, asignar responsable, programar fecha y gestionar estados con aislamiento contextual. |
 | [Roles y permisos](02-funcional/roles-y-permisos.md) | Completado | Registrar la matriz de acceso y las restricciones implementadas. |
 | [Ciclo de vida de una PQR](02-funcional/ciclo-de-vida-pqr.md) | Pendiente | Documentar estados, transiciones y efectos secundarios. |
 | [Reglas de negocio](02-funcional/reglas-de-negocio.md) | Pendiente | Consolidar validaciones, plazos, vencimientos, visibilidad y eliminación. |
@@ -104,6 +105,7 @@ Los estados utilizados en este índice son:
 | [Sprint 11 — Multi-copropiedad y Consola Administrativa](04-desarrollo-agil/sprint-11-multi-copropiedad-consola-administrativa.md) | Completado (S11-2 pendiente integración a main) | C.3.7.1–C.3.7.3 cerrados; multi-copropiedad, consola administrativa SaaS e invitaciones por correo. |
 | [Sprint 12 — Estabilización, dependencias y perfilamiento visual](04-desarrollo-agil/sprint-12-estabilizacion-perfilamiento-visual.md) | Completado | Estabilizar el producto, revisar dependencias y mejorar consistencia visual sin nuevas funcionalidades. |
 | [Sprint 13 — Simplificación visual y experiencia de usuario](04-desarrollo-agil/sprint-13-simplificacion-visual.md) | Completado | Simplificar la experiencia visual, reducir carga cognitiva, reorganizar navegación y homogeneizar componentes sin nuevas capacidades de negocio. |
+| [Sprint 14 — Gestión de mantenimiento](04-desarrollo-agil/sprint-14-gestion-mantenimiento.md) | Completado | Incorpora mantenimiento con experiencia visible y permisos aprobados. Cierre formal el 2 de octubre de 2026: 35 pruebas de mantenimiento y documentos aprobadas (138 aserciones) y suite completa de 498 (493 aprobadas, 5 omitidas, 2190 aserciones); 3 hallazgos menores no bloqueantes; sin regresiones ni problemas de seguridad detectados. |
 | [Pruebas automatizadas](04-desarrollo-agil/pruebas-automatizadas.md) | Pendiente | Inventariar la cobertura existente y sus límites. |
 
 ### 05. Arquitectura
@@ -234,6 +236,6 @@ antes de avanzar a capacidades nuevas:
 
 ## Control documental
 
-- **Versión:** v1.35
+- **Versión:** v1.36
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 30 de agosto de 2026
+- **Fecha de última actualización:** 2 de octubre de 2026
