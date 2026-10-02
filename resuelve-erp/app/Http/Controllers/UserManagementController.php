@@ -89,6 +89,14 @@ class UserManagementController extends Controller {
             DB::table('membresia_copropiedad_rol')
                 ->where('membresia_copropiedad_id', $contextoObjetivo->membresiaCopropiedad->id)
                 ->delete();
+            DB::table('model_has_roles')
+                ->where('model_type', \App\Models\User::class)
+                ->where('model_id', $user->id)
+                ->delete();
+            DB::table('model_has_permissions')
+                ->where('model_type', \App\Models\User::class)
+                ->where('model_id', $user->id)
+                ->delete();
             $contextoObjetivo->membresiaCopropiedad->delete();
             $user->delete();
         });

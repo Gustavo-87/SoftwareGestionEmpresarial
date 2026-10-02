@@ -53,6 +53,17 @@ class ContextResolverTest extends TestCase
         $membresia = $this->createMembership($usuario, $organizacion, $copropiedad);
         $this->assignRole($membresia, $rol, $organizacion, $copropiedad);
 
+        // Trazabilidad (Sprint 15, Bloque 2B): el contexto resuelve roles y
+        // permisos desde el RBAC de Spatie (equipo = Copropiedad). El espejo
+        // legado anterior se conserva como compatibilidad y diagnóstico.
+        setPermissionsTeamId(null);
+        $rolSpatie = \Spatie\Permission\Models\Role::findOrCreate('gestor', 'web');
+        \Spatie\Permission\Models\Permission::findOrCreate('pqrs.gestionar', 'web');
+        $rolSpatie->syncPermissions(['pqrs.gestionar']);
+        setPermissionsTeamId($copropiedad->id);
+        $usuario->unsetRelation('roles')->unsetRelation('permissions');
+        $usuario->assignRole($rolSpatie);
+
         $contexto = app(ContextResolver::class)->resolverExplicito(
             $organizacion->id,
             $copropiedad->id,

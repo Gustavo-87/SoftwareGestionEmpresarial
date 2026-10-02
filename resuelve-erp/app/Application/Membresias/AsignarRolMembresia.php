@@ -6,6 +6,7 @@ use App\Models\MembresiaCopropiedad;
 use App\Models\Rol;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 final class AsignarRolMembresia
 {
@@ -65,6 +66,30 @@ final class AsignarRolMembresia
                 'vigente_hasta' => $vigenteHasta,
                 'asignado_por' => $asignadoPor,
             ]);
+
+            $this->sincronizarSpatie($membresia, $rol, $vigenteDesde, $vigenteHasta);
         });
+    }
+
+    /**
+     * Doble escritura temporal hacia Spatie (equipo = Copropiedad). El pivote
+     * legado se conserva como espejo para rollback y diagnóstico. Una
+     * asignación futura se activa luego mediante resuelve:migrar-rbac-spatie.
+     */
+    private function sincronizarSpatie(MembresiaCopropiedad $membresia, Rol $rol, string $vigenteDesde, ?string $vigenteHasta): void
+    {
+        $activaAhora = strtotime($vigenteDesde) <= time()
+            && ($vigenteHasta === null || strtotime($vigenteHasta) > time());
+        if (! $activaAhora) {
+            return;
+        }
+
+        // El catálogo de Spatie es global; la asignación es por Copropiedad.
+        setPermissionsTeamId(null);
+        SpatieRole::findOrCreate($rol->clave, 'web');
+        setPermissionsTeamId($membresia->copropiedad_id);
+        $usuario = $membresia->usuario;
+        $usuario->unsetRelation('roles')->unsetRelation('permissions');
+        $usuario->assignRole($rol->clave);
     }
 }

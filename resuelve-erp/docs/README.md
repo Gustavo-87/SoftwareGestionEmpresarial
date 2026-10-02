@@ -106,6 +106,7 @@ Los estados utilizados en este índice son:
 | [Sprint 12 — Estabilización, dependencias y perfilamiento visual](04-desarrollo-agil/sprint-12-estabilizacion-perfilamiento-visual.md) | Completado | Estabilizar el producto, revisar dependencias y mejorar consistencia visual sin nuevas funcionalidades. |
 | [Sprint 13 — Simplificación visual y experiencia de usuario](04-desarrollo-agil/sprint-13-simplificacion-visual.md) | Completado | Simplificar la experiencia visual, reducir carga cognitiva, reorganizar navegación y homogeneizar componentes sin nuevas capacidades de negocio. |
 | [Sprint 14 — Gestión de mantenimiento](04-desarrollo-agil/sprint-14-gestion-mantenimiento.md) | Completado | Incorpora mantenimiento con experiencia visible y permisos aprobados. Cierre formal el 2 de octubre de 2026: 35 pruebas de mantenimiento y documentos aprobadas (138 aserciones) y suite completa de 498 (493 aprobadas, 5 omitidas, 2190 aserciones); 3 hallazgos menores no bloqueantes; sin regresiones ni problemas de seguridad detectados. |
+| [Sprint 15 — Integración de Spatie y migración controlada del RBAC](04-desarrollo-agil/sprint-15-integracion-spatie-rbac.md) | Completado | Incorpora `spatie/laravel-permission` (Teams por Copropiedad) como fuente efectiva de roles y permisos, con `ContextoOperativo` como snapshot, `AutorizacionContextual` como fachada y el RBAC legado como espejo temporal. Cierre el 2 de octubre de 2026: suite de 516 pruebas (511 aprobadas, 5 omitidas, 2302 aserciones) y diagnóstico legado ↔ Spatie con 0 divergencias. Catálogo inicial: 5 roles base, 24 permisos y 63 relaciones rol-permiso. Ver [ADR-011](10-adr/ADR-011-spatie-rbac-contextual.md). |
 | [Pruebas automatizadas](04-desarrollo-agil/pruebas-automatizadas.md) | Pendiente | Inventariar la cobertura existente y sus límites. |
 
 ### 05. Arquitectura
@@ -155,6 +156,7 @@ Los estados utilizados en este índice son:
 | [ADR-008 — Casos de uso compartidos](10-adr/ADR-008-casos-de-uso-compartidos.md) | Completado | Reutilizar lógica de aplicación entre web, API, jobs y móviles. |
 | [ADR-009 — Gestión Documental antes de IA](10-adr/ADR-009-gestion-documental-antes-de-ia.md) | Completado | Establecer fuentes documentales gobernadas antes de incorporar IA. |
 | [ADR-010 — IA asistiva con RAG](10-adr/ADR-010-ia-rag-revision-humana.md) | Completado | Usar RAG, citas y revisión humana obligatoria. |
+| [ADR-011 — Motor RBAC contextual con Spatie](10-adr/ADR-011-spatie-rbac-contextual.md) | Completado | Adoptar `spatie/laravel-permission` con Teams por Copropiedad como motor RBAC, conservando `ContextoOperativo` y `AutorizacionContextual` y el legado como espejo temporal. |
 
 ### 11. Glosario
 
@@ -236,6 +238,6 @@ antes de avanzar a capacidades nuevas:
 
 ## Control documental
 
-- **Versión:** v1.36
+- **Versión:** v1.38
 - **Fecha de creación:** 30 de julio de 2026
 - **Fecha de última actualización:** 2 de octubre de 2026

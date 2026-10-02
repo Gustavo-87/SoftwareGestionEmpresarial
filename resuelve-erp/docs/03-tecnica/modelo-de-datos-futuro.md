@@ -57,9 +57,9 @@ el esquema implementado.
 | 3 | `users` | Adaptada, nombre heredado | Plataforma |
 | 4 | `membresias_organizacion` | Nueva | Organización |
 | 5 | `membresias_copropiedad` | Nueva | Copropiedad |
-| 6 | `roles` | Nueva | Plataforma |
-| 7 | `permisos` | Nueva | Plataforma |
-| 8 | `rol_permiso` | Nueva | Plataforma |
+| 6 | `roles_contextuales` (antes `roles`) | Renombrada en el Sprint 15; espejo temporal | Plataforma |
+| 7 | `permisos_contextuales` (antes `permisos`) | Renombrada en el Sprint 15; espejo temporal | Plataforma |
+| 8 | `rol_permiso_contextual` (antes `rol_permiso`) | Renombrada en el Sprint 15; espejo temporal | Plataforma |
 | 9 | `membresia_organizacion_rol` | Nueva | Organización |
 | 10 | `membresia_copropiedad_rol` | Nueva | Copropiedad |
 | 11 | `personas` | Nueva | Organización |
@@ -192,6 +192,16 @@ decisión del Product Owner**. La estructura física no convierte esa posibilida
 en una regla funcional aprobada.
 
 ### 5.4. `roles`
+
+> **Actualización (Sprint 15, ADR-011):** las tablas 5.4–5.6 se renombraron a
+> `roles_contextuales`, `permisos_contextuales` y `rol_permiso_contextual` y
+> permanecen como espejo temporal de compatibilidad y diagnóstico. El esquema
+> RBAC efectivo es el de `spatie/laravel-permission`: `roles` y `permissions`
+> (catálogo global con `copropiedad_id` nulo), `role_has_permissions` (matriz),
+> `model_has_roles` y `model_has_permissions` (asignaciones con
+> `copropiedad_id` como equipo). Estado inicial: 5 roles base, 24 permisos y 63
+> relaciones rol-permiso. El retiro del espejo está planificado según
+> ADR-011.
 
 - **Propósito:** agrupar Permisos aplicables a un ámbito.
 - **Clave primaria:** `id`.

@@ -2,6 +2,7 @@
 
 namespace App\Application\Identidad;
 
+use App\Application\Contexto\ContextoOperativo;
 use App\Application\Contexto\ContextResolver;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Rol;
@@ -9,6 +10,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 final class SincronizarIdentidadContextualUsuario
 {
@@ -128,5 +130,21 @@ final class SincronizarIdentidadContextualUsuario
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $this->sincronizarSpatie($usuario, $contexto, $rol);
+    }
+
+    /**
+     * Doble escritura temporal hacia Spatie (equipo = Copropiedad).
+     * La escritura legada anterior se conserva intacta mientras dure la transición.
+     */
+    private function sincronizarSpatie(User $usuario, ContextoOperativo $contexto, Rol $rol): void
+    {
+        // El catálogo de Spatie es global; la asignación es por Copropiedad.
+        setPermissionsTeamId(null);
+        SpatieRole::findOrCreate($rol->clave, 'web');
+        setPermissionsTeamId($contexto->copropiedad->id);
+        $usuario->unsetRelation('roles')->unsetRelation('permissions');
+        $usuario->syncRoles([$rol->clave]);
     }
 }

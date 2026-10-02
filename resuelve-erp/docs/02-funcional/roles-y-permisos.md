@@ -8,24 +8,46 @@ controladores y las condiciones de las vistas.
 
 ## 2. Implementación general
 
-El rol se almacena como texto en `users.role`. La migración establece
-`residente` como valor predeterminado. Los valores aceptados al crear, editar o
-cambiar el rol de un usuario son:
+Desde el Sprint 15 la fuente efectiva de roles y permisos es el RBAC de
+`spatie/laravel-permission` (ver [ADR-011](../10-adr/ADR-011-spatie-rbac-contextual.md)):
 
-- `admin`;
-- `gestor`;
-- `apoyo`;
-- `auditor`;
-- `residente`.
+- **Copropiedad como equipo (team):** `team_foreign_key = 'copropiedad_id'`.
+  Las asignaciones de roles son siempre por Copropiedad activa.
+- **Organización como frontera de tenant:** el aislamiento
+  Organización/Copropiedad se conserva en consultas, claves foráneas y
+  políticas.
+- **`MembresiaCopropiedad` como requisito de vigencia:** sin membresía activa y
+  vigente no se resuelven roles ni permisos, aunque existan asignaciones en
+  Spatie.
+- **`ContextoOperativo` como snapshot de autorización:** `roles[]` y
+  `permisos[]` se resuelven por petición desde Spatie y se exponen mediante
+  `clavesRoles()` y `clavesPermisos()`.
+- **`AutorizacionContextual` como fachada estable:** `tienePermiso()`,
+  `tieneRol()`, `puedeVerPqr()` y `puedeGestionarPqr()` conservan su API y las
+  Policies delegan en ella.
 
-No existe una tabla de roles o permisos ni se utiliza un paquete externo de
-autorización. Los permisos se implementan mediante:
+Catálogo inicial: **5 roles base** (`admin`, `gestor`, `apoyo`, `auditor`,
+`residente`), **24 permisos** y **63 relaciones rol-permiso**. Dos permisos
+nuevos participan como datos y se usarán en el sprint de autorización:
+`pqrs.gestionar_asignadas` (rol `apoyo`) y `pqrs.ver_borradores` (roles
+`admin` y `gestor`).
 
-- métodos del modelo `User`;
-- `PqrPolicy`;
-- verificaciones `abort_unless()` y `abort_if()` en controladores;
-- directivas y condiciones en vistas Blade;
-- middleware `auth` y `guest`.
+Compatibilidad temporal conservada:
+
+- `users.role` es un campo legado que ya no decide autorización; se mantiene
+  con doble escritura para rollback y diagnóstico.
+- El RBAC contextual legado (`roles_contextuales`, `permisos_contextuales`,
+  `rol_permiso_contextual`, `membresia_copropiedad_rol`) es espejo temporal de
+  compatibilidad y diagnóstico.
+- `resuelve:migrar-rbac-spatie` sincroniza de forma idempotente y
+  `resuelve:verificar-equivalencia-autorizacion-contextual` detecta divergencias
+  sin corregirlas.
+- `register_permission_check_method` permanece en `false`: el Gate de Spatie no
+  interviene en `can()`/`@can` hasta el sprint de autorización y UI.
+
+Los valores aceptados al crear, editar o cambiar el rol de un usuario
+permanecen siendo `admin`, `gestor`, `apoyo`, `auditor` y `residente` mientras
+dure la transición.
 
 ## 3. Capacidades auxiliares del usuario
 
@@ -35,6 +57,8 @@ autorización. Los permisos se implementan mediante:
 | `canManagePqrs()` | Administrador, gestor y apoyo. |
 | `isAdmin()` | Administrador. |
 
+Estas funciones son **compatibilidad legada** sobre `users.role` y ya no
+deciden autorización; se retirarán al terminar la transición (ver ADR-011).
 Estas funciones no expresan por sí solas todos los permisos. Algunas acciones
 usan la política y otras consultan directamente el rol.
 

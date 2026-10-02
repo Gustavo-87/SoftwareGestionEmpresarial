@@ -234,7 +234,7 @@ class CrearIdentidadContextualInicial extends Command
     {
         foreach (self::PERMISOS_POR_ROL as $rolClave => $permissionKeys) {
             foreach ($permissionKeys as $permisoClave) {
-                $exists = DB::table('rol_permiso')
+                $exists = DB::table('rol_permiso_contextual')
                     ->where('rol_id', $roles[$rolClave]->id)
                     ->where('permiso_id', $permisos[$permisoClave]->id)
                     ->exists();
@@ -245,7 +245,7 @@ class CrearIdentidadContextualInicial extends Command
                     continue;
                 }
 
-                DB::table('rol_permiso')->insert([
+                DB::table('rol_permiso_contextual')->insert([
                     'rol_id' => $roles[$rolClave]->id,
                     'permiso_id' => $permisos[$permisoClave]->id,
                     'ambito_aplicable' => self::AMBITO,

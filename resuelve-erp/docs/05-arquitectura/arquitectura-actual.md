@@ -135,16 +135,38 @@ membresía vigente. La selección automática ocurre cuando existe una única
 membresía. `SiteSetting` se conserva como fallback institucional para usuarios
 sin membresía. No se crearon nuevas tablas, migraciones ni permisos.
 
+Gestión de mantenimiento reutiliza las capas existentes: `Mantenimiento`,
+`MantenimientoPolicy`, consultas contextuales y casos de uso en
+`app/Application/Mantenimiento/`. Blade consume esas operaciones mediante
+`MantenimientoController`; no se agregan dependencias ni cambios de estilo
+arquitectónico.
+
 ### 3.5 Autorización
 
-La autorización combina:
+Desde el Sprint 15 la autorización se resuelve sobre el RBAC de
+`spatie/laravel-permission` (ver [ADR-011](../10-adr/ADR-011-spatie-rbac-contextual.md)):
 
-- `PqrPolicy` para operaciones principales de PQR;
-- métodos del modelo `User`;
-- verificaciones directas de rol en controladores;
-- condiciones de visibilidad en Blade.
+- `ContextResolver` fija el equipo activo (`team_foreign_key =
+  'copropiedad_id'`, es decir la Copropiedad) y construye `roles[]` y
+  `permisos[]` desde Spatie;
+- `ContextoOperativo` actúa como snapshot de autorización de la resolución;
+- `AutorizacionContextual` es la fachada estable y las Policies
+  (`PqrPolicy`, `DocumentoPolicy`, `MantenimientoPolicy`) delegan en ella;
+- `MembresiaCopropiedad` vigente es requisito obligatorio y la Organización
+  permanece como frontera de tenant.
 
-No existe un mecanismo central único para todas las capacidades.
+Complementan la autorización:
+
+- verificaciones directas en controladores (`abort_unless()`, `abort_if()`);
+- condiciones de visibilidad en Blade;
+- middleware `auth` y `guest`.
+
+Compatibilidad temporal: `users.role` y el RBAC contextual legado
+(`roles_contextuales`, `permisos_contextuales`, `rol_permiso_contextual`,
+`membresia_copropiedad_rol`) funcionan como espejo con doble escritura para
+rollback y diagnóstico; no deciden autorización. Las reglas por nombre de rol
+(`tieneRol('apoyo')`, `tieneRol('admin'|'gestor')`) se migrarán a permisos en el
+siguiente sprint. `register_permission_check_method` permanece en `false`.
 
 C.3.7.2.1 implementa la autoridad de plataforma. La columna
 `users.es_administrador_sistema` constituye la única fuente de autoridad de

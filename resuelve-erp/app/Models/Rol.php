@@ -11,7 +11,7 @@ class Rol extends Model
 {
     use HasFactory;
 
-    protected $table = 'roles';
+    protected $table = 'roles_contextuales';
 
     protected $fillable = [
         'clave',
@@ -23,7 +23,7 @@ class Rol extends Model
 
     public function permisos(): BelongsToMany
     {
-        return $this->belongsToMany(Permiso::class, 'rol_permiso', 'rol_id', 'permiso_id')
+        return $this->belongsToMany(Permiso::class, 'rol_permiso_contextual', 'rol_id', 'permiso_id')
             ->withPivot('ambito_aplicable');
     }
 

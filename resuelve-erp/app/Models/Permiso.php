@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Permiso extends Model
 {
-    protected $table = 'permisos';
+    protected $table = 'permisos_contextuales';
 
     protected $fillable = [
         'clave',
@@ -20,7 +20,7 @@ class Permiso extends Model
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Rol::class, 'rol_permiso', 'permiso_id', 'rol_id')
+        return $this->belongsToMany(Rol::class, 'rol_permiso_contextual', 'permiso_id', 'rol_id')
             ->withPivot('ambito_aplicable');
     }
 }

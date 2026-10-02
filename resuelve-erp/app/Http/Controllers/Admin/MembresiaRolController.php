@@ -21,7 +21,7 @@ final class MembresiaRolController extends Controller
     public function store(Request $request, MembresiaCopropiedad $membresia): RedirectResponse
     {
         $data = $request->validate([
-            'rol_id' => ['required', 'integer', 'exists:roles,id'],
+            'rol_id' => ['required', 'integer', 'exists:roles_contextuales,id'],
             'vigente_desde' => ['required', 'date'],
             'vigente_hasta' => ['nullable', 'date', 'after:vigente_desde'],
         ]);

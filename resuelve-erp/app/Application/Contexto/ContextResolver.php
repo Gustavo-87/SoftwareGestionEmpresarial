@@ -5,6 +5,8 @@ namespace App\Application\Contexto;
 use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Organizacion;
+use App\Models\Permiso;
+use App\Models\Rol;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -132,19 +134,47 @@ final class ContextResolver
             : User::query()->find($usuarioId)
                 ?? throw new RuntimeException("El Usuario {$usuarioId} no existe.");
 
+        // Equipo (team) de Spatie: la Copropiedad activa del contexto.
+        setPermissionsTeamId($copropiedad->id);
+        $usuario?->unsetRelation('roles')->unsetRelation('permissions');
+
         $membresia = $usuario === null
             ? null
             : $this->resolveMembresiaVigente($usuario, $organizacion, $copropiedad);
-        $roles = $membresia === null ? [] : $this->resolveRolesVigentes($membresia);
-        $permisos = collect($roles)
-            ->flatMap(fn ($rol) => $rol->permisos()
-                ->where('permisos.estado', 'activo')
-                ->where('permisos.ambito_aplicable', 'copropiedad')
-                ->wherePivot('ambito_aplicable', 'copropiedad')
-                ->get())
-            ->unique('id')
-            ->values()
-            ->all();
+
+        // Fuente efectiva desde el Bloque 2B: RBAC de Spatie por Copropiedad.
+        // La Membresía vigente sigue siendo requisito obligatorio: sin ella no
+        // se resuelven roles ni permisos, aunque existan asignaciones en Spatie.
+        // Los permisos se derivan de los roles del equipo activo (equivalente al
+        // modelo legado); los permisos directos de Spatie quedan reservados.
+        $roles = [];
+        $permisos = [];
+        if ($membresia !== null && $usuario !== null) {
+            foreach ($usuario->roles()->with('permissions')->get() as $rolSpatie) {
+                $roles[] = new Rol([
+                    'clave' => $rolSpatie->name,
+                    'nombre' => $rolSpatie->name,
+                    'ambito_aplicable' => 'copropiedad',
+                    'estado' => 'activo',
+                ]);
+
+                foreach ($rolSpatie->permissions as $permisoSpatie) {
+                    $clave = (string) $permisoSpatie->name;
+                    if (isset($permisos[$clave])) {
+                        continue;
+                    }
+                    [$modulo, $accion] = array_pad(explode('.', $clave, 2), 2, 'usar');
+                    $permisos[$clave] = new Permiso([
+                        'clave' => $clave,
+                        'modulo' => $modulo,
+                        'accion' => $accion,
+                        'ambito_aplicable' => 'copropiedad',
+                        'estado' => 'activo',
+                    ]);
+                }
+            }
+            $permisos = array_values($permisos);
+        }
 
         return new ContextoOperativo(
             $usuario,
@@ -172,21 +202,5 @@ final class ContextResolver
                 ->whereNull('vigente_hasta')
                 ->orWhere('vigente_hasta', '>', now()))
             ->first();
-    }
-
-    private function resolveRolesVigentes(MembresiaCopropiedad $membresia): array
-    {
-        return $membresia->roles()
-            ->where('roles.estado', 'activo')
-            ->where('roles.ambito_aplicable', 'copropiedad')
-            ->wherePivot('ambito_rol', 'copropiedad')
-            ->wherePivot('estado', 'activa')
-            ->wherePivot('vigente_desde', '<=', now())
-            ->where(function ($query): void {
-                $query->whereNull('membresia_copropiedad_rol.vigente_hasta')
-                    ->orWhere('membresia_copropiedad_rol.vigente_hasta', '>', now());
-            })
-            ->get()
-            ->all();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextResolver;
 use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
 use App\Models\MembresiaOrganizacion;
@@ -13,11 +14,13 @@ use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role as SpatieRole;
+use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
 class IdentidadMembresiasRelationshipsTest extends TestCase
 {
-    use RefreshDatabase;
+    use CreatesInstitutionalContext, RefreshDatabase;
 
     public function test_roles_and_permisos_are_related_with_their_scope(): void
     {
@@ -38,7 +41,7 @@ class IdentidadMembresiasRelationshipsTest extends TestCase
 
         $this->expectException(QueryException::class);
 
-        DB::table('rol_permiso')->insert([
+        DB::table('rol_permiso_contextual')->insert([
             'rol_id' => $rol->id,
             'permiso_id' => $permiso->id,
             'ambito_aplicable' => 'organizacion',
@@ -178,18 +181,43 @@ class IdentidadMembresiasRelationshipsTest extends TestCase
         $this->assertTrue($membresiaCopropiedad->vigente_hasta->equalTo($vigenteHasta));
     }
 
-    public function test_active_authorization_still_uses_users_role(): void
+    /**
+     * Trazabilidad (Sprint 15, Bloque 2B): sustituye a
+     * test_active_authorization_still_uses_users_role, cuya premisa dejó de ser
+     * válida. Nueva regla: la autorización efectiva usa el RBAC de Spatie por
+     * Copropiedad; users.role y sus helpers se conservan como compatibilidad
+     * legada temporal y ya no deciden autorización.
+     */
+    public function test_effective_authorization_uses_spatie_and_users_role_is_legacy_compatibility(): void
     {
-        $administrador = User::factory()->create(['role' => 'admin']);
-        $residente = User::factory()->create(['role' => 'residente']);
+        [$organizacion, $copropiedad] = $this->createInstitutionalContext();
+        $usuario = User::factory()->create(['role' => 'residente']);
+        $this->createContextualIdentity($usuario, $organizacion, $copropiedad, 'residente', ['pqrs.ver_propias']);
+        $resolver = app(ContextResolver::class);
 
-        $this->assertSame('admin', $administrador->role);
-        $this->assertTrue($administrador->isAdmin());
-        $this->assertTrue($administrador->canViewAllPqrs());
-        $this->assertTrue($administrador->canManagePqrs());
-        $this->assertFalse($residente->isAdmin());
-        $this->assertFalse($residente->canViewAllPqrs());
-        $this->assertFalse($residente->canManagePqrs());
+        // La autorización efectiva proviene de Spatie.
+        $contexto = $resolver->resolverExplicito($organizacion->id, $copropiedad->id, $usuario->id);
+        $this->assertSame(['residente'], $contexto->clavesRoles());
+        $this->assertSame(['pqrs.ver_propias'], $contexto->clavesPermisos());
+
+        // Cambiar únicamente users.role NO cambia la autorización efectiva.
+        $usuario->update(['role' => 'admin']);
+        $contexto = $resolver->resolverExplicito($organizacion->id, $copropiedad->id, $usuario->id);
+        $this->assertSame(['residente'], $contexto->clavesRoles());
+
+        // users.role conserva sus helpers como compatibilidad legada.
+        $usuario->refresh();
+        $this->assertTrue($usuario->isAdmin());
+        $this->assertTrue($usuario->canViewAllPqrs());
+        $this->assertTrue($usuario->canManagePqrs());
+
+        // Cambiar el RBAC de Spatie SÍ cambia la autorización efectiva.
+        setPermissionsTeamId($copropiedad->id);
+        SpatieRole::findOrCreate('admin', 'web');
+        $usuario->unsetRelation('roles')->unsetRelation('permissions');
+        $usuario->syncRoles(['admin']);
+        $contexto = $resolver->resolverExplicito($organizacion->id, $copropiedad->id, $usuario->id);
+        $this->assertSame(['admin'], $contexto->clavesRoles());
     }
 
     private function createRol(string $clave, string $ambito): Rol

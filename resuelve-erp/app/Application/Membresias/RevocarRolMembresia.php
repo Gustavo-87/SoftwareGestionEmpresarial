@@ -5,6 +5,7 @@ namespace App\Application\Membresias;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 final class RevocarRolMembresia
 {
@@ -25,6 +26,18 @@ final class RevocarRolMembresia
             }
 
             $membresia->roles()->detach($rolId);
+
+            // Doble escritura temporal hacia Spatie (equipo = Copropiedad).
+            setPermissionsTeamId($membresia->copropiedad_id);
+            $usuario = $membresia->usuario;
+            $usuario->unsetRelation('roles')->unsetRelation('permissions');
+            $rolSpatie = SpatieRole::query()
+                ->where('name', $rolAsignado->clave)
+                ->where('guard_name', 'web')
+                ->first();
+            if ($rolSpatie !== null) {
+                $usuario->removeRole($rolSpatie);
+            }
         });
     }
 }
