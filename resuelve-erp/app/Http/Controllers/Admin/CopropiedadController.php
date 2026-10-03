@@ -182,4 +182,15 @@ final class CopropiedadController extends Controller
         return redirect()->route('admin.copropiedades.show', $copropiedad)
             ->with('success', 'Copropiedad reactivada correctamente.');
     }
+
+    public function destroy(Request $request, Copropiedad $copropiedad): RedirectResponse
+    {
+        // Eliminación segura: solo Copropiedades sin información operativa.
+        app(\App\Application\Organizaciones\EliminarCopropiedad::class)
+            ->ejecutar($request->user(), $copropiedad);
+        $request->attributes->set('auditoria_especifica_registrada', true);
+
+        return redirect()->route('admin.copropiedades.index')
+            ->with('success', 'Copropiedad eliminada correctamente.');
+    }
 }

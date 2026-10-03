@@ -32,6 +32,7 @@ class AuditLog extends Model { protected $fillable=['user_id','action','auditabl
             'organizacion.reactivate' => 'Reactivó organización',
             'copropiedad.store' => 'Creó copropiedad',
             'copropiedad.update' => 'Actualizó copropiedad',
+            'copropiedad.delete' => 'Eliminó copropiedad',
             'copropiedad.deactivate' => 'Desactivó copropiedad',
             'copropiedad.reactivate' => 'Reactivó copropiedad',
             'membresia.store' => 'Creó membresía',

@@ -62,6 +62,21 @@ Como representante de una Organización
 Quiero conocer las capacidades habilitadas por la suscripción  
 Para comprender qué funciones del producto puede utilizar la Organización.
 
+### HU-ORG-03 — Eliminación segura de Copropiedades
+
+Como Administrador del sistema  
+Quiero eliminar una Copropiedad que no contiene información operativa  
+Para poder crearla nuevamente en la Organización correcta mediante el CRUD actual.
+
+Historia derivada de esta Épica, aprobada por el Product Owner el 3 de octubre
+de 2026 para el Sprint 17. Solo autoridad de plataforma; la eliminación se
+bloquea si existen datos operativos (PQRS, documentos, mantenimientos,
+unidades, membresías, vínculos y dependencias relacionadas) y solo se limpian
+las relaciones auxiliares de una Copropiedad sin operación. La transferencia de
+Copropiedades entre Organizaciones (versión original de esta HU) fue
+**descartada** por incompatibilidad con el modelo referencial actual. HU-ORG-02
+queda fuera del Sprint 17.
+
 # 2. Épica: Copropiedades
 
 - **Objetivo:** permitir que una Organización administre una o múltiples

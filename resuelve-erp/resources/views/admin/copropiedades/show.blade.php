@@ -143,6 +143,27 @@
                     </form>
                 </div>
             @endif
+
+            <div style="margin-top:18px;border-top:1px solid rgba(148,163,184,.25);padding-top:14px">
+                <h2>Eliminar copropiedad</h2>
+                <p style="font-size:12px;color:#64748b;line-height:1.5;margin:6px 0 10px">
+                    Acción permanente y secundaria. Solo puede eliminarse si la Copropiedad
+                    <b>no contiene información operativa</b> (PQRS, documentos, mantenimientos,
+                    unidades privadas, membresías ni vínculos). No se elimina información
+                    relacionada: si existe, la operación se bloquea indicando el motivo.
+                </p>
+                @error('copropiedad')
+                    <p class="field-error" style="margin-bottom:10px" role="alert">{{ $message }}</p>
+                @enderror
+                <form method="POST" action="{{ route('admin.copropiedades.destroy', $copropiedad) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="button danger"
+                            onclick="return confirm('¿Eliminar definitivamente esta copropiedad?\n\nSolo es posible si no contiene información operativa. Esta acción no se puede deshacer.')">
+                        🗑 Eliminar copropiedad
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

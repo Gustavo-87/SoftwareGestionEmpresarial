@@ -108,6 +108,7 @@ Los estados utilizados en este índice son:
 | [Sprint 14 — Gestión de mantenimiento](04-desarrollo-agil/sprint-14-gestion-mantenimiento.md) | Completado | Incorpora mantenimiento con experiencia visible y permisos aprobados. Cierre formal el 2 de octubre de 2026: 35 pruebas de mantenimiento y documentos aprobadas (138 aserciones) y suite completa de 498 (493 aprobadas, 5 omitidas, 2190 aserciones); 3 hallazgos menores no bloqueantes; sin regresiones ni problemas de seguridad detectados. |
 | [Sprint 15 — Integración de Spatie y migración controlada del RBAC](04-desarrollo-agil/sprint-15-integracion-spatie-rbac.md) | Completado | Incorpora `spatie/laravel-permission` (Teams por Copropiedad) como fuente efectiva de roles y permisos, con `ContextoOperativo` como snapshot, `AutorizacionContextual` como fachada y el RBAC legado como espejo temporal. Cierre el 2 de octubre de 2026: suite de 516 pruebas (511 aprobadas, 5 omitidas, 2302 aserciones) y diagnóstico legado ↔ Spatie con 0 divergencias. Catálogo inicial: 5 roles base, 24 permisos y 63 relaciones rol-permiso. Ver [ADR-011](10-adr/ADR-011-spatie-rbac-contextual.md). |
 | [Sprint 16 — Administración funcional de roles y permisos](04-desarrollo-agil/sprint-16-administracion-roles-permisos.md) | Completado | Catálogo de roles vivo (base globales y personalizados por Copropiedad), matriz de permisos por módulo, asignación/revocación segura con anti-escalada y protección de la última capacidad de administración, interfaz condicionada por permisos, 403 y auditoría (HU-USR-03 y refinamiento de HU-USR-02). Cierre el 3 de octubre de 2026: 65 pruebas específicas, concurrencia MySQL aprobada, suite de 540 (534 aprobadas, 6 omitidas, 2450 aserciones) y diagnóstico RBAC en 0 divergencias. Ver [ADR-012](10-adr/ADR-012-administracion-dinamica-roles-permisos.md). |
+| [Sprint 17 — Eliminación segura de Copropiedades](04-desarrollo-agil/sprint-17-eliminacion-copropiedades.md) | En curso | HU-ORG-03: eliminación segura de Copropiedades sin información operativa (autoridad de plataforma, bloqueo por dependencias, limpieza de auxiliares, auditoría, 403 e interfaz con confirmación). La transferencia entre Organizaciones fue descartada por incompatibilidad referencial. Aprobado el 3 de octubre de 2026. |
 | [Pruebas automatizadas](04-desarrollo-agil/pruebas-automatizadas.md) | Pendiente | Inventariar la cobertura existente y sus límites. |
 
 ### 05. Arquitectura
@@ -240,6 +241,6 @@ antes de avanzar a capacidades nuevas:
 
 ## Control documental
 
-- **Versión:** v1.40
+- **Versión:** v1.42
 - **Fecha de creación:** 30 de julio de 2026
 - **Fecha de última actualización:** 3 de octubre de 2026

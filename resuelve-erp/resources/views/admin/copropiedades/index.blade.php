@@ -59,6 +59,10 @@
         </div>
     </div>
 
+    @error('copropiedad')
+        <p class="field-error" style="margin-bottom:12px" role="alert">{{ $message }}</p>
+    @enderror
+
     @if($copropiedades->isEmpty())
         <x-empty-state title="No se encontraron copropiedades" description="Crea una nueva copropiedad para comenzar.">
             <a href="{{ route('admin.copropiedades.create') }}" class="button primary">✚ Nueva copropiedad</a>
@@ -96,6 +100,12 @@
                             </td>
                             <td class="actions">
                                 <a href="{{ route('admin.copropiedades.show', $copropiedad) }}" class="icon-button" title="Ver detalle">→</a>
+                                <form method="POST" action="{{ route('admin.copropiedades.destroy', $copropiedad) }}" style="display:inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="icon-button danger" title="Eliminar (solo si no contiene información operativa)"
+                                            onclick="return confirm('¿Eliminar definitivamente esta copropiedad?\n\nSolo es posible si no contiene información operativa. Esta acción no se puede deshacer.')">✕</button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

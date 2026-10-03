@@ -115,7 +115,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('organizaciones', OrganizacionController::class)->parameters(['organizaciones' => 'organizacion'])->except(['destroy']);
         Route::patch('organizaciones/{organizacion}/desactivar', [OrganizacionController::class, 'desactivar'])->name('organizaciones.desactivar');
         Route::patch('organizaciones/{organizacion}/reactivar', [OrganizacionController::class, 'reactivar'])->name('organizaciones.reactivar');
-        Route::resource('copropiedades', CopropiedadController::class)->parameters(['copropiedades' => 'copropiedad'])->except(['destroy']);
+        Route::resource('copropiedades', CopropiedadController::class)->parameters(['copropiedades' => 'copropiedad']);
         Route::patch('copropiedades/{copropiedad}/desactivar', [CopropiedadController::class, 'desactivar'])->name('copropiedades.desactivar');
         Route::patch('copropiedades/{copropiedad}/reactivar', [CopropiedadController::class, 'reactivar'])->name('copropiedades.reactivar');
         Route::resource('usuarios-globales', UsuarioGlobalController::class)->parameters(['usuarios-globales' => 'usuario'])->except(['destroy']);
