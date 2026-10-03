@@ -22,6 +22,9 @@
 
 @if($href)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => 'metric-card ' . $variantClass]) }} aria-label="{{ $label }}: {{ $value }}">
+        @if($icon)
+            <span class="metric-card-symbol" aria-hidden="true">{{ $icon }}</span>
+        @endif
         <div>
             <small>{{ $label }}</small>
             <strong>{{ $value }}</strong>
@@ -29,9 +32,13 @@
                 <p class="metric-note">{{ $note }}</p>
             @endif
         </div>
+        {{ $slot }}
     </a>
 @else
     <div {{ $attributes->merge(['class' => 'metric-card ' . $variantClass]) }} aria-label="{{ $label }}: {{ $value }}">
+        @if($icon)
+            <span class="metric-card-symbol" aria-hidden="true">{{ $icon }}</span>
+        @endif
         <div>
             <small>{{ $label }}</small>
             <strong>{{ $value }}</strong>
@@ -39,5 +46,6 @@
                 <p class="metric-note">{{ $note }}</p>
             @endif
         </div>
+        {{ $slot }}
     </div>
 @endif

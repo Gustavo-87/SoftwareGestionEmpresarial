@@ -40,11 +40,14 @@ mainNav?.addEventListener('click', (event) => {
 /* Teclado: Enter/Space en trigger, Escape global. */
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
+        const activeAdminDropdown = document.activeElement?.closest('.admin-navigation .nav-dropdown.open');
         closeAllDropdowns();
         if (mainNav?.classList.contains('open')) {
             mainNav.classList.remove('open');
             navToggle?.setAttribute('aria-expanded', 'false');
             navToggle?.focus();
+        } else {
+            activeAdminDropdown?.querySelector('.nav-dropdown-trigger')?.focus();
         }
     }
 });

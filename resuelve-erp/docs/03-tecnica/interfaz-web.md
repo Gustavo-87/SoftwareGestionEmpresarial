@@ -437,8 +437,63 @@ El Sprint 13 simplificó la experiencia visual mediante reorganización de naveg
 - `composer audit` y `npm audit` sin vulnerabilidades;
 - `git diff --check` limpio.
 
+## Ajuste visual de Roles — 3 de octubre de 2026
+
+Revisión incremental autorizada por el Product Owner tras la inspección visual:
+
+- creación y edición reutilizan `roles/partials/permisos.blade.php`, con
+  tarjetas por módulo, etiquetas comprensibles iniciadas en mayúscula a la
+  izquierda y casillas de selección alineadas a la derecha; los identificadores
+  técnicos se conservan en los valores enviados y no se muestran como etiquetas;
+- la edición separa datos generales, alcance, permisos y eliminación en
+  secciones compactas, sin la columna lateral sobredimensionada;
+- las tarjetas se distribuyen en tres, dos o una columna según el espacio;
+- el listado conserva sus datos y acciones en móvil mediante filas adaptadas,
+  sin heredar la ocultación ni el ancho mínimo de las tablas generales;
+- los estilos quedan limitados a Roles. Se conservan identificadores,
+  selecciones, formularios, rutas, validaciones, autorización y confirmaciones.
+
+Verificación: compilación de recursos correcta; `RolesCatalogoWebTest`,
+6 pruebas y 57 aserciones aprobadas. Revisión en navegador del listado y
+edición a 320 px efectivos, sin desbordamiento horizontal, y de la edición
+en escritorio. Casillas de 18 px dentro de etiquetas de al menos 44 px,
+con navegación por teclado y foco visible. Pendiente aceptación visual del
+Product Owner. Los demás hallazgos de la revisión general siguen pendientes.
+
+## Inicio administrativo — ajuste visual del 3 de octubre de 2026
+
+El Product Owner autorizó integrar resumen y accesos, compactar estadísticas
+e incorporar iconos profesionales respetando la identidad institucional y el
+modo oscuro.
+
+- Cuatro tarjetas reutilizan `x-metric-card`: cantidad, estado, descripción y
+  acceso al módulo. Sustituyen la sección redundante «Gestión principal».
+- El componente admite un icono y contenido complementario opcionales. Los
+  cuatro iconos SVG de trazo uniforme son decorativos, acompañan al texto y
+  no requieren dependencias.
+- Las membresías presentan cantidades y porcentajes en filas compactas; las
+  organizaciones conservan sus nombres completos y barras de menor altura.
+- Por solicitud posterior del Product Owner se conservan los colores de las
+  tarjetas: azul institucional para Organizaciones, cian para Copropiedades,
+  verde para Membresías y violeta para Usuarios. Se aplica un acabado de vidrio
+  translúcido mediante degradados, desenfoque de fondo y reflejos discretos,
+  con variantes de contraste en oscuro. Los fondos degradados se conservan
+  aunque el navegador no admita desenfoque. Se retira el subtítulo bajo
+  «Resumen de plataforma».
+- Los estilos nuevos están limitados al Inicio administrativo. En tableta su
+  cabecera utiliza el menú plegable existente para evitar superposiciones.
+  Se conservan consultas,
+  datos, rutas, permisos y reglas de negocio.
+
+Verificación: compilación de recursos y `git diff --check` correctos;
+`LogoPresentationTest` aprobada (9 pruebas, 51 aserciones) y regresión de
+`PanelOperativoTest` aprobada (5 pruebas, 23 aserciones). Revisión visual
+en escritorio de ambos temas y en móvil a 320 px efectivos, sin recortes
+en las tarjetas ni en los nombres de organizaciones. Aceptación visual del
+Product Owner pendiente.
+
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.4
 - **Fecha de creación:** 4 de agosto de 2026
-- **Fecha de última actualización:** 30 de agosto de 2026
+- **Fecha de última actualización:** 3 de octubre de 2026
