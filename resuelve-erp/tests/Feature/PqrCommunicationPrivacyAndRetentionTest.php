@@ -92,7 +92,7 @@ class PqrCommunicationPrivacyAndRetentionTest extends TestCase
         $apoyo = User::factory()->create();
         $other = User::factory()->create();
         $reader = User::factory()->create();
-        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $this->createContextualIdentity($reader, $org, $cop, 'lector', ['pqrs.ver_todas']);
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create(['assigned_to_id' => $apoyo->id]);
         Storage::disk('local')->put('draft-own.txt', 'own');
@@ -107,7 +107,7 @@ class PqrCommunicationPrivacyAndRetentionTest extends TestCase
 
         foreach (['admin', 'gestor'] as $role) {
             $manager = User::factory()->create();
-            $this->createContextualIdentity($manager, $org, $cop, $role, ['pqrs.ver_todas', 'pqrs.gestionar']);
+            $this->createContextualIdentity($manager, $org, $cop, $role, ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.ver_borradores']);
             $response = $this->actingAsContextual($manager)->get(route('pqrs.show', $pqr))->assertOk()->assertDontSee('BORRADOR_AJENO');
             $this->assertContains($foreign->id, $response->viewData('pqr')->replies->modelKeys());
             $this->get(route('pqrs.replies.download', [$pqr, $foreign, 0]))->assertOk();

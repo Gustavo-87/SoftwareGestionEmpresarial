@@ -108,6 +108,25 @@ Como Usuario
 Quiero acceder únicamente a la información y capacidades autorizadas para mi Rol  
 Para participar de forma segura en la gestión de la Copropiedad.
 
+### HU-USR-03 — Administración de Roles y Permisos
+
+Como Administrador  
+Quiero crear, editar y eliminar Roles y gestionar sus permisos desde la web  
+Para adaptar el acceso de los Usuarios sin modificar el código fuente.
+
+Historia derivada de esta Épica y aprobada por el Product Owner el 2 de
+octubre de 2026 para el Sprint 16. Refina HU-USR-02: la asignación de roles se
+realiza por Copropiedad y la interfaz condiciona las acciones según permisos.
+
+**Estado (Sprint 16, completado):** implementada con el modelo híbrido
+aprobado (roles base globales y personalizados por Copropiedad, permisos por
+módulo, creación copiando permisos, edición de matriz, eliminación segura,
+asignación/revocación por Copropiedad con anti-escalada, auditoría, 403 en
+backend e interfaz condicionada por permisos). También quedó implementado el
+refinamiento de HU-USR-02: las capacidades efectivas sustituyen las reglas por
+nombre de rol. No incluye (fuera de alcance aprobado): CRUD de permisos,
+definiciones de roles por Organización y desactivación de roles.
+
 # 4. Épica: Residentes y Propietarios
 
 - **Objetivo:** representar a Residentes y Propietarios y su relación con las

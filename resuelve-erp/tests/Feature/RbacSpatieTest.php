@@ -103,7 +103,8 @@ class RbacSpatieTest extends TestCase
 
         // E y F.
         $this->assertDatabaseCount('roles', 5);
-        $this->assertDatabaseCount('permissions', 24);
+        $this->assertDatabaseCount('permissions', 25);
+        $this->assertTrue(Role::query()->where('name', 'admin')->first()->hasPermissionTo('roles.gestionar'));
 
         // G: la matriz de los 22 permisos heredados coincide con el RBAC anterior.
         $clavesLegado = DB::table('permisos_contextuales')->orderBy('clave')->pluck('clave')->all();

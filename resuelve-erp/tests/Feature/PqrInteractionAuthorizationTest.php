@@ -17,7 +17,7 @@ class PqrInteractionAuthorizationTest extends TestCase
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $apoyo = User::factory()->create(['role' => 'apoyo']);
-        $this->createContextualIdentity($apoyo, $organizacion, $copropiedad, 'apoyo', ['pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $organizacion, $copropiedad, 'apoyo', ['pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $unassigned = Pqr::factory()->create(['assigned_to_id' => null]);
         $selfAssigned = Pqr::factory()->create(['assigned_to_id' => $apoyo->id]);
 
@@ -34,7 +34,7 @@ class PqrInteractionAuthorizationTest extends TestCase
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $apoyo = User::factory()->create(['role' => 'apoyo']);
         $other = User::factory()->create(['role' => 'apoyo']);
-        $this->createContextualIdentity($apoyo, $organizacion, $copropiedad, 'apoyo', ['pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $organizacion, $copropiedad, 'apoyo', ['pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $pqr = Pqr::factory()->create(['assigned_to_id' => $other->id]);
 
         $this->actingAs($apoyo)->post(route('pqrs.replies.store', $pqr), $this->replyData())
@@ -80,7 +80,7 @@ class PqrInteractionAuthorizationTest extends TestCase
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $apoyo = User::factory()->create(['role' => 'apoyo']);
         $other = User::factory()->create(['role' => 'apoyo']);
-        $this->createContextualIdentity($apoyo, $organizacion, $copropiedad, 'apoyo', ['pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $organizacion, $copropiedad, 'apoyo', ['pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $allowed = Pqr::factory()->create(['assigned_to_id' => $apoyo->id]);
         $forbidden = Pqr::factory()->create(['assigned_to_id' => $other->id]);
 

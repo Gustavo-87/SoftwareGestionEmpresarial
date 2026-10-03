@@ -18,7 +18,7 @@ use Spatie\Permission\Models\Role;
  */
 final class VerificadorEquivalenciaRbacSpatie
 {
-    public const PERMISOS_NUEVOS = ['pqrs.gestionar_asignadas', 'pqrs.ver_borradores'];
+    public const PERMISOS_NUEVOS = ['pqrs.gestionar_asignadas', 'pqrs.ver_borradores', 'roles.gestionar'];
 
     private const GUARD = 'web';
 
@@ -109,12 +109,25 @@ final class VerificadorEquivalenciaRbacSpatie
             ->all();
     }
 
-    /** @return list<string> "usuario_id|copropiedad_id|rol" de asignaciones de Spatie. */
+    /**
+     * Asignaciones de Spatie comparables con el espejo: solo las de roles con
+     * contraparte en `roles_contextuales`. Los roles personalizados de Spatie
+     * no tienen espejo y no generan divergencia; las diferencias en los roles
+     * equivalentes sí se reportan.
+     *
+     * @return list<string> "usuario_id|copropiedad_id|rol" de asignaciones de Spatie.
+     */
     private function asignacionesSpatie(): array
     {
+        $nombresLegado = DB::table('roles_contextuales')
+            ->where('ambito_aplicable', 'copropiedad')
+            ->pluck('clave')
+            ->all();
+
         return DB::table('model_has_roles')
             ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
             ->where('model_has_roles.model_type', User::class)
+            ->whereIn('roles.name', $nombresLegado)
             ->orderBy('model_has_roles.model_id')
             ->orderBy('model_has_roles.copropiedad_id')
             ->orderBy('roles.name')

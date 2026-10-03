@@ -16,11 +16,11 @@ class MigrarRbacSpatie extends Command
 
     private const GUARD = 'web';
 
-    private const PERMISOS_NUEVOS = ['pqrs.gestionar_asignadas', 'pqrs.ver_borradores'];
+    private const PERMISOS_NUEVOS = ['pqrs.gestionar_asignadas', 'pqrs.ver_borradores', 'roles.gestionar'];
 
     private const PERMISOS_NUEVOS_POR_ROL = [
         'apoyo' => ['pqrs.gestionar_asignadas'],
-        'admin' => ['pqrs.ver_borradores'],
+        'admin' => ['pqrs.ver_borradores', 'roles.gestionar'],
         'gestor' => ['pqrs.ver_borradores'],
     ];
 

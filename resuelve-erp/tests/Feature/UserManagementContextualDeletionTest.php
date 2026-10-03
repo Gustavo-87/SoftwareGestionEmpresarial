@@ -28,7 +28,14 @@ class UserManagementContextualDeletionTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $resident->id]);
     }
 
-    public function test_last_contextual_admin_cannot_be_deleted(): void
+    /**
+     * Trazabilidad (Sprint 16, B4): sustituye `test_last_contextual_admin_cannot_be_deleted`,
+     * cuya regla por nombre («Debe existir al menos un administrador») fue
+     * reemplazada por la protección de capacidad efectiva `usuarios.gestionar`
+     * (decisión aprobada). Eliminar al último usuario con rol `admin` está
+     * permitido cuando la Copropiedad conserva capacidad administrativa.
+     */
+    public function test_deletion_preserves_effective_administrative_capacity(): void
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $manager = User::factory()->create(['role' => 'gestor']);
@@ -38,9 +45,9 @@ class UserManagementContextualDeletionTest extends TestCase
 
         $this->actingAsContextual($manager)
             ->delete(route('users.destroy', $admin))
-            ->assertUnprocessable();
+            ->assertRedirect(route('users.index'));
 
-        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+        $this->assertDatabaseMissing('users', ['id' => $admin->id]);
     }
 
     public function test_contextual_admin_can_be_deleted_when_another_admin_remains(): void

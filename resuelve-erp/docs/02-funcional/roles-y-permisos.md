@@ -49,6 +49,33 @@ Los valores aceptados al crear, editar o cambiar el rol de un usuario
 permanecen siendo `admin`, `gestor`, `apoyo`, `auditor` y `residente` mientras
 dure la transición.
 
+### Administración de roles y permisos (Sprint 16)
+
+Modelo híbrido aprobado (ver [ADR-012](../10-adr/ADR-012-administracion-dinamica-roles-permisos.md)):
+
+- **Roles base globales:** catálogo inicial (5 roles) administrado por la
+  autoridad de plataforma desde la consola administrativa. Son datos
+  iniciales, no un catálogo cerrado.
+- **Roles personalizados por Copropiedad:** los crea y administra el usuario
+  con el permiso `roles.gestionar` dentro de su Copropiedad (equipo). No
+  afectan a otras Copropiedades.
+- **Permisos por módulo:** el catálogo se presenta agrupado por módulo
+  (`pqrs.*`, `documentos.*`, `mantenimiento.*`, `informes.*`, `roles.*`,
+  `usuarios.*`, …) y se asigna a los roles desde la web.
+- **Asignación y revocación por Copropiedad:** desde la consola de usuarios,
+  sobre la Membresía vigente, con confirmación, mensajes y auditoría.
+- **Anti-escalada:** un operador no puede conceder permisos ni roles cuyos
+  permisos no posee; la autoridad de plataforma está exenta.
+- **Capacidad administrativa efectiva:** una Copropiedad nunca queda sin al
+  menos un miembro vigente con el permiso `usuarios.gestionar`, tanto al
+  revocar roles como al eliminar usuarios. La protección evalúa capacidades
+  efectivas, nunca nombres de rol.
+- **Roles personalizados:** un rol con los permisos adecuados obtiene el mismo
+  comportamiento que un rol base equivalente; el nombre del rol no concede
+  capacidades. Las capacidades semánticas son `pqrs.ver_borradores` (borradores
+  ajenos) y `pqrs.gestionar_asignadas` (gestión restringida a la PQR sin
+  asignar o propia).
+
 ## 3. Capacidades auxiliares del usuario
 
 | Método | Roles incluidos |

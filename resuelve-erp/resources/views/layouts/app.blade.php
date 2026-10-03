@@ -54,7 +54,7 @@
                     @if($navegacion['documentos'] ?? false)
                         <a class="nav-item {{ request()->routeIs('documentos.*') ? 'active' : '' }}" @if(request()->routeIs('documentos.*')) aria-current="page" @endif href="{{ route('documentos.index') }}">Documentos</a>
                     @endif
-                    @if(($navegacion['herramientas'] ?? false) || ($navegacion['carga'] ?? false) || ($navegacion['auditoria'] ?? false) || ($navegacion['configuracion'] ?? false) || ($navegacion['usuarios'] ?? false) || ($navegacion['esAdministradorSistema'] ?? false))
+                    @if(($navegacion['herramientas'] ?? false) || ($navegacion['carga'] ?? false) || ($navegacion['auditoria'] ?? false) || ($navegacion['configuracion'] ?? false) || ($navegacion['usuarios'] ?? false) || ($navegacion['catalogoRoles'] ?? false) || ($navegacion['esAdministradorSistema'] ?? false))
                         <div class="nav-dropdown">
                             <button class="nav-item nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">Administración <span class="nav-chevron" aria-hidden="true">▾</span></button>
                             <div class="nav-dropdown-menu" role="menu" aria-label="Submenú de Administración">
@@ -63,6 +63,7 @@
                                 @if($navegacion['auditoria'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('management.audit') ? 'active' : '' }}" href="{{ route('management.audit') }}" role="menuitem">Auditoría</a>@endif
                                 @if($navegacion['configuracion'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.edit') }}" role="menuitem">Configuración general</a>@endif
                                 @if($navegacion['usuarios'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}" role="menuitem">Usuarios y roles</a>@endif
+                                @if($navegacion['catalogoRoles'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}" role="menuitem">Catálogo de roles</a>@endif
                                 @if($navegacion['esAdministradorSistema'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" @if(request()->routeIs('admin.*')) aria-current="page" @endif href="{{ route('admin.index') }}" role="menuitem">Administración del sistema</a>@endif
                             </div>
                         </div>

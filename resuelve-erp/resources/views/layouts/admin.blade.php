@@ -25,6 +25,7 @@
                     <a class="nav-item {{ request()->routeIs('admin.copropiedades.*') ? 'active' : '' }}" @if(request()->routeIs('admin.copropiedades.*')) aria-current="page" @endif href="{{ route('admin.copropiedades.index') }}">Copropiedades</a>
                     <a class="nav-item {{ request()->routeIs('admin.membresias.*') ? 'active' : '' }}" @if(request()->routeIs('admin.membresias.*')) aria-current="page" @endif href="{{ route('admin.membresias.index') }}">Membresías</a>
                     <a class="nav-item {{ request()->routeIs('admin.usuarios-globales.*') ? 'active' : '' }}" @if(request()->routeIs('admin.usuarios-globales.*')) aria-current="page" @endif href="{{ route('admin.usuarios-globales.index') }}">Usuarios</a>
+                    <a class="nav-item {{ request()->routeIs('roles.*') ? 'active' : '' }}" @if(request()->routeIs('roles.*')) aria-current="page" @endif href="{{ route('roles.index') }}">Roles</a>
                     <a class="nav-item {{ request()->routeIs('management.audit') ? 'active' : '' }}" @if(request()->routeIs('management.audit')) aria-current="page" @endif href="{{ route('management.audit') }}">Auditoría</a>
                     <a class="nav-item {{ request()->routeIs('settings.*') ? 'active' : '' }}" @if(request()->routeIs('settings.*')) aria-current="page" @endif href="{{ route('settings.edit') }}">Configuración</a>
                 </nav>

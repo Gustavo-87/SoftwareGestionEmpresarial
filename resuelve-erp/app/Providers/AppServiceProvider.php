@@ -97,6 +97,8 @@ class AppServiceProvider extends ServiceProvider
                         'notificaciones' => $autorizacion->tienePermiso($contexto, 'notificaciones.consultar'),
                         'configuracion' => $autorizacion->tienePermiso($contexto, 'configuracion.gestionar'),
                         'usuarios' => $autorizacion->tienePermiso($contexto, 'usuarios.gestionar'),
+                        'catalogoRoles' => Auth::user()->esAdministradorSistema()
+                            || $autorizacion->tienePermiso($contexto, 'roles.gestionar'),
                         'carga' => $autorizacion->tienePermiso($contexto, 'gestion.carga_ver'),
                         'herramientas' => $autorizacion->tienePermiso($contexto, 'gestion.herramientas_gestionar'),
                         'residentes' => $autorizacion->tienePermiso($contexto, 'residentes.gestionar'),

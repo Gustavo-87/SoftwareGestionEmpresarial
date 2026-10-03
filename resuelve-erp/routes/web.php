@@ -50,6 +50,13 @@ Route::middleware('auth')->group(function () {
     })->name('attachments.download');
     Route::resource('pqrs', PqrController::class);
     Route::resource('mantenimiento', \App\Http\Controllers\MantenimientoController::class)->only(['index', 'create', 'store', 'show', 'update']);
+    Route::get('/roles', [\App\Http\Controllers\RolesCatalogoController::class, 'index'])->name('roles.index');
+    Route::get('/roles/crear', [\App\Http\Controllers\RolesCatalogoController::class, 'create'])->name('roles.create');
+    Route::post('/roles', [\App\Http\Controllers\RolesCatalogoController::class, 'store'])->name('roles.store');
+    Route::get('/roles/{rol}/editar', [\App\Http\Controllers\RolesCatalogoController::class, 'edit'])->name('roles.edit');
+    Route::put('/roles/{rol}', [\App\Http\Controllers\RolesCatalogoController::class, 'update'])->name('roles.update');
+    Route::put('/roles/{rol}/permisos', [\App\Http\Controllers\RolesCatalogoController::class, 'permisos'])->name('roles.permisos.update');
+    Route::delete('/roles/{rol}', [\App\Http\Controllers\RolesCatalogoController::class, 'destroy'])->name('roles.destroy');
     Route::get('/documentos', [DocumentoController::class, 'index'])->name('documentos.index');
     Route::get('/documentos/crear', [DocumentoController::class, 'create'])->name('documentos.create');
     Route::post('/documentos', [DocumentoController::class, 'store'])->name('documentos.store');
@@ -79,6 +86,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/usuarios/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::delete('/usuarios/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     Route::patch('/usuarios/{user}/rol', [UserManagementController::class, 'updateRole'])->name('users.role.update');
+    Route::post('/usuarios/{user}/roles', [UserManagementController::class, 'asignarRol'])->name('users.roles.store');
+    Route::delete('/usuarios/{user}/roles/{rol}', [UserManagementController::class, 'revocarRol'])->name('users.roles.destroy');
     Route::get('/informes/pqrs.csv', [ReportController::class, 'csv'])->name('reports.csv');
     Route::get('/informes/pqrs.xlsx', [ReportController::class, 'xlsx'])->name('reports.xlsx');
     Route::get('/informes/pqrs.pdf', [ReportController::class, 'pdf'])->name('reports.pdf');

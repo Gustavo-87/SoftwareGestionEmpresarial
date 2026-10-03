@@ -22,9 +22,9 @@ class RbacSpatieCaracterizacionTest extends TestCase
     use CreatesInstitutionalContext, RefreshDatabase;
 
     private const PERMISOS_POR_ROL = [
-        'admin' => ['pqrs.ver_todas', 'pqrs.gestionar'],
-        'gestor' => ['pqrs.ver_todas', 'pqrs.gestionar'],
-        'apoyo' => ['pqrs.ver_todas', 'pqrs.gestionar'],
+        'admin' => ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.ver_borradores'],
+        'gestor' => ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.ver_borradores'],
+        'apoyo' => ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.gestionar_asignadas'],
         'auditor' => ['pqrs.ver_todas'],
         'residente' => ['pqrs.ver_propias'],
     ];

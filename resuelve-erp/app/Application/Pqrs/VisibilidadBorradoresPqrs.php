@@ -52,6 +52,8 @@ final class VisibilidadBorradoresPqrs
 
     private function gestionaBorradoresAjenos(ContextoOperativo $contexto): bool
     {
-        return $this->autorizacion->tieneRol($contexto, 'admin') || $this->autorizacion->tieneRol($contexto, 'gestor');
+        // Capacidad `pqrs.ver_borradores`: sustituye la regla por nombres de
+        // rol admin/gestor (semántica preservada para los roles base).
+        return $this->autorizacion->tienePermiso($contexto, 'pqrs.ver_borradores');
     }
 }

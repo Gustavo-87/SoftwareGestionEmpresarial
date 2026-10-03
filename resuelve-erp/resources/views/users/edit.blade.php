@@ -12,4 +12,33 @@
 <div class="field"><label for="edit-tower">Torre o bloque</label><input id="edit-tower" name="tower" value="{{ old('tower',$user->tower) }}"></div><div class="field"><label for="edit-unit">Apartamento o unidad</label><input id="edit-unit" name="unit" value="{{ old('unit',$user->unit) }}"></div>
 <div class="field"><label for="edit-password">Nueva contraseña</label><input id="edit-password" name="password" type="password" minlength="8" autocomplete="new-password">@error('password')<span class="field-error">{{ $message }}</span>@enderror</div><div class="field"><label for="edit-password-confirmation">Confirmar nueva contraseña</label><input id="edit-password-confirmation" name="password_confirmation" type="password" minlength="8" autocomplete="new-password"></div>
 </div><div class="form-actions"><div><a class="button ghost" href="{{ route('users.index') }}">Cancelar</a><button class="button primary" type="submit">Guardar cambios</button></div></div></form></section>
+<section class="form-panel"><div class="form-intro"><span class="form-step">02</span><div><h2>Roles en esta Copropiedad</h2><p>Roles efectivos del usuario en la Copropiedad activa. Solo puedes conceder roles cuyos permisos posees.</p></div></div>
+<div class="form-grid">
+    <div class="field"><label for="asignar-rol">Asignar rol</label>
+        <form method="POST" action="{{ route('users.roles.store', $user) }}">@csrf
+            <select id="asignar-rol" name="rol_id" required>
+                <option value="">Selecciona un rol</option>
+                @foreach($disponibles as $rol)
+                <option value="{{ $rol->id }}" @selected(old('rol_id') == $rol->id)>{{ $rol->name }} — {{ $rol->copropiedad_id === null ? 'Global' : 'Copropiedad activa' }}</option>
+                @endforeach
+            </select>
+            @error('rol_id')<span class="field-error">{{ $message }}</span>@enderror
+            @error('usuario')<span class="field-error">{{ $message }}</span>@enderror
+            <div class="form-actions"><button class="button primary" type="submit">Asignar rol</button></div>
+        </form>
+    </div>
+    <div class="field"><span class="field-label">Roles asignados</span>
+        <div class="role-guide">
+            @forelse($asignados as $rol)
+            <span><b>{{ $rol->name }}</b> ({{ $rol->copropiedad_id === null ? 'Global' : 'Copropiedad activa' }})
+                <form method="POST" action="{{ route('users.roles.destroy', [$user, $rol->id]) }}" data-confirm="Revocar rol" data-confirm-message="El usuario perderá este rol en la Copropiedad activa.">@csrf @method('DELETE')<button class="button subtle danger" type="submit">Revocar</button></form>
+            </span>
+            @empty
+            <span>Sin roles asignados en esta Copropiedad.</span>
+            @endforelse
+        </div>
+        @error('rol')<span class="field-error">{{ $message }}</span>@enderror
+    </div>
+</div>
+</section>
 @endsection

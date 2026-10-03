@@ -4,12 +4,16 @@ use App\Application\Identidad\SincronizarIdentidadContextualUsuario;
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextResolver;
 use App\Application\Contexto\ContextoOperativo;
+use App\Application\Roles\AsignarRolUsuario;
+use App\Application\Roles\ConsultaRolesGestionables;
+use App\Application\Roles\RevocarRolUsuario;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Documento;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 class UserManagementController extends Controller {
     public function __construct(private readonly SincronizarIdentidadContextualUsuario $sincronizarIdentidad) {}
@@ -30,7 +34,56 @@ class UserManagementController extends Controller {
         $this->sincronizarIdentidad->crearUsuario($data);
         return redirect()->route('users.index')->with('success','Usuario creado correctamente.');
     }
-    public function edit(Request $request,User $user): View { $this->autorizar(); return view('users.edit',compact('user')); }
+    public function edit(Request $request,User $user): View {
+        $this->autorizar();
+        $contexto = app(ContextoOperativo::class);
+        $equipoId = (int) $contexto->copropiedad->id;
+        setPermissionsTeamId($equipoId);
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+        $asignados = $user->roles()->get();
+        $disponibles = app(ConsultaRolesGestionables::class)->asignablesEn($equipoId)
+            ->reject(fn ($rol) => $asignados->contains('id', $rol->id))
+            ->values();
+        return view('users.edit',compact('user','asignados','disponibles'));
+    }
+
+    public function asignarRol(Request $request, User $user): RedirectResponse {
+        $this->autorizar();
+        $data = $request->validate(['rol_id' => ['required', 'integer']]);
+        app(AsignarRolUsuario::class)->ejecutar(
+            $request->user(),
+            app(ContextoOperativo::class),
+            $this->membresiaDelContexto($user),
+            (int) $data['rol_id'],
+        );
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        return back()->with('success', 'Rol asignado correctamente.');
+    }
+
+    public function revocarRol(Request $request, User $user, int $rol): RedirectResponse {
+        $this->autorizar();
+        app(RevocarRolUsuario::class)->ejecutar(
+            $request->user(),
+            app(ContextoOperativo::class),
+            $this->membresiaDelContexto($user),
+            $rol,
+        );
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        return back()->with('success', 'Rol revocado correctamente.');
+    }
+
+    private function membresiaDelContexto(User $user): MembresiaCopropiedad {
+        $contexto = app(ContextoOperativo::class);
+        $membresia = MembresiaCopropiedad::query()
+            ->where('usuario_id', $user->id)
+            ->where('organizacion_id', $contexto->organizacion->id)
+            ->where('copropiedad_id', $contexto->copropiedad->id)
+            ->first();
+        if ($membresia === null) {
+            throw ValidationException::withMessages(['usuario' => 'El usuario no tiene Membresía en la Copropiedad activa.']);
+        }
+        return $membresia;
+    }
     public function update(Request $request,User $user): RedirectResponse {
         $this->autorizar();
         $data=$request->validate([
@@ -53,7 +106,6 @@ class UserManagementController extends Controller {
         abort_if($user->is($request->user()),422,'No puedes eliminar tu propia cuenta.');
         $contexto = app(ContextoOperativo::class);
         $resolver = app(ContextResolver::class);
-        $autorizacion = app(AutorizacionContextual::class);
         $contextoObjetivo = $resolver->resolverExplicito(
             $contexto->organizacion->id,
             $contexto->copropiedad->id,
@@ -61,31 +113,19 @@ class UserManagementController extends Controller {
         );
         abort_unless($contextoObjetivo->tieneMembresiaContextual(), 404);
 
-        if ($autorizacion->tieneRol($contextoObjetivo, 'admin')) {
-            $administradores = MembresiaCopropiedad::query()
-                ->where('organizacion_id', $contexto->organizacion->id)
-                ->where('copropiedad_id', $contexto->copropiedad->id)
-                ->where('estado', 'activa')
-                ->where('vigente_desde', '<=', now())
-                ->where(fn ($query) => $query
-                    ->whereNull('vigente_hasta')
-                    ->orWhere('vigente_hasta', '>', now()))
-                ->get()
-                ->filter(fn (MembresiaCopropiedad $membresia) => $autorizacion->tieneRol(
-                    $resolver->resolverExplicito(
-                        $contexto->organizacion->id,
-                        $contexto->copropiedad->id,
-                        $membresia->usuario_id,
-                    ),
-                    'admin',
-                ))
-                ->count();
-            abort_if($administradores <= 1,422,'Debe existir al menos un administrador.');
-        }
-
         abort_if($user->pqrs()->exists(),422,'No se puede eliminar porque tiene PQRS asociadas. Puedes cambiar su rol para conservar el historial.');
         abort_if(Documento::query()->where('propietario_documental_user_id', $user->id)->where('estado', 'activo')->exists(),422,'No se puede eliminar porque es propietario documental de Documentos activos.');
         DB::transaction(function () use ($contextoObjetivo, $user): void {
+            // Protección por capacidad efectiva (usuarios.gestionar), no por
+            // nombres de rol. Reutiliza el mecanismo seguro de asignación de
+            // roles con bloqueo de Membresías ante concurrencia.
+            $capacidad = app(\App\Application\Roles\CapacidadAdministrativa::class);
+            $membresias = $capacidad->membresiasBloqueadas($contextoObjetivo->membresiaCopropiedad);
+            abort_if(
+                $capacidad->titularesRestantes($membresias, $contextoObjetivo->membresiaCopropiedad, null, (int) $user->id) === 0,
+                422,
+                'Debe existir al menos un usuario con capacidad de administración (permiso usuarios.gestionar).'
+            );
             DB::table('membresia_copropiedad_rol')
                 ->where('membresia_copropiedad_id', $contextoObjetivo->membresiaCopropiedad->id)
                 ->delete();

@@ -59,7 +59,7 @@ class PqrSafeDraftLifecycleTest extends TestCase
         $owner = User::factory()->create();
         $this->createContextualIdentity($owner, $organization, $property, 'gestor', ['pqrs.ver_todas', 'pqrs.gestionar']);
         $other = User::factory()->create();
-        $this->createContextualIdentity($other, $organization, $property, 'gestor', ['pqrs.ver_todas', 'pqrs.gestionar']);
+        $this->createContextualIdentity($other, $organization, $property, 'gestor', ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.ver_borradores']);
         $pqr = Pqr::factory()->paraContexto($organization, $property)->create();
         $draft = $pqr->replies()->create(['user_id' => $owner->id, 'body' => 'x', 'is_draft' => true]);
 

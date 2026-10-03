@@ -164,9 +164,14 @@ Complementan la autorización:
 Compatibilidad temporal: `users.role` y el RBAC contextual legado
 (`roles_contextuales`, `permisos_contextuales`, `rol_permiso_contextual`,
 `membresia_copropiedad_rol`) funcionan como espejo con doble escritura para
-rollback y diagnóstico; no deciden autorización. Las reglas por nombre de rol
-(`tieneRol('apoyo')`, `tieneRol('admin'|'gestor')`) se migrarán a permisos en el
-siguiente sprint. `register_permission_check_method` permanece en `false`.
+rollback y diagnóstico; no deciden autorización. Las reglas principales ya se
+migraron de nombres de rol a capacidades efectivas (Sprint 16): borradores
+ajenos mediante `pqrs.ver_borradores`, gestión restringida mediante
+`pqrs.gestionar_asignadas` y protección de la última capacidad administrativa
+mediante `usuarios.gestionar` (`CapacidadAdministrativa`). La administración de
+roles y permisos es configurable desde la web (roles base globales y
+personalizados por Copropiedad, con anti-escalada). `register_permission_check_method`
+permanece en `false`.
 
 C.3.7.2.1 implementa la autoridad de plataforma. La columna
 `users.es_administrador_sistema` constituye la única fuente de autoridad de

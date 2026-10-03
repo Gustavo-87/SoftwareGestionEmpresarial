@@ -37,8 +37,13 @@ final class AutorizacionContextual
             return false;
         }
 
-        return ! $this->tieneRol($contexto, 'apoyo')
-            || $pqr->assigned_to_id === null
+        // Capacidad `pqrs.gestionar_asignadas`: gestión restringida a la PQR
+        // sin asignar o asignada al propio usuario (semántica de apoyo).
+        if (! $this->tienePermiso($contexto, 'pqrs.gestionar_asignadas')) {
+            return true;
+        }
+
+        return $pqr->assigned_to_id === null
             || $pqr->assigned_to_id === $contexto->usuario?->id;
     }
 

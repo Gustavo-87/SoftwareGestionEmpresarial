@@ -35,7 +35,7 @@ class PqrTagAssignmentExperienceTest extends TestCase
     {
         [$org, $cop] = $this->createInstitutionalContext();
         $apoyo = User::factory()->create(['role' => 'apoyo']);
-        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create(['assigned_to_id' => null]);
         $tag = PqrTag::factory()->paraContexto($org, $cop)->create();
 
@@ -49,7 +49,7 @@ class PqrTagAssignmentExperienceTest extends TestCase
         $otro = User::factory()->create(['role' => 'apoyo']);
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create(['assigned_to_id' => $otro->id]);
 
-        foreach ([['apoyo', ['pqrs.ver_todas', 'pqrs.gestionar']], ['residente', ['pqrs.ver_todas']], ['auditor', ['pqrs.ver_todas']], ['gestor', ['pqrs.ver_todas']]] as [$rol, $permisos]) {
+        foreach ([['apoyo', ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.gestionar_asignadas']], ['residente', ['pqrs.ver_todas']], ['auditor', ['pqrs.ver_todas']], ['gestor', ['pqrs.ver_todas']]] as [$rol, $permisos]) {
             $actor = User::factory()->create(['role' => $rol]);
             $this->createContextualIdentity($actor, $org, $cop, $rol, $permisos);
             $this->actingAsContextual($actor)->get(route('pqrs.show', $pqr))->assertOk()->assertDontSee('data-tag-assignment', false)->assertDontSee('Selecciona las etiquetas');

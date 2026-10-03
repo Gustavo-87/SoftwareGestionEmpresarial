@@ -27,7 +27,7 @@ class PqrExpedientePresentationTest extends TestCase
         $apoyo = User::factory()->create(['role' => 'apoyo']);
         $otroResponsable = User::factory()->create(['role' => 'apoyo']);
         $residente = User::factory()->create(['role' => 'residente']);
-        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create([
             'user_id' => $residente->id,
             'assigned_to_id' => $otroResponsable->id,
@@ -66,7 +66,7 @@ class PqrExpedientePresentationTest extends TestCase
         [$org, $cop] = $this->createInstitutionalContext();
         $apoyo = User::factory()->create(['role' => 'apoyo']);
         $residente = User::factory()->create(['role' => 'residente']);
-        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar']);
+        $this->createContextualIdentity($apoyo, $org, $cop, 'apoyo', ['pqrs.ver_todas', 'pqrs.gestionar', 'pqrs.gestionar_asignadas']);
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create([
             'user_id' => $residente->id,
             'assigned_to_id' => $apoyo->id,
