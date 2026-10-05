@@ -78,7 +78,9 @@ class AppServiceProvider extends ServiceProvider
                 ->whereIn('pqr_id', $consulta->para($contexto)->select('id'))
                 ->firstOrFail();
         });
-        View::composer('*', fn ($view) => $view->with('siteSettings', SiteSetting::current()));
+        // Se memoiza por petición: el disparador '*' se ejecuta en cada vista
+        // renderizada (incluidos los partials) y current() consulta la base.
+        View::composer('*', fn ($view) => $view->with('siteSettings', once(fn () => SiteSetting::current())));
         View::composer('layouts.app', function ($view): void {
             $contador = 0;
             $navegacion = [];

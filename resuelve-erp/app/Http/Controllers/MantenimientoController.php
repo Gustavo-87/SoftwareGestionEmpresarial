@@ -16,8 +16,9 @@ class MantenimientoController extends Controller
     public function index(ContextoOperativo $contexto, ConsultaMantenimientos $consulta): View
     {
         $mantenimientos = $consulta->para($contexto)->with(['solicitante', 'responsable'])->latest()->paginate(15);
+        $resumen = $consulta->resumen($contexto);
 
-        return view('mantenimiento.index', compact('mantenimientos'));
+        return view('mantenimiento.index', compact('mantenimientos', 'resumen'));
     }
 
     public function create(): View

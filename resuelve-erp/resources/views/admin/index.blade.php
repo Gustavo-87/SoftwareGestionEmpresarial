@@ -19,7 +19,7 @@
     <x-metric-card
         label="Organizaciones"
         :value="number_format($totalOrganizaciones)"
-        note="{{ $organizacionesActivas }} activas"
+        note="{{ $organizacionesActivas }} activa{{ $organizacionesActivas === 1 ? '' : 's' }} · {{ $organizacionesInactivas }} inactiva{{ $organizacionesInactivas === 1 ? '' : 's' }}"
         variant="info"
         :href="route('admin.organizaciones.index')"
     >
@@ -29,7 +29,7 @@
     <x-metric-card
         label="Copropiedades"
         :value="number_format($totalCopropiedades)"
-        note="{{ $copropiedadesActivas }} activas"
+        note="{{ $copropiedadesActivas }} activa{{ $copropiedadesActivas === 1 ? '' : 's' }} · {{ $copropiedadesInactivas }} inactiva{{ $copropiedadesInactivas === 1 ? '' : 's' }}"
         variant="cyan"
         :href="route('admin.copropiedades.index')"
     >
@@ -39,7 +39,7 @@
     <x-metric-card
         label="Membresías"
         :value="number_format($totalMembresias)"
-        note="{{ $membresiasActivas }} activas · {{ $membresiasSuspendidas }} suspendida{{ $membresiasSuspendidas !== 1 ? 's' : '' }}"
+        note="{{ $membresiasActivas }} activa{{ $membresiasActivas === 1 ? '' : 's' }} · {{ $membresiasSuspendidas }} suspendida{{ $membresiasSuspendidas === 1 ? '' : 's' }} · {{ $membresiasFinalizadas }} finalizada{{ $membresiasFinalizadas === 1 ? '' : 's' }}"
         variant="success"
         :href="route('admin.membresias.index')"
     >
@@ -49,7 +49,7 @@
     <x-metric-card
         label="Usuarios globales"
         :value="number_format($totalUsuarios)"
-        note="+{{ $usuariosNuevosSemana }} esta semana"
+        note="{{ $usuariosActivos }} activo{{ $usuariosActivos === 1 ? '' : 's' }} · {{ $usuariosInactivos }} inactivo{{ $usuariosInactivos === 1 ? '' : 's' }}"
         variant="accent"
         :href="route('admin.usuarios-globales.index')"
     >

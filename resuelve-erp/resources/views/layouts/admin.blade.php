@@ -39,6 +39,7 @@
                             ['id' => 'administration', 'label' => 'Administración', 'icon' => 'settings', 'items' => [
                                 ['label' => 'Auditoría', 'route' => 'management.audit', 'match' => 'management.audit', 'icon' => 'audit'],
                                 ['label' => 'Configuración', 'route' => 'settings.edit', 'match' => 'settings.*', 'icon' => 'settings'],
+                                ['label' => 'Configuración PQRS', 'route' => 'admin.tipos-pqr.index', 'match' => 'admin.tipos-pqr.*', 'icon' => 'shield'],
                             ]],
                         ];
                     @endphp
@@ -75,6 +76,8 @@
                 @yield('contenido')
             </div>
         </main>
+
+        @include('partials.app-footer')
     </div>
 </body>
 </html>

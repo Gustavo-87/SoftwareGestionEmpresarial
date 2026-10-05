@@ -23,9 +23,21 @@ class AdminController extends Controller
         $membresiasSuspendidas = MembresiaCopropiedad::where('estado', 'suspendida')->count();
         $membresiasFinalizadas = MembresiaCopropiedad::where('estado', 'finalizada')->count();
 
-        // Organizaciones y copropiedades activas
-        $organizacionesActivas = Organizacion::where('estado', 'activa')->count();
-        $copropiedadesActivas = Copropiedad::where('estado', 'activa')->count();
+        // Desglose por estado real: una consulta agregada por entidad.
+        $organizacionEstados = Organizacion::query()
+            ->selectRaw('estado, COUNT(*) total')->groupBy('estado')->pluck('total', 'estado');
+        $organizacionesActivas = (int) $organizacionEstados->get('activa', 0);
+        $organizacionesInactivas = (int) $organizacionEstados->get('inactiva', 0);
+
+        $copropiedadEstados = Copropiedad::query()
+            ->selectRaw('estado, COUNT(*) total')->groupBy('estado')->pluck('total', 'estado');
+        $copropiedadesActivas = (int) $copropiedadEstados->get('activa', 0);
+        $copropiedadesInactivas = (int) $copropiedadEstados->get('inactiva', 0);
+
+        $usuarioEstados = User::query()
+            ->selectRaw('estado, COUNT(*) total')->groupBy('estado')->pluck('total', 'estado');
+        $usuariosActivos = (int) $usuarioEstados->get('activo', 0);
+        $usuariosInactivos = (int) $usuarioEstados->get('inactivo', 0);
 
         // Métricas de actividad reciente
         $usuariosNuevosHoy = User::whereDate('created_at', today())->count();
@@ -55,7 +67,11 @@ class AdminController extends Controller
             'membresiasSuspendidas',
             'membresiasFinalizadas',
             'organizacionesActivas',
+            'organizacionesInactivas',
             'copropiedadesActivas',
+            'copropiedadesInactivas',
+            'usuariosActivos',
+            'usuariosInactivos',
             'usuariosNuevosHoy',
             'membresiasNuevasHoy',
             'membresiasNuevasSemana',

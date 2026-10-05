@@ -23,6 +23,38 @@ class MantenimientoTest extends TestCase
         return [$u, $o, $c];
     }
 
+    public function test_index_muestra_resumen_por_estado_y_fechas_respetando_el_alcance(): void
+    {
+        [$u, $o, $c] = $this->identidad('admin', ['mantenimiento.ver_todas', 'mantenimiento.crear']);
+        $crear = fn (string $estado, ?string $fecha, string $titulo, $solicitante = null) => \App\Models\Mantenimiento::forceCreate([
+            'organizacion_id' => $o->id, 'copropiedad_id' => $c->id, 'solicitante_id' => $solicitante ?? $u->id,
+            'titulo' => $titulo, 'descripcion' => 'x', 'estado' => $estado, 'fecha_programada' => $fecha,
+        ]);
+        $crear('pendiente', null, 'Sin fecha');
+        $crear('pendiente', now()->subDay()->toDateString(), 'Pendiente atrasada');
+        $crear('en_proceso', now()->addDay()->toDateString(), 'Próxima');
+        $crear('finalizado', now()->subDay()->toDateString(), 'Finalizada tardía');
+        $crear('en_proceso', now()->subDay()->toDateString(), 'En proceso atrasada');
+
+        $respuesta = $this->actingAsContextual($u)->get(route('mantenimiento.index'))->assertOk();
+        $respuesta->assertViewHas('resumen', [
+            'total' => 5, 'pendientes' => 2, 'en_proceso' => 2, 'finalizados' => 1,
+            'programados' => 4, 'atrasados' => 2,
+        ]);
+        $respuesta->assertSee('Resumen de mantenimientos')->assertSee('Atrasados')->assertSee('Programados');
+
+        // El resumen respeta el mismo alcance del listado (solo lo propio sin ver_todas).
+        $v = User::factory()->create();
+        $this->createContextualIdentity($v, $o, $c, 'residente', ['mantenimiento.ver_propias', 'mantenimiento.crear']);
+        $crear('pendiente', null, 'Propia del residente', $v->id);
+        $this->actingAsContextual($v)->get(route('mantenimiento.index'))
+            ->assertOk()
+            ->assertViewHas('resumen', [
+                'total' => 1, 'pendientes' => 1, 'en_proceso' => 0, 'finalizados' => 0,
+                'programados' => 0, 'atrasados' => 0,
+            ]);
+    }
+
     public function test_residente_registra_y_solo_consulta_propias(): void
     {
         [$u, $o, $c] = $this->identidad('residente', ['mantenimiento.crear', 'mantenimiento.ver_propias']);
