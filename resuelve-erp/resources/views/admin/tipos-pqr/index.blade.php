@@ -37,13 +37,15 @@ compartido por todas las Organizaciones de la plataforma.</p>
                         <td>{{ $tipo->descripcion ?: '—' }}</td>
                         <td>{{ $tipo->pqrs_count }}</td>
                         <td class="actions">
-                            <a href="{{ route('admin.tipos-pqr.edit', $tipo) }}" class="icon-button" title="Editar">✎</a>
-                            <form method="POST" action="{{ route('admin.tipos-pqr.destroy', $tipo) }}" style="display:inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="icon-button danger" title="Eliminar"
-                                        onclick="return confirm('¿Eliminar definitivamente el tipo «{{ $tipo->nombre }}»?\n\nNo puede eliminarse si está siendo utilizado por alguna PQRS.')">✕</button>
-                            </form>
+                            <div class="user-actions">
+                                <a href="{{ route('admin.tipos-pqr.edit', $tipo) }}" class="button subtle">Editar</a>
+                                <form method="POST" action="{{ route('admin.tipos-pqr.destroy', $tipo) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="button danger"
+                                            onclick="return confirm('¿Eliminar definitivamente el tipo «{{ $tipo->nombre }}»?\n\nNo puede eliminarse si está siendo utilizado por alguna PQRS.')">Eliminar</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @endforeach

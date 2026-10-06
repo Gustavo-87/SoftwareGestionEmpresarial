@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentoVersion extends Model
 {
@@ -41,4 +42,18 @@ class DocumentoVersion extends Model
     public function sustituyeVersion(): BelongsTo { return $this->belongsTo(self::class, 'sustituye_version_id'); }
     public function sucesora(): HasMany { return $this->hasMany(self::class, 'sustituye_version_id'); }
     public function actuaciones(): HasMany { return $this->hasMany(DocumentoActuacion::class); }
+
+    /** El preview solo es posible para versiones aprobadas, vigentes, con archivo y de tipo visualizable. */
+    public function esPrevisualizable(): bool
+    {
+        $hoy = now()->toDateString();
+        $mimePermitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+
+        return $this->estado->value === 'aprobada'
+            && (! $this->vigente_desde || $this->vigente_desde->toDateString() <= $hoy)
+            && (! $this->vigente_hasta || $this->vigente_hasta->toDateString() >= $hoy)
+            && in_array($this->mime_type, $mimePermitidos, true)
+            && filled($this->ruta_archivo)
+            && Storage::disk('local')->exists($this->ruta_archivo);
+    }
 }

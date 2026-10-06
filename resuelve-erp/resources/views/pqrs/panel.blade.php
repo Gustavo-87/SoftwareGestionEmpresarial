@@ -14,7 +14,7 @@
     </x-page-heading>
 
     @if($resumen)
-        <section class="panel-overview" aria-label="Panorama general">
+        <section class="panel-overview metric-cards" aria-label="Panorama general">
             <x-metric-card
                 label="Vencidas"
                 :value="$resumen['vencidas']"
@@ -22,7 +22,9 @@
                 variant="danger"
                 :href="route('pqrs.index', ['estado' => 'vencidas'])"
                 class="overview-vencidas"
-            />
+            >
+                <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></x-slot>
+            </x-metric-card>
             <x-metric-card
                 label="Próximas a vencer"
                 :value="$resumen['por_vencer']"
@@ -30,7 +32,9 @@
                 variant="warning"
                 :href="route('pqrs.index', ['estado' => 'por_vencer'])"
                 class="overview-por-vencer"
-            />
+            >
+                <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></x-slot>
+            </x-metric-card>
             <x-metric-card
                 label="Pendientes"
                 :value="$resumen['pendientes']"
@@ -38,7 +42,9 @@
                 variant="info"
                 :href="route('pqrs.index', ['estado' => 'pendientes'])"
                 class="overview-pendientes"
-            />
+            >
+                <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></x-slot>
+            </x-metric-card>
             <x-metric-card
                 label="Total PQRS autorizadas"
                 :value="$resumen['total']"
@@ -46,7 +52,9 @@
                 variant="neutral"
                 :href="route('pqrs.index')"
                 class="overview-total-general"
-            />
+            >
+                <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></x-slot>
+            </x-metric-card>
         </section>
 
         {{-- Estadísticas --}}

@@ -99,13 +99,15 @@
                                 <x-badge :label="ucfirst($copropiedad->estado)" variant="status" :color="$copropiedad->estado === 'activa' ? 'activo' : 'cerrada'" :icon="true" />
                             </td>
                             <td class="actions">
-                                <a href="{{ route('admin.copropiedades.show', $copropiedad) }}" class="icon-button" title="Ver detalle">→</a>
-                                <form method="POST" action="{{ route('admin.copropiedades.destroy', $copropiedad) }}" style="display:inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="icon-button danger" title="Eliminar (solo si no contiene información operativa)"
-                                            onclick="return confirm('¿Eliminar definitivamente esta copropiedad?\n\nSolo es posible si no contiene información operativa. Esta acción no se puede deshacer.')">✕</button>
-                                </form>
+                                <div class="user-actions">
+                                    <a href="{{ route('admin.copropiedades.show', $copropiedad) }}" class="button subtle">Ver</a>
+                                    <form method="POST" action="{{ route('admin.copropiedades.destroy', $copropiedad) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="button danger"
+                                                onclick="return confirm('¿Eliminar definitivamente esta copropiedad?\n\nSolo es posible si no contiene información operativa. Esta acción no se puede deshacer.')">Eliminar</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

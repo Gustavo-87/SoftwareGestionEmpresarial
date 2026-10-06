@@ -6,7 +6,7 @@
 <x-slot name="actions">@can('create', App\Models\Mantenimiento::class)<a class="button primary" href="{{ route('mantenimiento.create') }}">Nueva solicitud</a>@endcan</x-slot>
 </x-page-heading>
 <p>Solicitudes autorizadas de la Copropiedad activa.</p>
-<section class="panel-overview" aria-label="Resumen de mantenimientos">
+<section class="panel-overview metric-cards" aria-label="Resumen de mantenimientos">
     <x-metric-card label="Total" :value="number_format($resumen['total'])" note="solicitudes del contexto" variant="neutral">
         <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></x-slot>
     </x-metric-card>

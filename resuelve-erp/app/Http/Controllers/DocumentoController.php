@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Documentos\ArchivarDocumento;
+use App\Application\Documentos\CargarVersionDocumento;
 use App\Application\Documentos\ConsultaDocumentosContextuales;
 use App\Application\Documentos\CrearDocumento;
 use App\Models\Documento;
+use App\Models\MembresiaCopropiedad;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -30,12 +33,38 @@ class DocumentoController extends Controller
         return view('documentos.index', compact('documentos', 'totalDocumentos', 'documentosActivos', 'documentosArchivados'));
     }
 
-    public function create(): View { $this->authorize('create', Documento::class); return view('documentos.create'); }
-
-    public function store(Request $request, ContextoOperativo $contexto, CrearDocumento $crear): RedirectResponse
+    public function create(ContextoOperativo $contexto): View
     {
-        $data = $request->validate(['tipo' => ['required', Rule::in(['documento_general', 'reglamento', 'manual_convivencia', 'acta'])], 'categoria' => ['required', Rule::in(['normativo', 'administrativo', 'gobierno_copropiedad', 'contractual', 'financiero', 'comunicaciones', 'otro'])], 'titulo' => ['required', 'string', 'max:180'], 'descripcion' => ['nullable', 'string'], 'nivel_acceso' => ['required', Rule::in(['administrativo', 'interno', 'comunidad'])], 'propietario_documental_user_id' => ['required', 'integer']]);
-        $documento = $crear->ejecutar($contexto, $request->user(), $data);
+        $this->authorize('create', Documento::class);
+
+        $usuariosPropietario = MembresiaCopropiedad::query()
+            ->where('organizacion_id', $contexto->organizacion->id)
+            ->where('copropiedad_id', $contexto->copropiedad->id)
+            ->where('estado', 'activa')
+            ->where('vigente_desde', '<=', now())
+            ->where(fn ($q) => $q->whereNull('vigente_hasta')->orWhere('vigente_hasta', '>', now()))
+            ->with('usuario:id,name,email')
+            ->get()
+            ->pluck('usuario')
+            ->filter()
+            ->sortBy('name')
+            ->values();
+
+        return view('documentos.create', compact('usuariosPropietario'));
+    }
+
+    public function store(Request $request, ContextoOperativo $contexto, CrearDocumento $crear, CargarVersionDocumento $cargar): RedirectResponse
+    {
+        $data = $request->validate(['tipo' => ['required', Rule::in(['documento_general', 'reglamento', 'manual_convivencia', 'acta'])], 'categoria' => ['required', Rule::in(['normativo', 'administrativo', 'gobierno_copropiedad', 'contractual', 'financiero', 'comunicaciones', 'otro'])], 'titulo' => ['required', 'string', 'max:180'], 'descripcion' => ['nullable', 'string'], 'nivel_acceso' => ['required', Rule::in(['administrativo', 'interno', 'comunidad'])], 'propietario_documental_user_id' => ['required', 'integer'], 'archivo' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,docx']]);
+        $archivo = $data['archivo'] ?? null;
+        unset($data['archivo']);
+        $documento = DB::transaction(function () use ($request, $contexto, $crear, $cargar, $data, $archivo): Documento {
+            $documento = $crear->ejecutar($contexto, $request->user(), $data);
+            if ($archivo) {
+                $cargar->ejecutar($contexto, $request->user(), $documento, $archivo, 'usuario', null);
+            }
+            return $documento;
+        });
         return redirect()->route('documentos.show', $documento)->with('success', 'Documento creado correctamente.');
     }
 

@@ -17,6 +17,13 @@ class DocumentoActuacion extends Model
 
     protected $fillable = ['documento_version_id', 'organizacion_id', 'copropiedad_id', 'accion', 'detalle', 'actor_user_id', 'nombre_actor'];
 
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
+    }
+
     public function documento(): BelongsTo { return $this->belongsTo(Documento::class); }
     public function version(): BelongsTo { return $this->belongsTo(DocumentoVersion::class, 'documento_version_id'); }
     public function actor(): BelongsTo { return $this->belongsTo(User::class, 'actor_user_id'); }

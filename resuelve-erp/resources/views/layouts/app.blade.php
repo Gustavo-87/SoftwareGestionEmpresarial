@@ -23,54 +23,73 @@
 </head>
 <body style="--forest: #1e3a5f">
     <div class="app-shell">
-        <header class="top-navbar" id="navbar" aria-label="Menú de Resuelve">
-            <div class="top-navbar-inner">
-                <a class="brand" href="{{ route('panel') }}" aria-label="Inicio de Resuelve">
-                    <span class="brand-mark image-mark"><img class="brand-logo-image" src="{{ $brandLogo }}" data-brand-fallback="{{ $brandFallback }}" onerror="this.onerror=null;this.src=this.dataset.brandFallback" alt="Logo institucional de {{ $siteSettings->nombre_conjunto }}" style="transform:{{ $logoTransform }}"></span>
-                    <span><strong>Resuelve</strong></span>
-                </a>
-                <button class="nav-toggle" id="navToggle" type="button" aria-label="Abrir menú" aria-haspopup="true" aria-expanded="false">Menú</button>
-                <nav class="main-nav" id="mainNav" aria-label="Navegación principal">
-                    <a class="nav-item {{ request()->routeIs('panel') ? 'active' : '' }}" @if(request()->routeIs('panel')) aria-current="page" @endif href="{{ route('panel') }}">Inicio</a>
-                    @if(($navegacion['pqrs'] ?? false) || ($navegacion['crearPqrs'] ?? false))
-                        <div class="nav-dropdown">
-                            <button class="nav-item nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">PQRS <span class="nav-chevron" aria-hidden="true">▾</span></button>
-                            <div class="nav-dropdown-menu" role="menu" aria-label="Submenú de PQRS">
-                                @if($navegacion['pqrs'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('pqrs.index', 'pqrs.show', 'pqrs.edit') ? 'active' : '' }}" @if(request()->routeIs('pqrs.index', 'pqrs.show', 'pqrs.edit')) aria-current="page" @endif href="{{ route('pqrs.index') }}" role="menuitem">Listado</a>@endif
-                                @if($navegacion['crearPqrs'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('pqrs.create') ? 'active' : '' }}" @if(request()->routeIs('pqrs.create')) aria-current="page" @endif href="{{ route('pqrs.create') }}" role="menuitem">Radicar</a>@endif
-                            </div>
-                        </div>
-                    @endif
-                    <div class="nav-dropdown">
-                        <button class="nav-item nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">Personas <span class="nav-chevron" aria-hidden="true">▾</span></button>
-                        <div class="nav-dropdown-menu" role="menu" aria-label="Submenú de Personas">
-                            @if($navegacion['residentes'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('management.residents') ? 'active' : '' }}" @if(request()->routeIs('management.residents')) aria-current="page" @endif href="{{ route('management.residents') }}" role="menuitem">Residentes</a>@endif
-                            <a class="nav-dropdown-item {{ request()->routeIs('profile.*') ? 'active' : '' }}" @if(request()->routeIs('profile.*')) aria-current="page" @endif href="{{ route('profile.edit') }}" role="menuitem">Mi perfil</a>
-                        </div>
-                    </div>
-                    @if($navegacion['mantenimiento'] ?? false)
-                        <a class="nav-item {{ request()->routeIs('mantenimiento.*') ? 'active' : '' }}" @if(request()->routeIs('mantenimiento.*')) aria-current="page" @endif href="{{ route('mantenimiento.index') }}">Mantenimiento</a>
-                    @endif
-                    @if($navegacion['documentos'] ?? false)
-                        <a class="nav-item {{ request()->routeIs('documentos.*') ? 'active' : '' }}" @if(request()->routeIs('documentos.*')) aria-current="page" @endif href="{{ route('documentos.index') }}">Documentos</a>
-                    @endif
-                    @if(($navegacion['herramientas'] ?? false) || ($navegacion['carga'] ?? false) || ($navegacion['auditoria'] ?? false) || ($navegacion['configuracion'] ?? false) || ($navegacion['usuarios'] ?? false) || ($navegacion['catalogoRoles'] ?? false) || ($navegacion['esAdministradorSistema'] ?? false))
-                        <div class="nav-dropdown">
-                            <button class="nav-item nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">Administración <span class="nav-chevron" aria-hidden="true">▾</span></button>
-                            <div class="nav-dropdown-menu" role="menu" aria-label="Submenú de Administración">
-                                @if($navegacion['carga'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('management.workload') ? 'active' : '' }}" href="{{ route('management.workload') }}" role="menuitem">Carga del equipo</a>@endif
-                                @if($navegacion['herramientas'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('management.tools') ? 'active' : '' }}" href="{{ route('management.tools') }}" role="menuitem">Herramientas</a>@endif
-                                @if($navegacion['auditoria'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('management.audit') ? 'active' : '' }}" href="{{ route('management.audit') }}" role="menuitem">Auditoría</a>@endif
-                                @if($navegacion['configuracion'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.edit') }}" role="menuitem">Configuración general</a>@endif
-                                @if($navegacion['usuarios'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}" role="menuitem">Usuarios y roles</a>@endif
-                                @if($navegacion['catalogoRoles'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}" role="menuitem">Catálogo de roles</a>@endif
-                                @if($navegacion['esAdministradorSistema'] ?? false)<a class="nav-dropdown-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" @if(request()->routeIs('admin.*')) aria-current="page" @endif href="{{ route('admin.index') }}" role="menuitem">Administración del sistema</a>@endif
-                            </div>
-                        </div>
-                    @endif
-                </nav>
-                <div class="navbar-context">
-                    <span class="navbar-context-label">{{ $navegacion['copropiedad']->nombre ?? $siteSettings->nombre_conjunto }}</span>
+        <?php
+            $navItems = [
+                ['label' => 'Inicio', 'route' => 'panel', 'match' => 'panel', 'icon' => 'home'],
+            ];
+            if (($navegacion['pqrs'] ?? false) || ($navegacion['crearPqrs'] ?? false)) {
+                $pqrsItems = [];
+                if ($navegacion['pqrs'] ?? false) {
+                    $pqrsItems[] = ['label' => 'Listado', 'route' => 'pqrs.index', 'match' => ['pqrs.index', 'pqrs.show', 'pqrs.edit'], 'icon' => 'audit'];
+                }
+                if ($navegacion['crearPqrs'] ?? false) {
+                    $pqrsItems[] = ['label' => 'Radicar', 'route' => 'pqrs.create', 'match' => 'pqrs.create', 'icon' => 'shield'];
+                }
+                $navItems[] = ['id' => 'pqrs', 'label' => 'PQRS', 'icon' => 'shield', 'items' => $pqrsItems];
+            }
+            if ($navegacion['mantenimiento'] ?? false) {
+                $navItems[] = ['label' => 'Mantenimiento', 'route' => 'mantenimiento.index', 'match' => 'mantenimiento.*', 'icon' => 'settings'];
+            }
+            if ($navegacion['documentos'] ?? false) {
+                $navItems[] = ['label' => 'Documentos', 'route' => 'documentos.index', 'match' => 'documentos.*', 'icon' => 'audit'];
+            }
+            if (($navegacion['herramientas'] ?? false) || ($navegacion['carga'] ?? false) || ($navegacion['auditoria'] ?? false) || ($navegacion['configuracion'] ?? false) || ($navegacion['usuarios'] ?? false) || ($navegacion['catalogoRoles'] ?? false) || ($navegacion['esAdministradorSistema'] ?? false)) {
+                $adminItems = [];
+                if ($navegacion['carga'] ?? false) {
+                    $adminItems[] = ['label' => 'Carga del equipo', 'route' => 'management.workload', 'match' => 'management.workload', 'icon' => 'users'];
+                }
+                if ($navegacion['herramientas'] ?? false) {
+                    $adminItems[] = ['label' => 'Herramientas', 'route' => 'management.tools', 'match' => 'management.tools', 'icon' => 'settings'];
+                }
+                if ($navegacion['auditoria'] ?? false) {
+                    $adminItems[] = ['label' => 'Auditoría', 'route' => 'management.audit', 'match' => 'management.audit', 'icon' => 'audit'];
+                }
+                if ($navegacion['configuracion'] ?? false) {
+                    $adminItems[] = ['label' => 'Configuración general', 'route' => 'settings.edit', 'match' => 'settings.*', 'icon' => 'settings'];
+                }
+                if ($navegacion['usuarios'] ?? false) {
+                    $adminItems[] = ['label' => 'Usuarios y roles', 'route' => 'users.index', 'match' => 'users.*', 'icon' => 'users'];
+                }
+                if ($navegacion['catalogoRoles'] ?? false) {
+                    $adminItems[] = ['label' => 'Catálogo de roles', 'route' => 'roles.index', 'match' => 'roles.*', 'icon' => 'shield'];
+                }
+                if ($navegacion['esAdministradorSistema'] ?? false) {
+                    $adminItems[] = ['label' => 'Administración del sistema', 'route' => 'admin.index', 'match' => 'admin.*', 'icon' => 'building'];
+                }
+                $navItems[] = ['id' => 'administracion', 'label' => 'Administración', 'icon' => 'building', 'items' => $adminItems];
+            }
+            $personasItems = [];
+            if ($navegacion['residentes'] ?? false) {
+                $personasItems[] = ['label' => 'Residentes', 'route' => 'management.residents', 'match' => 'management.residents', 'icon' => 'users'];
+            }
+            $personasItems[] = ['label' => 'Mi perfil', 'route' => 'profile.edit', 'match' => 'profile.*', 'icon' => 'membership'];
+            $navItems[] = ['id' => 'personas', 'label' => 'Perfil', 'icon' => 'users', 'items' => $personasItems];
+        ?>
+        @include('partials.top-navbar', [
+            'headerAria' => 'Menú de Resuelve',
+            'brandHref' => route('panel'),
+            'brandLabel' => 'Resuelve',
+            'brandAria' => 'Inicio de Resuelve',
+            'logoAlt' => 'Logo institucional de ' . $siteSettings->nombre_conjunto,
+            'navAria' => 'Navegación principal',
+            'navItems' => $navItems,
+            'showNotifications' => $navegacion['notificaciones'] ?? false,
+        ])
+
+        <main class="main-content">
+            <div class="page-content">
+                <div class="operational-context" aria-label="Copropiedad activa">
+                    <span class="operational-context-label">{{ $navegacion['copropiedad']->nombre ?? $siteSettings->nombre_conjunto }}</span>
                     @if(count($copropiedadesDisponibles ?? []) > 1)
                         <form method="POST" action="{{ route('contexto.cambiar') }}" class="contexto-selector-form">
                             @csrf
@@ -82,17 +101,6 @@
                         </form>
                     @endif
                 </div>
-                <div class="navbar-actions">
-                    @if($navegacion['notificaciones'] ?? false)<a class="notification-button" href="{{ route('notifications.index') }}" aria-label="Notificaciones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 6-3 7-3 9h18c0-2-3-3-3-9ZM10 21h4"/></svg>@if($unreadNotificationsCount)<b>{{ $unreadNotificationsCount }}</b>@endif</a>@endif
-                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Activar modo oscuro"><span class="sun">☀</span><span class="moon">☾</span></button>
-                    <span class="avatar navbar-avatar" title="{{ auth()->user()->name }}">{{ Str::upper(Str::substr(auth()->user()->name, 0, 2)) }}</span>
-                    <form method="POST" action="{{ route('logout') }}" class="logout-form">@csrf<button class="logout-text" type="submit">Cerrar sesión</button></form>
-                </div>
-            </div>
-        </header>
-
-        <main class="main-content">
-            <div class="page-content">
                 @if(session('success'))
                     <x-notice variant="success">{{ session('success') }}</x-notice>
                 @endif

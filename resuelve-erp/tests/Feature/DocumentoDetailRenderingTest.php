@@ -58,6 +58,36 @@ class DocumentoDetailRenderingTest extends TestCase
             ->assertDontSee('Aprobar versión');
     }
 
+    public function test_detail_renders_timeline_with_database_default_timestamps(): void
+    {
+        [$organizacion, $copropiedad] = $this->createInstitutionalContext();
+        $manager = User::factory()->create();
+        $this->createContextualIdentity($manager, $organizacion, $copropiedad, 'gestor', [
+            'documentos.consultar', 'documentos.gestionar', 'documentos.aprobar',
+        ]);
+        $documento = $this->documento($organizacion->id, $copropiedad->id, $manager->id, 'Con actuaciones');
+        $this->version($documento, 1, 'borrador');
+
+        // created_at queda a cargo de la base de datos (DEFAULT CURRENT_TIMESTAMP): al hidratar llega como string crudo.
+        $actuacion = $documento->actuaciones()->create([
+            'documento_version_id' => null,
+            'organizacion_id' => $organizacion->id,
+            'copropiedad_id' => $copropiedad->id,
+            'accion' => 'documento_creado',
+            'detalle' => 'Documento registrado en el sistema.',
+            'actor_user_id' => $manager->id,
+            'nombre_actor' => $manager->name,
+        ]);
+        $actuacion = $actuacion->fresh();
+
+        self::assertNotNull($actuacion->getRawOriginal('created_at'));
+        self::assertInstanceOf(\Carbon\CarbonInterface::class, $actuacion->created_at);
+
+        $this->actingAsContextual($manager)->get(route('documentos.show', $documento))
+            ->assertOk()
+            ->assertSee('Documento registrado en el sistema.');
+    }
+
     private function documento(int $organizacionId, int $copropiedadId, int $ownerId, string $titulo): Documento
     {
         $documento = new Documento([

@@ -159,4 +159,52 @@ class DocumentoPreviewTest extends TestCase
             ->assertSee('document-preview-cell')
             ->assertSee('document-preview-thumb');
     }
+
+    public function test_detail_offers_preview_only_for_visualizable_versions(): void
+    {
+        Storage::fake('local');
+        [$organizacion, $copropiedad] = $this->createInstitutionalContext();
+        $user = User::factory()->create();
+        $this->createContextualIdentity($user, $organizacion, $copropiedad, 'gestor', ['documentos.consultar']);
+
+        $documento = Documento::factory()->create([
+            'organizacion_id' => $organizacion->id,
+            'copropiedad_id' => $copropiedad->id,
+            'estado' => 'activo',
+        ]);
+        $file = UploadedFile::fake()->image('vigente.jpg', 100, 100);
+        $path = $file->store('documentos', 'local');
+        $vigente = DocumentoVersion::factory()->create([
+            'documento_id' => $documento->id,
+            'estado' => 'aprobada',
+            'mime_type' => 'image/jpeg',
+            'extension' => 'jpg',
+            'ruta_archivo' => $path,
+            'vigente_desde' => now()->toDateString(),
+        ]);
+        // Versión sin archivo físico asociado: no es visualizable.
+        $sinArchivo = DocumentoVersion::factory()->create([
+            'documento_id' => $documento->id,
+            'numero' => 2,
+            'estado' => 'borrador',
+            'mime_type' => 'application/pdf',
+            'extension' => 'pdf',
+            'ruta_archivo' => 'documentos/no-existe.pdf',
+        ]);
+
+        $this->actingAsContextual($user)
+            ->get(route('documentos.show', $documento))
+            ->assertOk()
+            ->assertSee('Vista previa')
+            ->assertSee(route('documentos.versions.preview', [$documento, $vigente]), false)
+            ->assertDontSee(route('documentos.versions.preview', [$documento, $sinArchivo]), false);
+
+        $this->actingAsContextual($user)
+            ->get(route('documentos.versions.preview', [$documento, $vigente]))
+            ->assertOk();
+
+        $this->actingAsContextual($user)
+            ->get(route('documentos.versions.preview', [$documento, $sinArchivo]))
+            ->assertNotFound();
+    }
 }

@@ -96,7 +96,9 @@
                                 @endif
                             </td>
                             <td class="actions">
-                                <a href="{{ route('admin.usuarios-globales.show', $usuario) }}" class="icon-button" title="Ver detalle">→</a>
+                                <div class="user-actions">
+                                    <a href="{{ route('admin.usuarios-globales.show', $usuario) }}" class="button subtle">Ver</a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

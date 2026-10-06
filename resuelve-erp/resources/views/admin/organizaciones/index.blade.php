@@ -87,7 +87,9 @@
                             </td>
                             <td>{{ $organizacion->copropiedades->count() }}</td>
                             <td class="actions">
-                                <a href="{{ route('admin.organizaciones.show', $organizacion) }}" class="icon-button" title="Ver detalle">→</a>
+                                <div class="user-actions">
+                                    <a href="{{ route('admin.organizaciones.show', $organizacion) }}" class="button subtle">Ver</a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

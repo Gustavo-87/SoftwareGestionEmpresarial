@@ -16,22 +16,28 @@
     </x-slot>
 </x-page-heading>
 
-<div class="metrics" style="margin-bottom:18px">
+<div class="metrics metric-cards" style="margin-bottom:18px">
     <x-metric-card
         label="Total documentos"
         :value="$totalDocumentos"
         variant="info"
-    />
+    >
+        <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></x-slot>
+    </x-metric-card>
     <x-metric-card
         label="Activos"
         :value="$documentosActivos"
         variant="success"
-    />
+    >
+        <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></x-slot>
+    </x-metric-card>
     <x-metric-card
         label="Archivados"
         :value="$documentosArchivados"
         variant="neutral"
-    />
+    >
+        <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/></svg></x-slot>
+    </x-metric-card>
 </div>
 
 @if($errors->any())<x-notice variant="error" title="No fue posible completar la acción."><p>Revisa la información y vuelve a intentarlo.</p></x-notice>@endif

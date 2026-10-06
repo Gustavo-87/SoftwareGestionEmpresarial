@@ -30,7 +30,7 @@ class PanelOperativoTest extends TestCase
             ->assertSee($copropiedad->nombre)
             ->assertSee('Inicio')
             ->assertSee('PQRS')
-            ->assertSee('Personas')
+            ->assertSee('Perfil')
             ->assertSee('Documentos')
             ->assertSee('Notificaciones');
     }

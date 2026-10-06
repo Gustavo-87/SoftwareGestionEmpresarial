@@ -15,7 +15,7 @@
 </x-page-heading>
 
 {{-- Métricas globales --}}
-<div class="metrics admin-home-cards">
+<div class="metrics metric-cards admin-home-cards">
     <x-metric-card
         label="Organizaciones"
         :value="number_format($totalOrganizaciones)"
