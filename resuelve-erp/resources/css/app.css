@@ -1182,3 +1182,12 @@ td small {
     .roles-catalog .button{min-height:44px}
 }
 
+/* Rejilla de Herramientas: tarjetas equilibradas, ancho completo y sin huecos */
+.tools-grid{max-width:none;align-items:stretch}
+.tools-grid>.tool-card{display:flex;flex-direction:column}
+.tool-card-actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
+.tool-fields-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:520px){.tool-fields-row{grid-template-columns:1fr}}
+@media(min-width:901px){.tools-grid>.tool-card:first-child:nth-last-child(2):not(.tag-catalog){grid-column:1/-1}}
+.report-filters .filter-fields{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+

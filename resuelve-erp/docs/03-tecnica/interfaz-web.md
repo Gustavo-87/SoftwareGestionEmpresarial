@@ -497,3 +497,91 @@ Product Owner pendiente.
 - **Versión:** v1.4
 - **Fecha de creación:** 4 de agosto de 2026
 - **Fecha de última actualización:** 3 de octubre de 2026
+
+## Centro de Reportes e Indicadores (16 de octubre de 2026)
+
+Sprint 18 (en curso) sobre HU-REP-01; no declara el cierre del Sprint 17.
+HU-REP-02 queda fuera del alcance.
+
+- `GET /informes` (`reports.index`) está en el grupo `auth` y usa
+  `ReportController::index()` con la vista `reports.index`. Reutiliza
+  `reportData()` y la consulta contextual de las exportaciones: exige
+  `pqrs.listar` e `informes.exportar`, limita los registros a la Copropiedad
+  activa y a los propios cuando falta `pqrs.ver_todas`. No utiliza el rol
+  global para conceder acceso.
+- La pantalla presenta cuatro secciones: PQRS, Mantenimiento, Documentos y
+  Consolidado General. La sección PQRS muestra el periodo de los registros,
+  total, pendientes, resueltas y ausencia de datos, y conserva los filtros de
+  la URL al descargar PDF, Excel o CSV.
+- La sección de Mantenimiento incorpora filtros de periodo (`desde`/`hasta`
+  sobre `fecha_programada`), estado y responsable, enviados como parámetros
+  `mantenimiento_*` para no interferir con los filtros de PQRS en la misma URL.
+  Sus indicadores y el detalle responden a esos filtros; los registros sin
+  fecha programada quedan fuera del filtro de periodo. El botón «Descargar
+  PDF» enlaza a `GET /informes/mantenimiento.pdf` (`reports.mantenimiento.pdf`)
+  con los filtros normalizados.
+- El reporte PDF de Mantenimiento usa `ReportController::mantenimientoPdf()`,
+  DomPDF y la plantilla `reports.mantenimiento`. Incluye identificación de la
+  Copropiedad (nombre institucional, NIT, representante legal, dirección y
+  contacto), indicadores (total, pendientes, en proceso, finalizados,
+  programados y atrasados) y detalle de solicitudes. Exige `informes.exportar`
+  y `viewAny` de `MantenimientoPolicy`; los datos se limitan mediante
+  `ConsultaMantenimientos::para()` (Copropiedad activa y registros propios sin
+  `mantenimiento.ver_todas`) y los filtros se validan en backend.
+- La sección de Documentos incorpora filtros de periodo (`desde`/`hasta` sobre
+  `created_at`, fecha de registro) y estado, enviados como parámetros
+  `documentos_*` para no interferir con los demás filtros de la misma URL. El
+  botón «Descargar PDF» enlaza a `GET /informes/documentos.pdf`
+  (`reports.documentos.pdf`) con los filtros normalizados. El reporte usa
+  `ReportController::documentosPdf()`, DomPDF y la plantilla
+  `reports.documentos`, con identificación de la Copropiedad, indicadores
+  (total, activos, archivados) y detalle de documentos. Exige
+  `informes.exportar` y `viewAny` de `DocumentoPolicy`; los datos se limitan
+  mediante `ConsultaDocumentosContextuales::para()` (Copropiedad activa y
+  ámbito de Copropiedad) y los filtros se validan en backend.
+- Los indicadores de Mantenimiento se componen sobre el mismo escopo de
+  `ConsultaMantenimientos` (sin `mantenimiento.ver_todas`, solo propios). Los
+  de Documentos se componen sobre el mismo escopo de
+  `ConsultaDocumentosContextuales` con los conteos de
+  `DocumentoController::index` y exigen `viewAny` de `DocumentoPolicy`. Sin
+  permiso del módulo la sección muestra el aviso de permisos y no presenta
+  datos, filtros ni descargas.
+- El Consolidado General suma los registros de los módulos autorizados para la
+  Copropiedad activa.
+- Administración → Herramientas (`management.tools`) incluye la tarjeta
+  «Reportes e Indicadores» con enlace a `reports.index`, visible solo con
+  `informes.exportar`. La autorización efectiva sigue residiendo en el
+  backend.
+- Esta entrada no incorpora filtros visuales de PQRS ni exportación del
+  Consolidado General.
+
+Evidencia: `routes/web.php`, `app/Http/Controllers/ReportController.php`,
+`app/Http/Controllers/ComplementaryController.php`,
+`resources/views/reports/index.blade.php`,
+`resources/views/reports/mantenimiento.blade.php`,
+`resources/views/reports/documentos.blade.php`,
+`resources/views/management/tools.blade.php`, `tests/Feature/ReportIndexTest.php`,
+`tests/Feature/MantenimientoReportPdfTest.php` y
+`tests/Feature/DocumentoReportPdfTest.php`.
+
+## Herramientas — reorganización visual (16 de octubre de 2026)
+
+La pantalla de Herramientas (`management.tools`) conserva las tarjetas
+«Reportes e Indicadores» (visible solo con `informes.exportar`), «Plantillas de
+respuesta» y «Catálogo de etiquetas», con sus permisos, formularios y
+contratos intactos. La sección «Reglas automáticas» ya no se muestra en la
+interfaz; la ruta `management.rules.store`, `ComplementaryController::rule()`,
+el modelo `AutomationRule` y la tabla `automation_rules` permanecen sin cambios
+y siguen operativos sin interfaz visible.
+
+La rejilla de tarjetas ocupa el ancho disponible: dos tarjetas en la primera
+fila y el catálogo de etiquetas a ancho completo, sin huecos; con una sola
+tarjeta en la primera fila ocupa el ancho completo. En pantallas pequeñas se
+apila en una columna. Las tarjetas se estiran a la misma altura y las acciones
+se alinean al pie. Se conservan los modos claro y oscuro.
+
+Evidencia: `resources/views/management/tools.blade.php`,
+`resources/css/app.css`, `tests/Feature/PqrTagContextTest.php`,
+`tests/Feature/PqrTagCatalogAdministrationTest.php`,
+`tests/Feature/PqrComplementaryFeaturesTest.php` y
+`tests/Feature/ReportIndexTest.php`.

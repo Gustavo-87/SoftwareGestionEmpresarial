@@ -92,6 +92,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/informes/pqrs.csv', [ReportController::class, 'csv'])->name('reports.csv');
     Route::get('/informes/pqrs.xlsx', [ReportController::class, 'xlsx'])->name('reports.xlsx');
     Route::get('/informes/pqrs.pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+    Route::get('/informes/mantenimiento.pdf', [ReportController::class, 'mantenimientoPdf'])->name('reports.mantenimiento.pdf');
+    Route::get('/informes/documentos.pdf', [ReportController::class, 'documentosPdf'])->name('reports.documentos.pdf');
+    Route::get('/informes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/gestion/carga', [ComplementaryController::class, 'workload'])->name('management.workload');
     Route::get('/gestion/herramientas', [ComplementaryController::class, 'tools'])->name('management.tools');
     Route::post('/gestion/plantillas', [ComplementaryController::class, 'template'])->name('management.templates.store');

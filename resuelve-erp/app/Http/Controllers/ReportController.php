@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Autorizacion\AutorizacionContextual;
+use App\Application\Documentos\ConsultaDocumentosContextuales;
+use App\Application\Mantenimiento\ConsultaMantenimientos;
 use App\Application\Pqrs\ConsultaPqrsContextuales;
+use App\Domain\GestionDocumental\Enums\EstadoDocumentoEnum;
+use App\Models\Documento;
+use App\Models\Mantenimiento;
 use App\Models\Pqr;
 use App\Models\SiteSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -12,7 +17,10 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -23,6 +31,199 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
+    public function index(
+        Request $request,
+        ContextoOperativo $contexto,
+        ConsultaPqrsContextuales $consultaPqrs,
+        ConsultaMantenimientos $consultaMantenimientos,
+        ConsultaDocumentosContextuales $consultaDocumentos
+    ): View
+    {
+        $pqrs = $this->reportData($request, $contexto, $consultaPqrs);
+        $filtros = $this->mantenimientoFiltros($request);
+        $reporte = Gate::forUser($request->user())->allows('viewAny', Mantenimiento::class)
+            ? $this->mantenimientoReportData($filtros, $contexto, $consultaMantenimientos)
+            : null;
+        $documentosFiltros = $this->documentosFiltros($request);
+        $documentos = Gate::forUser($request->user())->allows('viewAny', Documento::class)
+            ? $this->documentosReportData($documentosFiltros, $contexto, $consultaDocumentos)
+            : null;
+
+        return view('reports.index', $pqrs + [
+            'copropiedad' => $contexto->copropiedad,
+            'mantenimiento' => $reporte === null ? null : $reporte['stats'] + ['rows' => $reporte['rows'], 'period' => $reporte['period']],
+            'mantenimientoFiltros' => $filtros,
+            'responsables' => $reporte === null ? collect() : $consultaMantenimientos->responsables($contexto)->orderBy('name')->get(),
+            'documentos' => $documentos === null ? null : $documentos['stats'] + ['rows' => $documentos['rows'], 'period' => $documentos['period']],
+            'documentosFiltros' => $documentosFiltros,
+            'consolidado' => $this->consolidadoData($pqrs['stats'], $reporte['stats'] ?? null, $documentos['stats'] ?? null),
+        ]);
+    }
+
+    public function mantenimientoPdf(
+        Request $request,
+        ContextoOperativo $contexto,
+        ConsultaMantenimientos $consulta
+    ): Response
+    {
+        $filtros = array_filter($request->validate([
+            'desde' => ['nullable', 'date'],
+            'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
+            'estado' => ['nullable', Rule::in(['pendiente', 'en_proceso', 'finalizado'])],
+            'responsable_id' => ['nullable', 'integer'],
+        ]), fn ($valor) => $valor !== null);
+
+        $data = $this->mantenimientoReportData($filtros, $contexto, $consulta);
+
+        return Pdf::loadView('reports.mantenimiento', $data)->setPaper('a4', 'landscape')->download('informe-mantenimiento-'.now()->format('Ymd').'.pdf');
+    }
+
+    public function documentosPdf(
+        Request $request,
+        ContextoOperativo $contexto,
+        ConsultaDocumentosContextuales $consulta
+    ): Response
+    {
+        $filtros = array_filter($request->validate([
+            'desde' => ['nullable', 'date'],
+            'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
+            'estado' => ['nullable', Rule::in(['activo', 'archivado'])],
+        ]), fn ($valor) => $valor !== null);
+
+        $data = $this->documentosReportData($filtros, $contexto, $consulta);
+
+        return Pdf::loadView('reports.documentos', $data)->setPaper('a4', 'landscape')->download('informe-documentos-'.now()->format('Ymd').'.pdf');
+    }
+
+    // Los filtros del Centro de Reportes viajan prefijados para no interferir
+    // con los filtros de PQRS en la misma URL; el PDF recibe los nombres simples.
+    private function mantenimientoFiltros(Request $request): array
+    {
+        $data = $request->validate([
+            'mantenimiento_desde' => ['nullable', 'date'],
+            'mantenimiento_hasta' => ['nullable', 'date', 'after_or_equal:mantenimiento_desde'],
+            'mantenimiento_estado' => ['nullable', Rule::in(['pendiente', 'en_proceso', 'finalizado'])],
+            'mantenimiento_responsable_id' => ['nullable', 'integer'],
+        ]);
+
+        return array_filter([
+            'desde' => $data['mantenimiento_desde'] ?? null,
+            'hasta' => $data['mantenimiento_hasta'] ?? null,
+            'estado' => $data['mantenimiento_estado'] ?? null,
+            'responsable_id' => $data['mantenimiento_responsable_id'] ?? null,
+        ], fn ($valor) => $valor !== null);
+    }
+
+    private function mantenimientoQuery(
+        array $filtros,
+        ContextoOperativo $contexto,
+        ConsultaMantenimientos $consulta
+    ): Collection
+    {
+        abort_unless(app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar'), 403);
+        $query = $consulta->para($contexto)->with(['solicitante', 'responsable']);
+        if (isset($filtros['estado'])) $query->where('estado', $filtros['estado']);
+        if (isset($filtros['responsable_id'])) $query->where('responsable_id', (int) $filtros['responsable_id']);
+        if (isset($filtros['desde'])) $query->whereDate('fecha_programada', '>=', $filtros['desde']);
+        if (isset($filtros['hasta'])) $query->whereDate('fecha_programada', '<=', $filtros['hasta']);
+
+        return $query->orderBy('fecha_programada')->orderBy('id')->get();
+    }
+
+    private function mantenimientoReportData(
+        array $filtros,
+        ContextoOperativo $contexto,
+        ConsultaMantenimientos $consulta
+    ): array
+    {
+        $rows = $this->mantenimientoQuery($filtros, $contexto, $consulta);
+        $abiertas = $rows->whereIn('estado', ['pendiente', 'en_proceso']);
+        $from = $filtros['desde'] ?? $rows->min('fecha_programada');
+        $to = $filtros['hasta'] ?? $rows->max('fecha_programada');
+
+        return [
+            'rows' => $rows,
+            'settings' => SiteSetting::current(),
+            'copropiedad' => $contexto->copropiedad,
+            'stats' => [
+                'total' => $rows->count(),
+                'pendientes' => $rows->where('estado', 'pendiente')->count(),
+                'en_proceso' => $rows->where('estado', 'en_proceso')->count(),
+                'finalizados' => $rows->where('estado', 'finalizado')->count(),
+                'programados' => $rows->whereNotNull('fecha_programada')->count(),
+                'atrasados' => $abiertas->filter(fn (Mantenimiento $m) => $m->fecha_programada?->isBefore(today()))->count(),
+            ],
+            'period' => ($from ? Carbon::parse($from)->format('d/m/Y') : 'Sin registros').' - '.($to ? Carbon::parse($to)->format('d/m/Y') : 'Sin registros'),
+            'generatedAt' => now(),
+        ];
+    }
+
+    // Los filtros del Centro de Reportes viajan prefijados para no interferir
+    // con los filtros de PQRS en la misma URL; el PDF recibe los nombres simples.
+    private function documentosFiltros(Request $request): array
+    {
+        $data = $request->validate([
+            'documentos_desde' => ['nullable', 'date'],
+            'documentos_hasta' => ['nullable', 'date', 'after_or_equal:documentos_desde'],
+            'documentos_estado' => ['nullable', Rule::in(['activo', 'archivado'])],
+        ]);
+
+        return array_filter([
+            'desde' => $data['documentos_desde'] ?? null,
+            'hasta' => $data['documentos_hasta'] ?? null,
+            'estado' => $data['documentos_estado'] ?? null,
+        ], fn ($valor) => $valor !== null);
+    }
+
+    private function documentosQuery(
+        array $filtros,
+        ContextoOperativo $contexto,
+        ConsultaDocumentosContextuales $consulta
+    ): Collection
+    {
+        abort_unless(app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar'), 403);
+        $this->authorize('viewAny', Documento::class);
+        $query = $consulta->para($contexto)->with(['propietarioDocumental', 'versiones']);
+        if (isset($filtros['estado'])) $query->where('estado', $filtros['estado']);
+        if (isset($filtros['desde'])) $query->whereDate('created_at', '>=', $filtros['desde']);
+        if (isset($filtros['hasta'])) $query->whereDate('created_at', '<=', $filtros['hasta']);
+
+        return $query->orderBy('created_at')->orderBy('id')->get();
+    }
+
+    private function documentosReportData(
+        array $filtros,
+        ContextoOperativo $contexto,
+        ConsultaDocumentosContextuales $consulta
+    ): array
+    {
+        $rows = $this->documentosQuery($filtros, $contexto, $consulta);
+        $from = $filtros['desde'] ?? $rows->min('created_at');
+        $to = $filtros['hasta'] ?? $rows->max('created_at');
+
+        return [
+            'rows' => $rows,
+            'settings' => SiteSetting::current(),
+            'copropiedad' => $contexto->copropiedad,
+            'stats' => [
+                'total' => $rows->count(),
+                'activos' => $rows->filter(fn (Documento $documento) => $documento->estado === EstadoDocumentoEnum::ACTIVO)->count(),
+                'archivados' => $rows->filter(fn (Documento $documento) => $documento->estado === EstadoDocumentoEnum::ARCHIVADO)->count(),
+            ],
+            'period' => ($from ? Carbon::parse($from)->format('d/m/Y') : 'Sin registros').' - '.($to ? Carbon::parse($to)->format('d/m/Y') : 'Sin registros'),
+            'generatedAt' => now(),
+        ];
+    }
+
+    private function consolidadoData(array $stats, ?array $mantenimiento, ?array $documentos): array
+    {
+        $modulos = [['nombre' => 'PQRS', 'total' => $stats['total']]];
+        if ($mantenimiento !== null) $modulos[] = ['nombre' => 'Mantenimiento', 'total' => $mantenimiento['total']];
+        if ($documentos !== null) $modulos[] = ['nombre' => 'Documentos', 'total' => $documentos['total']];
+
+        return ['total' => array_sum(array_column($modulos, 'total')), 'modulos' => $modulos];
+    }
+
     private function query(
         Request $request,
         ContextoOperativo $contexto,
