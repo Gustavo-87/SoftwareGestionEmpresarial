@@ -1,6 +1,7 @@
 # Integración académica de Resuelve ERP
 
 Fecha: 5 de septiembre de 2026.
+Actualización: 17 de octubre de 2026.
 
 El proyecto se incorpora como carpeta normal de SoftwareGestionEmpresarial,
 a partir del commit 5e6996f de resuelve-pqrs-copropiedades, con las adaptaciones
@@ -66,3 +67,18 @@ programación de fecha y gestión de estados, con permisos `mantenimiento.*` y
 aislamiento por Copropiedad activa (ver
 [Roles y permisos](02-funcional/roles-y-permisos.md)).
 
+## Revisión de la guía "Roles, Permisos y Rol Activo" (Clase 10)
+
+El 17 de octubre de 2026 se realizó la revisión de cumplimiento de la guía de
+Clase 10 sobre roles, permisos y rol activo. Las brechas identificadas fueron
+aprobadas por el Product Owner para implementarse en el Sprint 18: rol activo
+con segregación de funciones, permisos directos por usuario con origen visible,
+matriz global de permisos "ver como usuario", administración de permisos, ciclo
+de vida de usuarios por desactivación y endurecimiento de las reglas de roles.
+El alcance, los criterios de aceptación y la adaptación de la guía al proyecto
+(permisos "modulo.accion", roles base y personalizados, regla "≥1 miembro con
+`usuarios.gestionar`" y rutas en español) se documentan en
+[Sprint 18 — Seguridad de acceso](04-desarrollo-agil/sprint-18-seguridad-acceso.md)
+y en [ADR-013](10-adr/ADR-013-rol-activo-segregacion-funciones.md). Estas
+capacidades están aprobadas y en implementación (Sprint 18, en curso); no se
+presentan como implementadas.

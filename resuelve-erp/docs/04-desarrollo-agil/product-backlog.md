@@ -2,10 +2,10 @@
 
 ## Control documental
 
-- **Versión:** v1.1
+- **Versión:** v1.2
 - **Estado:** En construcción
 - **Fecha de creación:** 31 de julio de 2026
-- **Última actualización:** 3 de agosto de 2026
+- **Última actualización:** 17 de octubre de 2026
 - **Responsable:** Product Owner de Resuelve
 
 ## Propósito y alcance
@@ -151,6 +151,60 @@ backend e interfaz condicionada por permisos). También quedó implementado el
 refinamiento de HU-USR-02: las capacidades efectivas sustituyen las reglas por
 nombre de rol. No incluye (fuera de alcance aprobado): CRUD de permisos,
 definiciones de roles por Organización y desactivación de roles.
+
+Las siguientes historias fueron aprobadas por el Product Owner el 17 de octubre
+de 2026 para el Sprint 18 (ver
+[Sprint 18 — Seguridad de acceso](sprint-18-seguridad-acceso.md) y
+[ADR-013](../10-adr/ADR-013-rol-activo-segregacion-funciones.md)). Sus
+criterios de aceptación se registran en el documento del sprint.
+
+### HU-USR-04 — Rol activo con segregación de funciones
+
+Como Usuario con varios Roles en una Copropiedad  
+Quiero elegir un Rol activo cuyos permisos, junto con mis permisos directos, definan mis permisos efectivos  
+Para concentrar mis responsabilidades sin mezclar las capacidades de todos mis Roles.
+
+**Estado: Aprobada (Sprint 18).**
+
+### HU-USR-05 — Permisos directos por usuario
+
+Como Administrador  
+Quiero conceder y revocar permisos directos a un usuario en la Copropiedad activa, con anti-escalada, origen visible y auditoría  
+Para atender excepciones puntuales sin crear roles adicionales.
+
+**Estado: Aprobada (Sprint 18).**
+
+### HU-USR-06 — Matriz global de permisos "ver como usuario"
+
+Como Administrador  
+Quiero consultar la matriz global de permisos de un usuario y el origen de cada permiso  
+Para verificar qué capacidades efectivas tiene y por qué.
+
+**Estado: Aprobada (Sprint 18).**
+
+### HU-USR-07 — Administración de permisos (CRUD)
+
+Como Autoridad de plataforma  
+Quiero administrar los permisos del catálogo desde la web, con clave por módulo y reglas de uso  
+Para mantener el catálogo alineado con los módulos sin modificar código.
+
+**Estado: Aprobada (Sprint 18).**
+
+### HU-USR-08 — Usuarios inactivos
+
+Como Administrador  
+Quiero desactivar y reactivar usuarios en vez de eliminarlos  
+Para bloquear su acceso sin perder la trazabilidad de su operación.
+
+**Estado: Aprobada (Sprint 18).**
+
+### HU-USR-09 — Endurecimiento de reglas de roles y fixture de demostración
+
+Como Administrador  
+Quiero que se endurezcan las reglas de eliminación y edición de roles y contar con un fixture de demostración  
+Para prevenir escaladas y evidenciar el modelo de permisos en la entrega académica.
+
+**Estado: Aprobada (Sprint 18).**
 
 # 4. Épica: Residentes y Propietarios
 

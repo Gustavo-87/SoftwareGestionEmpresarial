@@ -52,6 +52,7 @@ Los estados utilizados en este índice son:
 | [Dominio del negocio](01-producto/dominio-del-negocio.md) | En construcción | Definir los conceptos, relaciones, límites y reglas generales del dominio funcional de Resuelve. |
 | [Modelo del dominio](01-producto/modelo-del-dominio.md) | En construcción | Organizar el producto en dominios funcionales, capacidades y dependencias estratégicas. |
 | [Línea base del estado actual](01-producto/linea-base-estado-actual.md) | Completado | Delimitar el alcance implementado, las exclusiones y el estado comprobado del producto. |
+| [Experiencia de producto](01-producto/experiencia-de-producto.md) | Aprobado | Definir los criterios transversales de experiencia aplicados a toda interacción visible del producto. |
 
 ### 02. Documentación funcional
 
@@ -86,6 +87,7 @@ Los estados utilizados en este índice son:
 | [IA — Asistencia documental con revisión humana](03-tecnica/ia-asistencia-documental.md) | Aprobado | Formalizar el Diseño Técnico Definitivo de HU-IA-01, sus contratos, procesamiento, trazabilidad, seguridad y separación académica. |
 | [Dependencias](03-tecnica/dependencias.md) | Pendiente | Registrar paquetes de backend y frontend y su uso verificable. |
 | [Configuración técnica](03-tecnica/configuracion-tecnica.md) | Pendiente | Describir base de datos, sesión, caché, colas, correo y filesystem. |
+| [MER Resuelve ERP](03-tecnica/mer-resuelve-erp.md) | Completado | Presentar el diagrama entidad-relación integral de Resuelve ERP, con [diagrama_mer.png](03-tecnica/diagrama_mer.png) (imagen del MER) y [erDiagram.mmd](03-tecnica/erDiagram.mmd) (fuente editable) como recursos asociados. |
 
 ### 04. Desarrollo ágil
 
@@ -109,6 +111,7 @@ Los estados utilizados en este índice son:
 | [Sprint 15 — Integración de Spatie y migración controlada del RBAC](04-desarrollo-agil/sprint-15-integracion-spatie-rbac.md) | Completado | Incorpora `spatie/laravel-permission` (Teams por Copropiedad) como fuente efectiva de roles y permisos, con `ContextoOperativo` como snapshot, `AutorizacionContextual` como fachada y el RBAC legado como espejo temporal. Cierre el 2 de octubre de 2026: suite de 516 pruebas (511 aprobadas, 5 omitidas, 2302 aserciones) y diagnóstico legado ↔ Spatie con 0 divergencias. Catálogo inicial: 5 roles base, 24 permisos y 63 relaciones rol-permiso. Ver [ADR-011](10-adr/ADR-011-spatie-rbac-contextual.md). |
 | [Sprint 16 — Administración funcional de roles y permisos](04-desarrollo-agil/sprint-16-administracion-roles-permisos.md) | Completado | Catálogo de roles vivo (base globales y personalizados por Copropiedad), matriz de permisos por módulo, asignación/revocación segura con anti-escalada y protección de la última capacidad de administración, interfaz condicionada por permisos, 403 y auditoría (HU-USR-03 y refinamiento de HU-USR-02). Cierre el 3 de octubre de 2026: 65 pruebas específicas, concurrencia MySQL aprobada, suite de 540 (534 aprobadas, 6 omitidas, 2450 aserciones) y diagnóstico RBAC en 0 divergencias. Ver [ADR-012](10-adr/ADR-012-administracion-dinamica-roles-permisos.md). |
 | [Sprint 17 — Eliminación segura de Copropiedades](04-desarrollo-agil/sprint-17-eliminacion-copropiedades.md) | Completado | HU-ORG-03: eliminación segura de Copropiedades sin información operativa (autoridad de plataforma, bloqueo por dependencias, limpieza de auxiliares, auditoría, 403 e interfaz con confirmación). Cierre formal el 17 de octubre de 2026: condiciones 1–6 cumplidas y verificación re-ejecutada el mismo día (suite completa: 588 aprobadas, 6 omitidas, 2698 aserciones, sin regresiones); el diagnóstico RBAC detectó deriva de datos en la BD local de desarrollo (hallazgo no bloqueante documentado en el acta; resincronización pendiente de autorización). La transferencia entre Organizaciones fue descartada por incompatibilidad referencial. |
+| [Sprint 18 — Seguridad de acceso: rol activo, permisos directos y ciclo de vida de usuarios](04-desarrollo-agil/sprint-18-seguridad-acceso.md) | En curso | Rol activo con segregación de funciones, permisos directos por usuario con origen visible, matriz global de permisos "ver como usuario", administración de permisos, usuarios inactivos y endurecimiento de reglas de roles (HU-USR-04 a HU-USR-09, Épica Usuarios y Seguridad). Aprobado el 17 de octubre de 2026. Ver [ADR-013](10-adr/ADR-013-rol-activo-segregacion-funciones.md). |
 | [Pruebas automatizadas](04-desarrollo-agil/pruebas-automatizadas.md) | Pendiente | Inventariar la cobertura existente y sus límites. |
 
 ### 05. Arquitectura
@@ -160,6 +163,7 @@ Los estados utilizados en este índice son:
 | [ADR-010 — IA asistiva con RAG](10-adr/ADR-010-ia-rag-revision-humana.md) | Completado | Usar RAG, citas y revisión humana obligatoria. |
 | [ADR-011 — Motor RBAC contextual con Spatie](10-adr/ADR-011-spatie-rbac-contextual.md) | Completado | Adoptar `spatie/laravel-permission` con Teams por Copropiedad como motor RBAC, conservando `ContextoOperativo` y `AutorizacionContextual` y el legado como espejo temporal. |
 | [ADR-012 — Administración dinámica de roles y semántica por capacidades](10-adr/ADR-012-administracion-dinamica-roles-permisos.md) | Completado | Administrar roles y permisos desde la web con modelo híbrido (base globales y personalizados por Copropiedad) y sustituir las reglas por nombre de rol por capacidades efectivas. |
+| [ADR-013 — Rol activo, permisos directos y ciclo de vida de usuarios](10-adr/ADR-013-rol-activo-segregacion-funciones.md) | Completado | Definir el rol activo por Membresía/Copropiedad con permisos directos y origen visible de los permisos, y el ciclo de vida de usuarios por desactivación, conservando las fachadas de autorización (Sprint 18). |
 
 ### 11. Glosario
 
@@ -170,6 +174,14 @@ los documentos de la línea base.
 
 Esta sección alojará decisiones funcionales aprobadas y trazables. No contiene
 por defecto propuestas ni comportamiento futuro.
+
+### Documentos complementarios de la raíz de `docs/`
+
+| Documento | Estado | Propósito |
+| --- | --- | --- |
+| [Integración académica](integracion-academica.md) | En construcción | Registrar la incorporación del proyecto al entorno académico, su verificación y la revisión de las guías de clase. |
+| [Instrucciones por agente](AGENTES-FLUJO.md) | Completado | Definir el rol, las skills asignadas y el flujo de trabajo de cada agente del equipo de desarrollo de Resuelve. |
+| [Flujo de desarrollo](FLUJO-DESARROLLO.md) | Completado | Establecer el flujo metodológico del equipo de agentes, desde la recepción de la solicitud hasta la integración. |
 
 ## Prioridad de construcción
 
@@ -241,6 +253,6 @@ antes de avanzar a capacidades nuevas:
 
 ## Control documental
 
-- **Versión:** v1.42
+- **Versión:** v1.43
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 3 de octubre de 2026
+- **Fecha de última actualización:** 17 de octubre de 2026
