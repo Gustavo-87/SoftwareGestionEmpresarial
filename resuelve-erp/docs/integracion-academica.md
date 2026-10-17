@@ -53,5 +53,16 @@ renderizar. Sin organización asociada se muestra Gestión empresarial.
 
 El MER representa el diseño integral de Resuelve ERP, incluido mantenimiento.
 El modelo de datos describe las tablas implementadas y documenta los
-pendientes identificados. El módulo de mantenimiento se encuentra en
-construcción.
+pendientes identificados. El módulo de mantenimiento fue completado en el
+Sprint 14 (cierre el 2 de octubre de 2026).
+
+## Módulo de mantenimiento
+
+El módulo de mantenimiento se encuentra completado: fue implementado en el
+Sprint 14 y cerrado formalmente el 2 de octubre de 2026 (ver
+[Sprint 14 — Gestión de mantenimiento](04-desarrollo-agil/sprint-14-gestion-mantenimiento.md)).
+Incluye registro y consulta de solicitudes, asignación de responsable,
+programación de fecha y gestión de estados, con permisos `mantenimiento.*` y
+aislamiento por Copropiedad activa (ver
+[Roles y permisos](02-funcional/roles-y-permisos.md)).
+

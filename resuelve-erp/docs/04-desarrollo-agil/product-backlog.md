@@ -77,6 +77,10 @@ Copropiedades entre Organizaciones (versión original de esta HU) fue
 **descartada** por incompatibilidad con el modelo referencial actual. HU-ORG-02
 queda fuera del Sprint 17.
 
+**Estado (Sprint 17, completado):** implementada y verificada el 3 de octubre
+de 2026 y cerrada formalmente el 17 de octubre de 2026 (ver
+[Sprint 17 — Eliminación segura de Copropiedades](sprint-17-eliminacion-copropiedades.md)).
+
 # 2. Épica: Copropiedades
 
 - **Objetivo:** permitir que una Organización administre una o múltiples
@@ -122,6 +126,12 @@ Para permitir su participación dentro del alcance que les corresponda.
 Como Usuario  
 Quiero acceder únicamente a la información y capacidades autorizadas para mi Rol  
 Para participar de forma segura en la gestión de la Copropiedad.
+
+**Estado (Sprint 16, completado):** el refinamiento aprobado para el Sprint 16
+quedó implementado con la asignación de roles por Copropiedad, la interfaz
+condicionada por permisos y las capacidades efectivas que sustituyen las reglas
+por nombre de rol (cierre el 3 de octubre de 2026); ver
+[Sprint 16 — Administración funcional de roles y permisos](sprint-16-administracion-roles-permisos.md).
 
 ### HU-USR-03 — Administración de Roles y Permisos
 
@@ -387,6 +397,10 @@ todas las solicitudes de la Copropiedad activa. Los residentes registran y
 consultan únicamente las propias. El responsable debe ser un Usuario activo
 con membresía vigente en esa Copropiedad. Esta aprobación no incorpora
 funcionalidades adicionales ni modifica la arquitectura.
+
+**Estado (Sprint 14, completado):** HU-MAN-01 y HU-MAN-02 quedaron
+implementadas en el Sprint 14 y cerradas formalmente el 2 de octubre de 2026
+(ver [Sprint 14 — Gestión de mantenimiento](sprint-14-gestion-mantenimiento.md)).
 
 Este Product Backlog evolucionará durante el desarrollo de Resuelve. Las
 Épicas y las Historias de Usuario podrán ser refinadas, ampliadas o ajustadas
