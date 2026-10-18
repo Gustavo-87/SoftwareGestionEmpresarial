@@ -7,6 +7,13 @@ use InvalidArgumentException;
 
 final class DesactivarUsuarioGlobal
 {
+    /**
+     * Motivo canónico registrado en las Membresías suspendidas como
+     * consecuencia de la desactivación de la cuenta. Permite restaurarlas al
+     * reactivar sin afectar suspensiones por otros motivos (HU-USR-08).
+     */
+    public const MOTIVO_SUSPENSION = 'desactivacion_cuenta';
+
     public function ejecutar(User $user, int $solicitanteId): void
     {
         if ($user->id === $solicitanteId) {
@@ -36,7 +43,10 @@ final class DesactivarUsuarioGlobal
 
         $user->membresiasCopropiedad()
             ->where('estado', 'activa')
-            ->update(['estado' => 'suspendida']);
+            ->update([
+                'estado' => 'suspendida',
+                'motivo_terminacion' => self::MOTIVO_SUSPENSION,
+            ]);
     }
 
     public function reactivar(User $user): void
@@ -49,5 +59,18 @@ final class DesactivarUsuarioGlobal
             'estado' => 'activo',
             'desactivado_at' => null,
         ]);
+
+        // Regla aprobada por el Product Owner: se restauran exclusivamente las
+        // Membresías suspendidas como consecuencia de la desactivación (motivo
+        // canónico registrado). Las suspensiones por otros motivos se
+        // conservan, y las anteriores a esta regla no registran motivo
+        // demostrable, por lo que tampoco se restauran automáticamente.
+        $user->membresiasCopropiedad()
+            ->where('estado', 'suspendida')
+            ->where('motivo_terminacion', self::MOTIVO_SUSPENSION)
+            ->update([
+                'estado' => 'activa',
+                'motivo_terminacion' => null,
+            ]);
     }
 }

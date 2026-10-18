@@ -59,6 +59,17 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
+        // HU-USR-08: los usuarios con users.estado ≠ 'activo' no inician sesión.
+        // Auth::logout() rota el remember_token, por lo que un intento con
+        // "recordarme" de una cuenta desactivada tampoco deja acceso persistente.
+        if (Auth::user()->estado !== 'activo') {
+            Auth::logout();
+
+            return back()
+                ->withErrors(['email' => 'Tu cuenta está desactivada. Contacta con el administrador del sistema.'])
+                ->onlyInput('email');
+        }
+
         RateLimiter::clear($rateLimitKey);
         $request->session()->regenerate();
 

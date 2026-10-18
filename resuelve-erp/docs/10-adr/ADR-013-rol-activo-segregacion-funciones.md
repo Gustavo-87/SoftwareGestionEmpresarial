@@ -93,8 +93,9 @@ estables, compatibilidad temporal del legado y evoluciones pendientes) y la
    sesión (invalida la sesión y el token "recordarme"), integración contextual
    con `usuarios.gestionar`/`CapacidadAdministrativa` (no desactivar al último
    administrador efectivo de la Copropiedad) y la regla de reactivación de las
-   Membresías suspendidas por la desactivación (decisión pendiente del Product
-   Owner; opción recomendada: restaurar las suspendidas por ese motivo). La
+   Membresías suspendidas por la desactivación (decisión del Product Owner:
+   restaurar exclusivamente las suspendidas por la desactivación y conservar
+   las suspensiones por otros motivos). La
    regla desactivar frente a eliminar se define en
    `docs/02-funcional/roles-y-permisos.md` §7.4: desactivar es el camino
    estándar y reversible para retirar accesos; eliminar queda reservado a

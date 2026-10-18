@@ -249,11 +249,12 @@ la sesión y bloquea el inicio de sesión, suspende las Membresías y no cuenta
 para la capacidad administrativa mientras permanezca inactivo. La
 desactivación global ya está implementada (`DesactivarUsuarioGlobal`:
 `users.estado = 'inactivo'` y `users.desactivado_at`, con las prohibiciones de
-la propia cuenta y del último administrador del sistema); el bloqueo de inicio
-de sesión, la expulsión de la sesión, la integración con
-`usuarios.gestionar`/`CapacidadAdministrativa` y la regla de reactivación de
-las Membresías suspendidas quedan como huecos de HU-USR-08 (Sprint 18, en
-implementación).
+la propia cuenta y del último administrador del sistema) y el flujo contextual
+de HU-USR-08 (Sprint 18) cierra los huecos: bloqueo de inicio de sesión y
+expulsión de la sesión para `users.estado ≠ 'activo'`, integración con
+`usuarios.gestionar`/`CapacidadAdministrativa` y reactivación que restaura
+exclusivamente las Membresías suspendidas por la desactivación (motivo
+`desactivacion_cuenta`).
 
 **ELIMINAR — irreversible y excepcional.** Queda reservado para registros que
 no deberían existir (duplicados, datos de prueba, cuentas erróneas) y está

@@ -87,6 +87,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/usuarios/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::delete('/usuarios/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     Route::patch('/usuarios/{user}/rol', [UserManagementController::class, 'updateRole'])->name('users.role.update');
+    Route::patch('/usuarios/{user}/desactivar', [UserManagementController::class, 'desactivar'])->name('users.desactivar');
+    Route::patch('/usuarios/{user}/reactivar', [UserManagementController::class, 'reactivar'])->name('users.reactivar');
     Route::post('/usuarios/{user}/roles', [UserManagementController::class, 'asignarRol'])->name('users.roles.store');
     Route::delete('/usuarios/{user}/roles/{rol}', [UserManagementController::class, 'revocarRol'])->name('users.roles.destroy');
     Route::get('/informes/pqrs.csv', [ReportController::class, 'csv'])->name('reports.csv');

@@ -133,9 +133,12 @@ Criterios de aceptación:
 4. Auditoría `usuario.desactivar`/`usuario.activar` en el flujo contextual (el
    flujo global conserva `usuario_global.deactivate`/`usuario_global.reactivate`,
    sin renombrar; ver la convención de vocabulario en ADR-013).
-5. Regla de reactivación de las Membresías suspendidas por la desactivación:
-   **decisión pendiente del Product Owner** (opción recomendada: restaurar las
-   suspendidas por ese motivo). Hasta que se decida, la regla no se implementa.
+5. Regla de reactivación de las Membresías suspendidas por la desactivación
+   (decisión del Product Owner, 17 de octubre de 2026): al reactivar se
+   restauran exclusivamente las Membresías suspendidas como consecuencia de la
+   desactivación (motivo `desactivacion_cuenta` registrado en
+   `motivo_terminacion`); las suspensiones por otros motivos y las anteriores
+   a la regla, sin motivo demostrable, se conservan.
 6. Pruebas de bloqueo, expulsión, reactivación y protección administrativa.
 
 ### HU-USR-09 — Endurecimiento de reglas de roles y fixture de demostración

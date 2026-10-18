@@ -204,9 +204,9 @@ huecos: bloqueo de inicio de sesión para `users.estado ≠ 'activo'`, middlewar
 de expulsión de sesión (sesión y token "recordarme"), integración contextual
 con `usuarios.gestionar`/`CapacidadAdministrativa`, auditoría
 `usuario.desactivar`/`usuario.activar` en el flujo contextual y la regla de
-reactivación de las Membresías suspendidas por la desactivación (decisión
-pendiente del Product Owner; opción recomendada: restaurar las suspendidas por
-ese motivo). Ver
+reactivación de las Membresías suspendidas por la desactivación (decisión del
+Product Owner: restaurar exclusivamente las suspendidas por la desactivación y
+conservar las suspensiones por otros motivos). Ver
 [Sprint 18 — Seguridad de acceso](sprint-18-seguridad-acceso.md).
 
 **Estado: Aprobada (Sprint 18).**

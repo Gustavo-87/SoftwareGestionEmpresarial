@@ -8,6 +8,8 @@ use App\Application\Roles\AsignarRolUsuario;
 use App\Application\Roles\CapacidadAdministrativa;
 use App\Application\Roles\ConsultaRolesGestionables;
 use App\Application\Roles\RevocarRolUsuario;
+use App\Application\Usuarios\DesactivarUsuarioGlobal;
+use App\Models\AuditLog;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Documento;
 use App\Models\User;
@@ -16,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use InvalidArgumentException;
 class UserManagementController extends Controller {
     public function __construct(private readonly SincronizarIdentidadContextualUsuario $sincronizarIdentidad) {}
     private function autorizar(): void { abort_unless(app(AutorizacionContextual::class)->tienePermiso(app(ContextoOperativo::class), 'usuarios.gestionar'), 403); }
@@ -199,5 +202,89 @@ class UserManagementController extends Controller {
             $user->delete();
         });
         return redirect()->route('users.index')->with('success','Usuario eliminado correctamente.');
+    }
+
+    /**
+     * Desactivación contextual de la cuenta (HU-USR-08). La desactivación es
+     * global (users.estado); este flujo la expone con autorización
+     * usuarios.gestionar del contexto activo y sus guardas, reutilizando
+     * DesactivarUsuarioGlobal. No confundir con la suspensión contextual de una
+     * Membresía (SuspenderMembresia), que no desactiva la cuenta.
+     */
+    public function desactivar(Request $request, User $user): RedirectResponse {
+        $this->autorizar();
+        abort_if($user->is($request->user()),422,'No puedes desactivar tu propia cuenta.');
+        $this->membresiaDelContexto($user);
+        try {
+            DB::transaction(function () use ($request, $user): void {
+                // users.estado es global: se verifican los efectos sobre todas
+                // las Copropiedades con Membresía del usuario antes de desactivar.
+                $this->protegerUltimoAdministradorEfectivo($user);
+                app(DesactivarUsuarioGlobal::class)->ejecutar($user, (int) $request->user()->id);
+            });
+        } catch (InvalidArgumentException $e) {
+            abort(422, $e->getMessage());
+        }
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'usuario.desactivar',
+            'auditable_type' => User::class,
+            'auditable_id' => $user->id,
+            'ip_address' => $request->ip(),
+        ]);
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        return back()->with('success','Usuario desactivado correctamente.');
+    }
+
+    /**
+     * Reactivación contextual de la cuenta (HU-USR-08). Restaura
+     * exclusivamente las Membresías suspendidas como consecuencia de la
+     * desactivación (regla aprobada por el Product Owner, ver
+     * DesactivarUsuarioGlobal::reactivar).
+     */
+    public function reactivar(Request $request, User $user): RedirectResponse {
+        $this->autorizar();
+        $this->membresiaDelContexto($user);
+        try {
+            app(DesactivarUsuarioGlobal::class)->reactivar($user);
+        } catch (InvalidArgumentException $e) {
+            abort(422, $e->getMessage());
+        }
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'usuario.activar',
+            'auditable_type' => User::class,
+            'auditable_id' => $user->id,
+            'ip_address' => $request->ip(),
+        ]);
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        return back()->with('success','Usuario reactivado correctamente.');
+    }
+
+    /**
+     * Protección del último administrador efectivo ante la desactivación
+     * (HU-USR-08), reutilizando CapacidadAdministrativa con bloqueo de
+     * Membresías (patrón de destroy). No se permite dejar ninguna Copropiedad
+     * con Membresía del usuario sin al menos un titular de usuarios.gestionar.
+     */
+    private function protegerUltimoAdministradorEfectivo(User $user): void {
+        $capacidad = app(CapacidadAdministrativa::class);
+        $equipoAnterior = getPermissionsTeamId();
+        try {
+            $membresiasUsuario = MembresiaCopropiedad::query()
+                ->where('usuario_id', $user->id)
+                ->where('estado', 'activa')
+                ->orderBy('id')
+                ->get();
+            foreach ($membresiasUsuario as $membresia) {
+                $membresias = $capacidad->membresiasBloqueadas($membresia);
+                $sinUsuario = $capacidad->titularesRestantes($membresias, $membresia, null, (int) $user->id);
+                if ($sinUsuario === 0 && $capacidad->titularesRestantes($membresias, $membresia) > 0) {
+                    abort(422, 'No se puede desactivar: es el único usuario con capacidad de administración (permiso usuarios.gestionar) en la Copropiedad "'.$membresia->copropiedad?->nombre.'".');
+                }
+            }
+        } finally {
+            setPermissionsTeamId($equipoAnterior);
+        }
     }
 }

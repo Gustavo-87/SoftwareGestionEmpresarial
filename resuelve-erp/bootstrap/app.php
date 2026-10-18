@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use App\Http\Middleware\AuditMutations;
+use App\Http\Middleware\ExpulsarUsuariosInactivos;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        $middleware->appendToGroup('web', ExpulsarUsuariosInactivos::class);
         $middleware->appendToGroup('web', AuditMutations::class);
         $middleware->alias([
             'admin.sistema' => \App\Http\Middleware\EsAdministradorSistema::class,
