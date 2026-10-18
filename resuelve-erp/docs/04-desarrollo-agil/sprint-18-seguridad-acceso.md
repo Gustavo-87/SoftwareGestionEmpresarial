@@ -11,9 +11,12 @@ reglas de roles con fixture de demostración.
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Estado:** En curso
 - **Fecha de aprobación:** 17 de octubre de 2026
+- **Errata:** 17 de octubre de 2026 — correcciones documentales D1–D4
+  (alcance de HU-USR-08, vocabulario de auditoría y baseline real de pruebas y
+  divergencias RBAC)
 - **Aprobación:** Product Owner (17 de octubre de 2026)
 - **Responsable:** Equipo de desarrollo de Resuelve
 
@@ -60,7 +63,9 @@ Criterios de aceptación:
    Membresía/Copropiedad; cambiar de Copropiedad reinicia o revalida la
    selección.
 3. AutorizacionContextual y Policies conservan su API; diagnóstico
-   legado↔Spatie sin divergencias.
+   legado↔Spatie ejecutado con el criterio de verificación corregido (el gate
+   no exige 0 divergencias artificiales; ver «Baseline real y divergencias RBAC
+   conocidas»).
 4. Interfaz: selector de rol activo visible, con el rol actual indicado en la
    navegación.
 5. Pruebas: multi-rol con y sin rol activo, cambio de contexto, concurrencia.
@@ -105,19 +110,33 @@ Criterios de aceptación:
 
 ### HU-USR-08 — Usuarios inactivos
 
+Alcance: **no es crear un flujo nuevo**. La desactivación global ya existe
+(`app/Application/Usuarios/DesactivarUsuarioGlobal.php` pone
+`users.estado = 'inactivo'` y `users.desactivado_at`, suspende las Membresías
+activas y prohíbe desactivar la propia cuenta o al último administrador del
+sistema; rutas `admin.usuarios-globales.desactivar`/`reactivar`; auditoría
+`usuario_global.deactivate`/`usuario_global.reactivate`; pruebas en
+`tests/Feature/Admin/UsuarioGlobalCrudTest.php`). Esta historia cierra los
+huecos restantes:
+
 Criterios de aceptación:
 
-1. Flujo activar/desactivar sobre users.estado/desactivado_at; desactivar en
-   vez de eliminar.
-2. Bloqueo en AuthController@store: un usuario desactivado no inicia sesión
-   (mensaje inequívoco).
-3. Middleware de expulsión: la sesión abierta de un usuario desactivado se
-   invalida en la siguiente petición.
-4. Un usuario desactivado no cuenta para la protección "≥1 miembro con
-   usuarios.gestionar"; no se desactiva la propia cuenta ni al último
-   administrador efectivo.
-5. Auditoría usuario.desactivar/usuario.activar; pruebas de bloqueo, expulsión,
-   reactivación y protección administrativa.
+1. Bloqueo en AuthController@store: un usuario con `users.estado ≠ 'activo'`
+   no inicia sesión (mensaje inequívoco).
+2. Middleware de expulsión de sesión: se invalidan la sesión abierta y el token
+   "recordarme" del usuario desactivado en la siguiente petición.
+3. Integración contextual con `usuarios.gestionar` y `CapacidadAdministrativa`:
+   no se desactiva la propia cuenta ni al último administrador efectivo de la
+   Copropiedad (el flujo global conserva su protección del último administrador
+   del sistema) y un usuario desactivado no cuenta para la protección "≥1
+   miembro con usuarios.gestionar".
+4. Auditoría `usuario.desactivar`/`usuario.activar` en el flujo contextual (el
+   flujo global conserva `usuario_global.deactivate`/`usuario_global.reactivate`,
+   sin renombrar; ver la convención de vocabulario en ADR-013).
+5. Regla de reactivación de las Membresías suspendidas por la desactivación:
+   **decisión pendiente del Product Owner** (opción recomendada: restaurar las
+   suspendidas por ese motivo). Hasta que se decida, la regla no se implementa.
+6. Pruebas de bloqueo, expulsión, reactivación y protección administrativa.
 
 ### HU-USR-09 — Endurecimiento de reglas de roles y fixture de demostración
 
@@ -166,9 +185,11 @@ usuarios por desactivación y nota de adaptación académica de la guía de Clas
 5. **HU-USR-06** — matriz global de permisos "ver como usuario".
 6. **HU-USR-07** — administración de permisos (CRUD).
 
-Después de cada paso debe mantenerse el diagnóstico
-`resuelve:verificar-equivalencia-autorizacion-contextual` en 0 divergencias y
-la suite completa sin regresiones.
+Después de cada paso debe ejecutarse el diagnóstico
+`resuelve:verificar-equivalencia-autorizacion-contextual` y la suite completa
+debe permanecer sin regresiones. El gate no exige 0 divergencias artificiales:
+primero se corrige el criterio de verificación (ver «Baseline real y
+divergencias RBAC conocidas») y las divergencias conocidas ya están clasificadas.
 
 ## Documentación a crear/actualizar
 
@@ -184,12 +205,40 @@ la suite completa sin regresiones.
 - `docs/README.md`: estado del sprint y referencias.
 - Este documento: registro de ejecución y acta de cierre.
 
+## Baseline real y divergencias RBAC conocidas (17 de octubre de 2026)
+
+Estado inicial verificado en la auditoría preventiva del 17 de octubre de 2026
+(sustituye a las cifras anteriores de "546 pruebas" y "diagnóstico en 0
+divergencias"):
+
+- **Suite de pruebas (estado inicial):** 594 pruebas — 588 aprobadas, 6
+  omitidas (las 6 requieren MySQL real) y 2698 aserciones.
+- **Baseline actualizado tras HU-USR-09 (commit `de5b241`, 17 de octubre de
+  2026):** 611 pruebas — 605 aprobadas, 6 omitidas (las 6 que requieren MySQL
+  real) y 2757 aserciones. Las 32 divergencias se mantienen sin incremento
+  (10 + 22) tras el diagnóstico de solo lectura.
+- **Divergencias RBAC conocidas en la BD local:** 32 (10 entre `users.role` y el
+  contexto, 22 entre Spatie y el legado), con 3 causas raíz: (1) renombre de
+  roles desde la interfaz en el Sprint 16 (`audit_logs` #59–63), amplificado por
+  el defecto de sensibilidad del verificador; (2) ampliación de la matriz de
+  Apoyo (#144); y (3) bloque de datos de prueba del 3 de octubre (usuarios
+  21–26, orgs 19–24, copropiedades 17–21 y roles `rol-fk-…`).
+- **Regla del Product Owner:** el gate no exige 0 divergencias artificiales.
+  Primero se corrige el criterio de verificación —el verificador actual compara
+  en PHP con sensibilidad a mayúsculas mientras SQL usa colación `*_ci` y exige
+  un solo rol— con el contrato propuesto por Arquitectura (normalización
+  canónica + multi-rol + severidad). Las divergencias actuales están clasificadas
+  como deriva de datos locales documentada, con plan de saneamiento en
+  preparación (sin ejecutar).
+
 ## Riesgos y estimación
 
 Riesgos:
 
-- Regresión de autorización (base: 546 pruebas) → suite completa y diagnóstico
-  RBAC por cada HU.
+- Regresión de autorización (base tras HU-USR-09 del 17 de octubre de 2026:
+  611 pruebas, 605 aprobadas y 6 omitidas que requieren MySQL real; estado
+  inicial del sprint: 594 pruebas, 588 aprobadas y 6 omitidas) → suite completa
+  y diagnóstico RBAC por cada HU.
 - El rol activo rompe las fachadas → compatibilidad de API como criterio de
   aceptación.
 - Anti-escalada incompleta con permisos directos → reutilizar
@@ -219,8 +268,10 @@ y queda pendiente de la ejecución. Al terminar la implementación se registrar�
 
 1. Estado de los criterios de aceptación de las 6 HU.
 2. Pruebas específicas del sprint y suite completa sin regresiones.
-3. Diagnóstico `resuelve:verificar-equivalencia-autorizacion-contextual` en 0
-   divergencias.
+3. Diagnóstico `resuelve:verificar-equivalencia-autorizacion-contextual` con el
+   criterio de verificación corregido (normalización canónica + multi-rol +
+   severidad), sin regresiones nuevas frente a las divergencias conocidas
+   clasificadas.
 4. Deuda resultante y evidencias para la entrega académica (incluido el
    fixture de demostración de HU-USR-09).
 5. Acta de cierre con fecha y aprobación del Product Owner.

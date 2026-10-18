@@ -4,9 +4,12 @@
 
 - **Identificador:** ADR-013
 - **Título:** Rol activo, permisos directos y ciclo de vida de usuarios
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Estado:** Aprobado
 - **Fecha:** 17 de octubre de 2026
+- **Errata:** 17 de octubre de 2026 — correcciones documentales D1–D4
+  (funcionalidad existente de desactivación, vocabulario de auditoría, baseline
+  real de pruebas y divergencias RBAC, y regla desactivar frente a eliminar).
 - **Responsable:** Arquitectura Resuelve
 - **Aprobación:** Product Owner (Sprint 18)
 
@@ -31,9 +34,19 @@ estables, compatibilidad temporal del legado y evoluciones pendientes) y la
    por usuario para excepciones puntuales.
 3. Ni el usuario ni el administrador pueden observar el origen de cada permiso
    efectivo (qué rol lo aporta o si es un permiso directo).
-4. El ciclo de vida de las cuentas se basa en la eliminación y en reglas
-   puntuales: no existe un estado de desactivación que bloquee el acceso sin
-   perder la trazabilidad histórica.
+4. El ciclo de vida de las cuentas ya dispone de desactivación global:
+   `app/Application/Usuarios/DesactivarUsuarioGlobal.php` pone
+   `users.estado = 'inactivo'` y `users.desactivado_at`, suspende las Membresías
+   activas y prohíbe desactivar la propia cuenta o al último administrador del
+   sistema; expone las rutas `admin.usuarios-globales.desactivar`/`reactivar`,
+   audita `usuario_global.deactivate`/`usuario_global.reactivate` y tiene
+   pruebas en `tests/Feature/Admin/UsuarioGlobalCrudTest.php`. La brecha real no
+   es un flujo de desactivación nuevo, sino huecos sin cerrar: el inicio de
+   sesión no consulta `users.estado` (`AuthController@store`), no existe
+   expulsión de la sesión abierta (ni del token "recordarme"), no hay
+   integración contextual con `usuarios.gestionar`/`CapacidadAdministrativa`, y
+   no está definida la regla de reactivación de las Membresías suspendidas por
+   la desactivación.
 
 ## Alternativas evaluadas
 
@@ -66,22 +79,70 @@ estables, compatibilidad temporal del legado y evoluciones pendientes) y la
    fijada en ADR-012. El rol activo se elige y persiste por
    Membresía/Copropiedad en `/cambiar-contexto`; cambiar de Copropiedad
    reinicia o revalida la selección. El diagnóstico de equivalencia
-   legado ↔ Spatie se mantiene en 0 divergencias y
+   legado ↔ Spatie se ejecuta en cada paso, pero el gate no exige 0
+   divergencias artificiales: primero se corrige el criterio de verificación
+   (ver «Baseline real y divergencias RBAC conocidas») y
    `register_permission_check_method` permanece en `false`.
-5. **Ciclo de vida de usuarios:** desactivar en vez de eliminar
-   (`users.estado` y `users.desactivado_at`). Un usuario desactivado no
-   inicia sesión (bloqueo en `AuthController@store` con mensaje inequívoco),
-   su sesión abierta se invalida en la siguiente petición (middleware de
-   expulsión) y no cuenta para la protección "≥1 miembro con
-   `usuarios.gestionar`". No se desactiva la propia cuenta ni al último
-   administrador efectivo. Cada mutación se audita
-   (`usuario.desactivar`/`usuario.activar`).
+5. **Ciclo de vida de usuarios:** desactivar en vez de eliminar. El flujo
+   global ya existente se conserva sin cambios
+   (`DesactivarUsuarioGlobal`: `users.estado` y `users.desactivado_at`,
+   suspensión de Membresías y prohibiciones de la propia cuenta y del último
+   administrador del sistema). HU-USR-08 no crea un flujo nuevo: cierra los
+   huecos restantes — bloqueo en `AuthController@store` para
+   `users.estado ≠ 'activo'` con mensaje inequívoco, middleware de expulsión de
+   sesión (invalida la sesión y el token "recordarme"), integración contextual
+   con `usuarios.gestionar`/`CapacidadAdministrativa` (no desactivar al último
+   administrador efectivo de la Copropiedad) y la regla de reactivación de las
+   Membresías suspendidas por la desactivación (decisión pendiente del Product
+   Owner; opción recomendada: restaurar las suspendidas por ese motivo). La
+   regla desactivar frente a eliminar se define en
+   `docs/02-funcional/roles-y-permisos.md` §7.4: desactivar es el camino
+   estándar y reversible para retirar accesos; eliminar queda reservado a
+   registros que no deberían existir, sujeto a las guardas existentes. Cada
+   mutación se audita con el vocabulario unificado (ver «Convención de
+   vocabulario de auditoría»).
 6. **Nota de adaptación académica:** la guía de Clase 10 se adapta al
    proyecto: los permisos usan la forma "modulo.accion"; los roles son los
    cinco roles base (`admin`, `gestor`, `apoyo`, `auditor`, `residente`)
    más los personalizados por Copropiedad; la regla "≥1 administrador" se
    interpreta como "≥1 miembro con `usuarios.gestionar`"; y las rutas
    permanecen en español.
+
+## Convención de vocabulario de auditoría (errata alineada)
+
+- El flujo global (consola administrativa) conserva las acciones existentes
+  `usuario_global.deactivate`/`usuario_global.reactivate`; no se renombran.
+- El flujo contextual por Copropiedad (HU-USR-08) usará
+  `usuario.desactivar`/`usuario.activar`.
+- La convención se aplica a toda mención posterior de este vocabulario en la
+  documentación del proyecto.
+
+## Baseline real y divergencias RBAC conocidas (17 de octubre de 2026)
+
+Estado inicial real al iniciar el Sprint 18 (corrige las cifras anteriores de
+"546 pruebas" y "diagnóstico en 0 divergencias"):
+
+- **Suite de pruebas (estado inicial):** 594 pruebas — 588 aprobadas, 6
+  omitidas (las 6 requieren MySQL real) y 2698 aserciones.
+- **Baseline actualizado tras HU-USR-09 (commit `de5b241`, 17 de octubre de
+  2026):** 611 pruebas — 605 aprobadas, 6 omitidas (las 6 que requieren MySQL
+  real) y 2757 aserciones. Las 32 divergencias se mantienen sin incremento
+  (10 + 22) tras el diagnóstico de solo lectura.
+- **Divergencias RBAC conocidas en la BD local:** 32 (10 entre `users.role` y el
+  contexto, 22 entre Spatie y el legado), con 3 causas raíz:
+  1. Renombre de roles desde la interfaz en el Sprint 16 (`audit_logs` #59–63),
+     amplificado por el defecto de sensibilidad del verificador.
+  2. Ampliación de la matriz de Apoyo (#144).
+  3. Bloque de datos de prueba del 3 de octubre (usuarios 21–26, orgs 19–24,
+     copropiedades 17–21 y roles `rol-fk-…`).
+
+Regla del Product Owner: el gate **no** exige 0 divergencias artificiales.
+Primero se corrige el criterio de verificación —el verificador actual compara
+en PHP con sensibilidad a mayúsculas mientras SQL usa colación `*_ci` y exige un
+solo rol— con el contrato propuesto por Arquitectura (normalización canónica +
+multi-rol + severidad). Las divergencias actuales están clasificadas como deriva
+de datos locales documentada, con un plan de saneamiento en preparación (sin
+ejecutar).
 
 ## Consecuencias positivas
 
@@ -112,7 +173,9 @@ estables, compatibilidad temporal del legado y evoluciones pendientes) y la
 ## Riesgos
 
 - Regresión de autorización (mitigado: suite completa y diagnóstico RBAC en
-  cada historia; base de 546 pruebas).
+  cada historia; base tras HU-USR-09 del 17 de octubre de 2026: 611 pruebas,
+  605 aprobadas y 6 omitidas que requieren MySQL real; estado inicial del
+  sprint: 594 pruebas, 588 aprobadas y 6 omitidas).
 - El rol activo rompe las fachadas (mitigado: la compatibilidad de API es
   criterio de aceptación).
 - Anti-escalada incompleta con permisos directos (mitigado: reutilizar
@@ -146,6 +209,8 @@ permisos mientras dure la compatibilidad por defecto.
   API: `ContextoOperativo`, `AutorizacionContextual`, las Policies, la ruta
   `/cambiar-contexto` y `CapacidadAdministrativa`.
 
-> **Alcance de este ADR:** aprueba decisiones de diseño para el Sprint 18. Las
-> capacidades descritas se encuentran en implementación y no se presentan como
-> parte del sistema actual.
+> **Alcance de este ADR:** aprueba decisiones de diseño para el Sprint 18. Con
+> la excepción de la desactivación global ya existente
+> (`DesactivarUsuarioGlobal` con sus rutas, auditoría y pruebas, ver Problema
+> #4), las capacidades descritas se encuentran en implementación y no se
+> presentan como parte del sistema actual.

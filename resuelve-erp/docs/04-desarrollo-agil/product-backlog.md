@@ -2,7 +2,7 @@
 
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.3
 - **Estado:** En construcción
 - **Fecha de creación:** 31 de julio de 2026
 - **Última actualización:** 17 de octubre de 2026
@@ -195,6 +195,19 @@ Para mantener el catálogo alineado con los módulos sin modificar código.
 Como Administrador  
 Quiero desactivar y reactivar usuarios en vez de eliminarlos  
 Para bloquear su acceso sin perder la trazabilidad de su operación.
+
+**Alcance ajustado (17 de octubre de 2026):** no es crear un flujo nuevo. La
+desactivación global ya existe (`DesactivarUsuarioGlobal`, rutas
+`admin.usuarios-globales.desactivar`/`reactivar` y auditoría
+`usuario_global.deactivate`/`usuario_global.reactivate`). La historia cierra
+huecos: bloqueo de inicio de sesión para `users.estado ≠ 'activo'`, middleware
+de expulsión de sesión (sesión y token "recordarme"), integración contextual
+con `usuarios.gestionar`/`CapacidadAdministrativa`, auditoría
+`usuario.desactivar`/`usuario.activar` en el flujo contextual y la regla de
+reactivación de las Membresías suspendidas por la desactivación (decisión
+pendiente del Product Owner; opción recomendada: restaurar las suspendidas por
+ese motivo). Ver
+[Sprint 18 — Seguridad de acceso](sprint-18-seguridad-acceso.md).
 
 **Estado: Aprobada (Sprint 18).**
 

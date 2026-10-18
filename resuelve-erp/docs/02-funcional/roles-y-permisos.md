@@ -224,15 +224,48 @@ administrador” existe únicamente en la eliminación.
 
 ### 7.3 Eliminación
 
-No se permite:
+La eliminación es **irreversible** y está reservada a registros que no
+deberían existir (duplicados, datos de prueba, cuentas erróneas). No se
+permite:
 
 - eliminar la propia cuenta;
-- eliminar al único administrador;
-- eliminar un usuario con PQR radicadas asociadas.
+- eliminar un usuario con PQR radicadas asociadas;
+- eliminar a un usuario que sea propietario documental de Documentos activos;
+- eliminar si la Copropiedad queda sin usuarios con el permiso
+  `usuarios.gestionar` (protección por capacidad administrativa efectiva, no
+  por nombre de rol).
 
-La validación consulta la relación `user.pqrs`, no las PQR donde el usuario sea
-responsable. La clave `assigned_to_id` usa `nullOnDelete`, por lo que la base de
-datos permite eliminar un responsable sin PQR radicadas.
+La validación de PQR consulta la relación `user.pqrs`, no las PQR donde el
+usuario sea responsable. La clave `assigned_to_id` usa `nullOnDelete`, por lo
+que la base de datos permite eliminar un responsable sin PQR radicadas. La
+eliminación limpia las asignaciones del usuario por equipo (roles y permisos
+directos) y su Membresía en la Copropiedad, dentro de una transacción.
+
+### 7.4 Desactivar frente a eliminar
+
+**DESACTIVAR — camino estándar para retirar accesos.** Es reversible (el
+usuario puede reactivarse), conserva el historial y la trazabilidad, expulsa
+la sesión y bloquea el inicio de sesión, suspende las Membresías y no cuenta
+para la capacidad administrativa mientras permanezca inactivo. La
+desactivación global ya está implementada (`DesactivarUsuarioGlobal`:
+`users.estado = 'inactivo'` y `users.desactivado_at`, con las prohibiciones de
+la propia cuenta y del último administrador del sistema); el bloqueo de inicio
+de sesión, la expulsión de la sesión, la integración con
+`usuarios.gestionar`/`CapacidadAdministrativa` y la regla de reactivación de
+las Membresías suspendidas quedan como huecos de HU-USR-08 (Sprint 18, en
+implementación).
+
+**ELIMINAR — irreversible y excepcional.** Queda reservado para registros que
+no deberían existir (duplicados, datos de prueba, cuentas erróneas) y está
+sujeto a las guardas de §7.3.
+
+**Regla de coexistencia:** ante cualquier baja de personal se desactiva; la
+eliminación requiere justificación explícita.
+
+**Vocabulario de auditoría:** el flujo global conserva
+`usuario_global.deactivate`/`usuario_global.reactivate`; el flujo contextual
+(HU-USR-08) usará `usuario.desactivar`/`usuario.activar` (convención registrada
+en [ADR-013](../10-adr/ADR-013-rol-activo-segregacion-funciones.md)).
 
 ## 8. Protección de rutas y recursos
 
@@ -337,9 +370,11 @@ deseado. El punto 5 describe el comportamiento implementado y verificado.
 
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.4
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 14 de agosto de 2026
+- **Fecha de última actualización:** 17 de octubre de 2026 (regla desactivar
+  frente a eliminar y vocabulario de auditoría; ver ADR-013; §9-5 corregido
+  con la protección de capacidad administrativa del cambio de rol)
 
 ## Gestión de mantenimiento — Sprint 14
 
