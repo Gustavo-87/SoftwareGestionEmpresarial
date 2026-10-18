@@ -13,19 +13,32 @@ final class EliminarRol
 {
     public function __construct(private readonly AutorizacionGestionRoles $autorizacion) {}
 
-    /** Eliminación segura: solo Roles sin asignaciones a usuarios. */
+    /**
+     * Eliminación segura (HU-USR-09): solo Roles sin asignaciones a usuarios
+     * y nunca un Rol base del catálogo inicial. El conteo de asignaciones se
+     * informa en el mensaje; la comparación con el catálogo inicial usa
+     * normalización canónica consistente con la colación *_ci.
+     */
     public function ejecutar(User $operador, ?ContextoOperativo $contexto, int $rolId): void
     {
         $rol = SpatieRole::query()->findOrFail($rolId);
         $this->autorizacion->autorizarGestion($operador, $contexto, $rol);
 
-        $enUso = DB::table('model_has_roles')
-            ->where('role_id', $rol->id)
-            ->exists();
-
-        if ($enUso) {
+        if (CatalogoRolesBase::esBase($rol)) {
             throw ValidationException::withMessages([
-                'rol' => 'El Rol está asignado a usuarios y no puede eliminarse.',
+                'rol' => 'El Rol "'.CatalogoRolesBase::normalizar($rol->name).'" es un Rol base del catálogo inicial y no puede eliminarse.',
+            ]);
+        }
+
+        $asignaciones = DB::table('model_has_roles')
+            ->where('role_id', $rol->id)
+            ->distinct()
+            ->count('model_id');
+
+        if ($asignaciones > 0) {
+            $usuarios = $asignaciones === 1 ? '1 usuario' : $asignaciones.' usuarios';
+            throw ValidationException::withMessages([
+                'rol' => "El Rol está asignado a {$usuarios} y no puede eliminarse.",
             ]);
         }
 

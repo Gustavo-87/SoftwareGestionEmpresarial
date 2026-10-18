@@ -5,6 +5,7 @@ use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextResolver;
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Roles\AsignarRolUsuario;
+use App\Application\Roles\CapacidadAdministrativa;
 use App\Application\Roles\ConsultaRolesGestionables;
 use App\Application\Roles\RevocarRolUsuario;
 use App\Models\MembresiaCopropiedad;
@@ -97,10 +98,67 @@ class UserManagementController extends Controller {
         abort_if($user->is($request->user())&&$data['role']!=='admin',422,'No puedes retirar tu propio rol de administrador.');
         $data['email']=strtolower($data['email']);
         if(blank($data['password']??null)) unset($data['password']);
-        $this->sincronizarIdentidad->actualizarUsuario($user,$data);
+        DB::transaction(function () use ($user,$data): void {
+            $cambiaRol = $data['role'] !== (string) $user->role;
+            $this->sincronizarIdentidad->actualizarUsuario($user,$data);
+            if ($cambiaRol) {
+                $this->protegerCapacidadAdministrativa($user);
+            }
+        });
         return redirect()->route('users.index')->with('success','Usuario actualizado correctamente.');
     }
-    public function updateRole(Request $request,User $user): RedirectResponse { $this->autorizar(); $data=$request->validate(['role'=>['required','in:admin,gestor,apoyo,auditor,residente']]); abort_if($user->is($request->user())&&$data['role']!=='admin',422,'No puedes retirar tu propio rol de administrador.'); $this->sincronizarIdentidad->actualizarUsuario($user,$data); return back()->with('success','Rol actualizado.'); }
+    public function updateRole(Request $request,User $user): RedirectResponse {
+        $this->autorizar();
+        $data=$request->validate(['role'=>['required','in:admin,gestor,apoyo,auditor,residente']]);
+        abort_if($user->is($request->user())&&$data['role']!=='admin',422,'No puedes retirar tu propio rol de administrador.');
+        DB::transaction(function () use ($user,$data): void {
+            $cambiaRol = $data['role'] !== (string) $user->role;
+            $this->sincronizarIdentidad->actualizarUsuario($user,$data);
+            if ($cambiaRol) {
+                $this->protegerCapacidadAdministrativa($user);
+            }
+        });
+        return back()->with('success','Rol actualizado.');
+    }
+
+    /**
+     * Protección "≥1 miembro con usuarios.gestionar" ante el cambio de
+     * users.role (hallazgo §9-5 de docs/02-funcional/roles-y-permisos.md),
+     * reutilizando CapacidadAdministrativa con bloqueo de Membresías (patrón
+     * de destroy). Mide el estado final real dentro de la transacción que
+     * escribe —después de la sincronización— en lugar de predecirlo: la
+     * escritura puede omitir el espejo Spatie ante divergencia legada y la
+     * resolución de Roles homónimos (global vs. de la Copropiedad) es ambigua
+     * en Spatie. Evalúa los permisos efectivos conforme al contrato RBAC
+     * vigente (derivados de los Roles del equipo activo; los permisos directos
+     * de Spatie quedan reservados). No modifica asignaciones existentes ni la
+     * doble escritura de users.role: solo evalúa y aborta (rollback). Restaura
+     * el equipo de permisos activo para no dejar efectos colaterales.
+     */
+    private function protegerCapacidadAdministrativa(User $user): void {
+        $contexto = app(ContextoOperativo::class);
+        $membresia = MembresiaCopropiedad::query()
+            ->where('usuario_id', $user->id)
+            ->where('organizacion_id', $contexto->organizacion->id)
+            ->where('copropiedad_id', $contexto->copropiedad->id)
+            ->first();
+        if ($membresia === null) {
+            return;
+        }
+        $capacidad = app(CapacidadAdministrativa::class);
+        $equipoAnterior = getPermissionsTeamId();
+        try {
+            $membresias = $capacidad->membresiasBloqueadas($membresia);
+            $titulares = $capacidad->titularesRestantes($membresias, $membresia);
+        } finally {
+            setPermissionsTeamId($equipoAnterior);
+        }
+        abort_if(
+            $titulares === 0,
+            422,
+            'Debe existir al menos un usuario con capacidad de administración (permiso usuarios.gestionar).'
+        );
+    }
     public function destroy(Request $request,User $user): RedirectResponse {
         $this->autorizar();
         abort_if($user->is($request->user()),422,'No puedes eliminar tu propia cuenta.');

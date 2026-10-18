@@ -25,11 +25,26 @@ final class SincronizarPermisosRol
         $rol = SpatieRole::query()->findOrFail($rolId);
         $this->autorizacion->autorizarGestion($operador, $contexto, $rol);
 
+        // HU-USR-09: el Rol base admin es inmutable (matriz no editable vía
+        // web), para cualquier autoridad. Comparación con normalización
+        // canónica consistente con la colación *_ci.
+        if (CatalogoRolesBase::esAdminBase($rol)) {
+            throw ValidationException::withMessages([
+                'permisos' => 'El Rol admin base del catálogo inicial es inmutable: su matriz de permisos no puede editarse.',
+            ]);
+        }
+
         $datos = Validator::make(['permisos' => $permisos], [
             'permisos' => 'present|array',
             'permisos.*' => 'string',
         ])->validate();
-        $claves = array_values(array_unique($datos['permisos']));
+        // Normalización canónica de claves: recorte + unicidad estricta, para
+        // que el resultado no dependa de la sensibilidad a mayúsculas de la
+        // colación de la base (anti-escalada verificada y endurecida).
+        $claves = array_values(array_unique(array_map(
+            static fn (string $clave) => trim($clave),
+            $datos['permisos'],
+        )));
 
         $conocidas = Permission::query()
             ->where('guard_name', AutorizacionGestionRoles::GUARD)

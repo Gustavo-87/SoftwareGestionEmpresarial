@@ -18,6 +18,15 @@ final class EditarRol
         $rol = SpatieRole::query()->findOrFail($rolId);
         $this->autorizacion->autorizarGestion($operador, $contexto, $rol);
 
+        // HU-USR-09: el Rol base admin es inmutable (no renombrable vía web),
+        // para cualquier autoridad. Comparación con normalización canónica
+        // consistente con la colación *_ci.
+        if (CatalogoRolesBase::esAdminBase($rol)) {
+            throw ValidationException::withMessages([
+                'nombre' => 'El Rol admin base del catálogo inicial es inmutable: no puede renombrarse.',
+            ]);
+        }
+
         $datos = Validator::make($datos, ['nombre' => 'required|string|max:100'])->validate();
         $nombre = trim($datos['nombre']);
 

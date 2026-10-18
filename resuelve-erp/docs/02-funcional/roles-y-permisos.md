@@ -284,11 +284,19 @@ permanece privado por defecto.
 3. Cualquier rol puede registrar una encuesta si es el radicador y la PQR
    cumple el estado requerido.
 4. El backend permite exportaciones para todos los roles autenticados.
-5. El cambio de rol no protege la existencia de al menos un administrador
-   cuando se modifica a otro usuario.
+5. El cambio de `users.role` está protegido por capacidad administrativa
+   efectiva (Sprint 18, HU-USR-09, corregido el 17 de octubre de 2026):
+   `UserManagementController` bloquea con 422 la operación —dentro de la
+   transacción que escribe— si la Copropiedad activa quedaría sin ningún
+   miembro vigente con el permiso `usuarios.gestionar` (protección "≥1" por
+   capacidad efectiva y no por nombre de rol, reutilizando
+   `CapacidadAdministrativa`). La regla mide el estado final real tras la
+   sincronización —no predice el resultado del nuevo rol—, se aplica solo
+   cuando el rol cambia y no afecta a usuarios sin Membresía en el contexto
+   activo ni a otras Copropiedades.
 
-Estos puntos describen el código actual y no establecen el comportamiento
-deseado.
+Los puntos 1 a 4 describen el código actual y no establecen el comportamiento
+deseado. El punto 5 describe el comportamiento implementado y verificado.
 
 ## 10. Evidencias utilizadas
 
