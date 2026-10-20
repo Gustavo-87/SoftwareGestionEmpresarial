@@ -66,7 +66,9 @@ class PanelOperativoTest extends TestCase
         $this->actingAsContextual($user)->get(route('panel'))
             ->assertOk()
             ->assertSee('>1<', false)
-            ->assertSee('No hay accesos adicionales disponibles');
+            ->assertSee('Ir a PQRS')
+            ->assertDontSee('Ir a Mantenimiento')
+            ->assertDontSee('Ir a Documentos');
     }
 
     public function test_panel_shows_overdue_metric_when_present(): void
@@ -85,7 +87,7 @@ class PanelOperativoTest extends TestCase
 
         $this->actingAsContextual($user)->get(route('panel'))
             ->assertOk()
-            ->assertSee('Vencidas')
+            ->assertSee('PQRS vencidas')
             ->assertSee('>1<', false);
     }
 
@@ -105,8 +107,7 @@ class PanelOperativoTest extends TestCase
 
         $this->actingAsContextual($user)->get(route('panel'))
             ->assertOk()
-            ->assertSee('Vencidas')
-            ->assertSee('>0<', false)
-            ->assertSee('No hay PQRS con plazo superado');
+            ->assertSee('PQRS vencidas')
+            ->assertSee('>0<', false);
     }
 }

@@ -21,7 +21,7 @@
     <title>@yield('titulo', 'Panel') · {{ $siteSettings->nombre_conjunto }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body style="--forest: #1e3a5f">
+<body class="@yield('clase_pagina')" style="--forest: #1e3a5f">
     <div class="app-shell">
         <?php
             $navItems = [

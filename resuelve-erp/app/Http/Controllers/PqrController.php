@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
+use App\Application\Documentos\ConsultaDocumentosContextuales;
+use App\Application\Mantenimiento\ConsultaMantenimientos;
 use App\Application\Notificaciones\ConsultaNotificacionesContextuales;
 use App\Application\Pqrs\ActualizarPqrs;
 use App\Application\Pqrs\ConsultaParticipacionContextual;
@@ -12,6 +14,7 @@ use App\Application\Pqrs\PresentarPqrs;
 use App\Application\Pqrs\VisibilidadBorradoresPqrs;
 use App\Domain\Pqrs\CalendarioLaboralColombia;
 use App\Models\Documento;
+use App\Models\Mantenimiento;
 use App\Models\Pqr;
 use App\Models\PqrActivity;
 use App\Models\PqrReply;
@@ -32,6 +35,8 @@ class PqrController extends Controller
         ContextoOperativo $contexto,
         ConsultaPqrsContextuales $consultaPqrs,
         ConsultaNotificacionesContextuales $consultaNotificaciones,
+        ConsultaMantenimientos $consultaMantenimientos,
+        ConsultaDocumentosContextuales $consultaDocumentos,
     ) {
         $autorizacion = app(AutorizacionContextual::class);
         $puedeConsultarPqrs = $request->user()->can('viewAny', Pqr::class);
@@ -72,10 +77,10 @@ class PqrController extends Controller
             ];
 
             $estadosColores = [
-                'radicada' => '#2563eb',
-                'en_revision' => '#d97706',
-                'respondida' => '#16a34a',
-                'cerrada' => '#64748b',
+                'radicada' => '#1d4ed8',
+                'en_revision' => '#3b82f6',
+                'respondida' => '#60a5fa',
+                'cerrada' => '#93c5fd',
             ];
 
             $estadisticasEstados = [];
@@ -108,13 +113,133 @@ class PqrController extends Controller
                     'porcentaje' => round(($cantidad / $maxTipo) * 100),
                 ];
             }
+
+            // Indicador analítico: Top 5 de PQRS por tipo (orden descendente).
+            $estadisticasTipos = array_slice($estadisticasTipos, 0, 5);
         }
+
+        // Resumen operativo por módulo: solo módulos con acceso (RBAC), con
+        // aislamiento por Organización y Copropiedad y sin consultas N+1.
+        // Estados realmente existentes: PQRS (radicada, en_revision,
+        // respondida, cerrada), Mantenimiento (pendiente, en_proceso,
+        // finalizado) y versiones de Documento (borrador, pendiente_aprobacion,
+        // aprobada, rechazada).
+        $indicadores = [];
+        if ($puedeConsultarPqrs) {
+            $indicadores['pqrs'] = [
+                'total' => $resumen['total'],
+                'pendientes' => $resumen['pendientes'], // radicada + en_revision
+                'en_tramite' => (int) $porEstado->get('en_revision', 0),
+                'estados' => $estadisticasEstados,
+            ];
+        }
+        if ($request->user()->can('viewAny', Mantenimiento::class)) {
+            $porEstadoMantenimiento = $consultaMantenimientos->para($contexto)
+                ->select('estado', DB::raw('count(*) as total'))
+                ->groupBy('estado')
+                ->pluck('total', 'estado');
+            $totalMantenimiento = (int) $porEstadoMantenimiento->sum();
+            $indicadores['mantenimiento'] = [
+                'total' => $totalMantenimiento,
+                'pendientes' => (int) $porEstadoMantenimiento->get('pendiente', 0),
+                'en_proceso' => (int) $porEstadoMantenimiento->get('en_proceso', 0),
+                'finalizados' => (int) $porEstadoMantenimiento->get('finalizado', 0),
+                'estados' => array_map(fn (array $estado) => [
+                    'label' => $estado['label'],
+                    'cantidad' => (int) $porEstadoMantenimiento->get($estado['key'], 0),
+                    'porcentaje' => $totalMantenimiento > 0
+                        ? round((int) $porEstadoMantenimiento->get($estado['key'], 0) / $totalMantenimiento * 100)
+                        : 0,
+                    'color' => $estado['color'],
+                ], [
+                    ['label' => 'Pendientes', 'key' => 'pendiente', 'color' => '#15803d'],
+                    ['label' => 'En proceso', 'key' => 'en_proceso', 'color' => '#22c55e'],
+                    ['label' => 'Finalizados', 'key' => 'finalizado', 'color' => '#86efac'],
+                ]),
+            ];
+        }
+        if ($puedeConsultarDocumentos) {
+            $documentosBase = $consultaDocumentos->para($contexto);
+            $totalDocumentos = (clone $documentosBase)->count();
+            $documentosEnTramite = (clone $documentosBase)
+                ->whereHas('versiones', fn ($q) => $q->whereIn('estado', ['borrador', 'pendiente_aprobacion']))
+                ->whereDoesntHave('versiones', fn ($q) => $q->where('estado', 'aprobada'))
+                ->count();
+            $documentosAprobados = (clone $documentosBase)
+                ->whereHas('versiones', fn ($q) => $q->where('estado', 'aprobada'))
+                ->count();
+            $documentosOtros = max(0, $totalDocumentos - $documentosEnTramite - $documentosAprobados);
+            $indicadores['documentos'] = [
+                'total' => $totalDocumentos,
+                'en_tramite' => $documentosEnTramite,
+                'aprobados' => $documentosAprobados,
+                'estados' => [
+                    ['label' => 'En trámite', 'cantidad' => $documentosEnTramite, 'color' => '#7c3aed'],
+                    ['label' => 'Aprobados', 'cantidad' => $documentosAprobados, 'color' => '#a78bfa'],
+                    ['label' => 'Otros estados', 'cantidad' => $documentosOtros, 'color' => '#d8b4fe'],
+                ],
+            ];
+            foreach ($indicadores['documentos']['estados'] as &$estadoDocumento) {
+                $estadoDocumento['porcentaje'] = $totalDocumentos > 0
+                    ? round($estadoDocumento['cantidad'] / $totalDocumentos * 100)
+                    : 0;
+            }
+            unset($estadoDocumento);
+        }
+
+        // Actividad reciente: últimos movimientos reales de los módulos con
+        // acceso (sin eventos ficticios), acotados por las mismas consultas
+        // contextuales. Enlace al registro solo cuando la policy lo autoriza.
+        $etiquetasEstadosPqrs = ['radicada' => 'Radicada', 'en_revision' => 'En revisión', 'respondida' => 'Respondida', 'cerrada' => 'Cerrada'];
+        $actividad = collect();
+        if ($puedeConsultarPqrs) {
+            $actividad = $actividad->merge(
+                (clone $baseQuery)->orderByDesc('updated_at')->limit(3)->get()->map(fn (Pqr $pqr) => [
+                    'modulo' => 'pqrs',
+                    'titulo' => $pqr->asunto,
+                    'detalle' => 'PQRS · '.($etiquetasEstadosPqrs[$pqr->estado] ?? $pqr->estado),
+                    'fecha' => $pqr->updated_at ?? $pqr->created_at,
+                    'href' => $request->user()->can('view', $pqr) ? route('pqrs.show', $pqr) : null,
+                ])
+            );
+        }
+        if (isset($indicadores['mantenimiento'])) {
+            $actividad = $actividad->merge(
+                $consultaMantenimientos->para($contexto)->orderByDesc('updated_at')->limit(3)->get()->map(fn (Mantenimiento $mantenimiento) => [
+                    'modulo' => 'mantenimiento',
+                    'titulo' => $mantenimiento->titulo,
+                    'detalle' => 'Mantenimiento · '.$mantenimiento->etiquetaEstado(),
+                    'fecha' => $mantenimiento->updated_at ?? $mantenimiento->created_at,
+                    'href' => $request->user()->can('view', $mantenimiento) ? route('mantenimiento.show', $mantenimiento) : null,
+                ])
+            );
+        }
+        if ($puedeConsultarDocumentos) {
+            $actividad = $actividad->merge(
+                $consultaDocumentos->para($contexto)->orderByDesc('updated_at')->limit(3)->get()->map(fn (Documento $documento) => [
+                    'modulo' => 'documentos',
+                    'titulo' => $documento->titulo,
+                    'detalle' => 'Documentos · '.($documento->estado->value === 'activo' ? 'Activo' : 'Archivado'),
+                    'fecha' => $documento->updated_at ?? $documento->created_at,
+                    'href' => $request->user()->can('view', $documento) ? route('documentos.show', $documento) : null,
+                ])
+            );
+        }
+        $actividadReciente = $actividad
+            ->sortByDesc(fn (array $item) => $item['fecha'])
+            ->take(8)
+            ->values();
 
         return view('pqrs.panel', [
             'resumen' => $resumen,
             'estadisticasEstados' => $estadisticasEstados ?? [],
             'estadisticasTipos' => $estadisticasTipos ?? [],
+            'indicadores' => $indicadores,
+            'actividadReciente' => $actividadReciente,
+            'organizacion' => $contexto->organizacion,
+            'copropiedad' => $contexto->copropiedad,
             'puedeCrearPqrs' => $request->user()->can('create', Pqr::class),
+            'puedeConsultarPqrs' => $puedeConsultarPqrs,
             'puedeConsultarDocumentos' => $puedeConsultarDocumentos,
             'notificacionesNoLeidas' => $puedeConsultarNotificaciones
                 ? $consultaNotificaciones->contarNoLeidas($contexto, $request->user())

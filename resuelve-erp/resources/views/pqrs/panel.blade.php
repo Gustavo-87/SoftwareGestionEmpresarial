@@ -2,128 +2,95 @@
 
 @section('titulo', 'Panel')
 @section('titulo_pagina', 'Panel')
+@section('clase_pagina', 'panel-page')
 
 @section('contenido')
-    <x-page-heading
-        title="Prioriza lo que requiere atención"
-        eyebrow="Consola operativa"
-    >
-        <x-slot name="actions">
+    {{-- Encabezado de una fila: Copropiedad activa y acción principal. --}}
+    <section class="panel-heading">
+        <h1>{{ $copropiedad->nombre }}</h1>
+        <div class="heading-actions">
             @if($puedeCrearPqrs)<a href="{{ route('pqrs.create') }}" class="button primary"><span>＋</span> Radicar PQRS</a>@endif
-        </x-slot>
-    </x-page-heading>
+        </div>
+    </section>
 
     @if($resumen)
-        <section class="panel-overview metric-cards" aria-label="Panorama general">
+        {{-- Prioridades: etiqueta y cifra, sin explicaciones repetidas. --}}
+        <section class="atencion-grid" aria-label="Atención prioritaria">
             <x-metric-card
-                label="Vencidas"
+                label="PQRS vencidas"
                 :value="$resumen['vencidas']"
-                :note="$resumen['vencidas'] ? 'Plazo superado. Requieren atención inmediata.' : 'No hay PQRS con plazo superado.'"
                 variant="danger"
                 :href="route('pqrs.index', ['estado' => 'vencidas'])"
-                class="overview-vencidas"
             >
                 <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></x-slot>
             </x-metric-card>
             <x-metric-card
                 label="Próximas a vencer"
                 :value="$resumen['por_vencer']"
-                :note="$resumen['por_vencer'] ? 'Vencen dentro de los próximos 3 días.' : 'No hay PQRS próximas a vencer.'"
                 variant="warning"
                 :href="route('pqrs.index', ['estado' => 'por_vencer'])"
-                class="overview-por-vencer"
             >
                 <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></x-slot>
             </x-metric-card>
             <x-metric-card
-                label="Pendientes"
+                label="PQRS pendientes"
                 :value="$resumen['pendientes']"
-                :note="$resumen['pendientes'] ? 'Requieren gestión o seguimiento.' : 'No hay PQRS pendientes de gestión.'"
                 variant="info"
                 :href="route('pqrs.index', ['estado' => 'pendientes'])"
-                class="overview-pendientes"
             >
                 <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></x-slot>
             </x-metric-card>
-            <x-metric-card
-                label="Total PQRS autorizadas"
-                :value="$resumen['total']"
-                :note="$resumen['total'] ? 'Consulta el listado disponible en este contexto.' : 'No hay PQRS para consultar en este contexto.'"
-                variant="neutral"
-                :href="route('pqrs.index')"
-                class="overview-total-general"
-            >
-                <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></x-slot>
-            </x-metric-card>
         </section>
 
-        {{-- Estadísticas --}}
-        @if($resumen['total'] > 0)
-            <div class="stats-grid">
-                {{-- Donut: Distribución por estado --}}
-                <div class="panel stats-panel">
+        {{-- Módulos: total, distribución por estados y acceso. --}}
+        <section class="operativo-grid" aria-label="Resumen operativo por módulo">
+            @isset($indicadores['pqrs'])
+                <div class="panel stats-panel operativo-pqrs-panel">
                     <div class="panel-header">
-                        <h2>Distribución por estado</h2>
+                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon blue">✉</span><h2>PQRS</h2></div>
+                        <span class="operativo-total operativo-total-pqrs">{{ $indicadores['pqrs']['total'] }} solicitudes</span>
                     </div>
-                    <div class="stats-donut-container">
-                        @php
-                            $gradosAcumulados = 0;
-                        @endphp
-                        <div class="stats-donut" style="background:conic-gradient(
-                            @foreach($estadisticasEstados as $i => $estado)
-                                {{ $estado['color'] }} {{ $gradosAcumulados }}deg {{ $gradosAcumulados + ($estado['porcentaje'] * 3.6) }}deg{{ $i < count($estadisticasEstados) - 1 ? ',' : '' }}
-                                @php $gradosAcumulados += $estado['porcentaje'] * 3.6; @endphp
-                            @endforeach
-                        )">
-                            <div class="stats-donut-center">
-                                <strong>{{ $resumen['total'] }}</strong>
-                                <small>total</small>
-                            </div>
-                        </div>
-                        <div class="stats-legend">
-                            @foreach($estadisticasEstados as $estado)
-                                <div class="stats-legend-item">
-                                    <span class="stats-legend-dot" style="background:{{ $estado['color'] }}"></span>
-                                    <span class="stats-legend-label">{{ $estado['label'] }}</span>
-                                    <span class="stats-legend-value">{{ $estado['cantidad'] }}</span>
-                                    <span class="stats-legend-pct">{{ $estado['porcentaje'] }}%</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+                    <x-modulo-estados :estados="$indicadores['pqrs']['estados']" :total="$indicadores['pqrs']['total']" vacio="Sin solicitudes en este contexto." />
+                    <div class="panel-footer"><a class="modulo-ir modulo-ir-pqrs" href="{{ route('pqrs.index') }}">Ir a PQRS <span aria-hidden="true">›</span></a></div>
                 </div>
-
-                {{-- Barras: PQRS por tipo --}}
-                <div class="panel stats-panel">
+            @endisset
+            @isset($indicadores['mantenimiento'])
+                <div class="panel stats-panel operativo-mantenimiento-panel">
                     <div class="panel-header">
-                        <h2>PQRS por tipo</h2>
+                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon mint">⚙</span><h2>Mantenimiento</h2></div>
+                        <span class="operativo-total operativo-total-mantenimiento">{{ $indicadores['mantenimiento']['total'] }} registros</span>
                     </div>
-                    <div class="stats-bars-container">
-                        @forelse($estadisticasTipos as $tipo)
-                            <div class="stats-bar-row">
-                                <div class="stats-bar-label">{{ Str::limit($tipo['nombre'], 20) }}</div>
-                                <div class="stats-bar-track">
-                                    <div class="stats-bar-fill" style="width:{{ $tipo['porcentaje'] }}%"></div>
-                                </div>
-                                <div class="stats-bar-value">{{ $tipo['cantidad'] }}</div>
-                            </div>
-                        @empty
-                            <div class="empty-state" style="padding:20px">
-                                <p>Sin tipos registrados</p>
-                            </div>
-                        @endforelse
-                    </div>
+                    <x-modulo-estados :estados="$indicadores['mantenimiento']['estados']" :total="$indicadores['mantenimiento']['total']" vacio="Sin registros de mantenimiento en este contexto." />
+                    <div class="panel-footer"><a class="modulo-ir modulo-ir-mantenimiento" href="{{ route('mantenimiento.index') }}">Ir a Mantenimiento <span aria-hidden="true">›</span></a></div>
                 </div>
-            </div>
-        @endif
+            @endisset
+            @isset($indicadores['documentos'])
+                <div class="panel stats-panel operativo-documentos-panel">
+                    <div class="panel-header">
+                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon violet">▤</span><h2>Documentos</h2></div>
+                        <span class="operativo-total operativo-total-documentos">{{ $indicadores['documentos']['total'] }} documentos</span>
+                    </div>
+                    <x-modulo-estados :estados="$indicadores['documentos']['estados']" :total="$indicadores['documentos']['total']" vacio="Sin documentos en este contexto." />
+                    <div class="panel-footer"><a class="modulo-ir modulo-ir-documentos" href="{{ route('documentos.index') }}">Ir a Documentos <span aria-hidden="true">›</span></a></div>
+                </div>
+            @endisset
+        </section>
 
-        <section class="panel console-access">
-            <div class="panel-header"><div><h2>Accesos disponibles</h2><p>Capacidades autorizadas para la Copropiedad activa.</p></div></div>
-            <div class="console-access-grid">
-                @if($puedeConsultarDocumentos)<a class="console-access-card" href="{{ route('documentos.index') }}"><span class="metric-icon mint">▤</span><div><h3>Documentos</h3><p>Consulta documentos autorizados.</p></div><span aria-hidden="true">→</span></a>@endif
-                @if($notificacionesNoLeidas !== null)<a class="console-access-card" href="{{ route('notifications.index') }}"><span class="metric-icon blue">✓</span><div><h3>Notificaciones</h3><p>{{ $notificacionesNoLeidas ? 'Tienes avisos sin leer.' : 'No tienes avisos sin leer.' }}</p></div><span aria-hidden="true">→</span></a>@endif
-                @if($navegacion['carga'] ?? false)<a class="console-access-card" href="{{ route('management.workload') }}"><span class="metric-icon amber">◷</span><div><h3>Carga del equipo</h3><p>Consulta la distribución operativa disponible.</p></div><span aria-hidden="true">→</span></a>@endif
-                @if(! $puedeConsultarDocumentos && $notificacionesNoLeidas === null)<x-empty-state title="No hay accesos adicionales disponibles" description="Las capacidades se muestran según tus permisos contextuales." />@endif
+        {{-- Top 5 de PQRS por tipo: bloque compacto exigido por la rúbrica. --}}
+        <section class="panel stats-panel modulo-pqrs-accent top-tipos">
+            <div class="panel-header"><h2>Top 5 de PQRS por tipo</h2></div>
+            <div class="stats-bars-container">
+                @forelse($estadisticasTipos as $tipo)
+                    <div class="stats-bar-row">
+                        <div class="stats-bar-label">{{ Str::limit($tipo['nombre'], 20) }}</div>
+                        <div class="stats-bar-track"><div class="stats-bar-fill" style="width:{{ $tipo['porcentaje'] }}%"></div></div>
+                        <div class="stats-bar-value">{{ $tipo['cantidad'] }}</div>
+                    </div>
+                @empty
+                    <div class="empty-state" style="padding:12px">
+                        <p>Sin tipos registrados</p>
+                    </div>
+                @endforelse
             </div>
         </section>
     @else

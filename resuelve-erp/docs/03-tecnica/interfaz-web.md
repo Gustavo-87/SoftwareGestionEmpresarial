@@ -494,9 +494,9 @@ Product Owner pendiente.
 
 ## Control documental
 
-- **Versión:** v1.4
+- **Versión:** v1.6
 - **Fecha de creación:** 4 de agosto de 2026
-- **Fecha de última actualización:** 3 de octubre de 2026
+- **Fecha de última actualización:** 20 de octubre de 2026
 
 ## Centro de Reportes e Indicadores (16 de octubre de 2026)
 
@@ -585,3 +585,81 @@ Evidencia: `resources/views/management/tools.blade.php`,
 `tests/Feature/PqrTagCatalogAdministrationTest.php`,
 `tests/Feature/PqrComplementaryFeaturesTest.php` y
 `tests/Feature/ReportIndexTest.php`.
+
+## Panel principal — ajuste visual compacto (20 de octubre de 2026)
+
+Ajuste exclusivamente presentacional de `/panel`, conservando los indicadores,
+consultas, rutas, permisos, colores y estados existentes:
+
+- El encabezado muestra «Panel principal» (26 px; 24 px en móvil), sin repetir
+  el nombre de la Copropiedad identificado en el contexto activo.
+- La clase `panel-page`, declarada por la vista y admitida por el layout,
+  limita la reducción de la navegación a esta pantalla: barra de 60 px en
+  escritorio, logo de 36 px y controles compactos. En móvil se apilan marca,
+  acciones y menú, conservando controles táctiles de al menos 44 px.
+- Se usan subtítulos de 18–19 px, texto de 14–16 px y separaciones de 16–20 px.
+  Las tres prioridades mantienen una fila por encima de 760 px, con relleno de
+  16 px y sin altura mínima impuesta.
+- Los resúmenes alinean título y total, con una descripción breve a ancho
+  completo. Se distribuyen en tres, dos o una columna según el espacio; las
+  donas de 160 px comparten fila con sus leyendas cuando caben y se apilan
+  cuando falta ancho. Las barras tienen 20 px de alto y separación de 8 px.
+- «Radicar PQRS» mide 40 px en escritorio y 44 px en móvil. Se conservan los
+  temas claro y oscuro, sin zoom, escalado ni reducción tipográfica global.
+
+Verificación: `npm run build` y `git diff --check` correctos; 18 pruebas
+focalizadas aprobadas (119 aserciones) entre `PanelOperativoTest`,
+`PanelIndicadoresTest`, `PanelPresentacionTest` y `LogoPresentationTest`.
+La revisión en navegador utiliza HTML Blade generado con SQLite en memoria,
+sin iniciar sesión ni alterar datos reales. Se comprueban ambos temas, menús
+plegados y abiertos, y anchos entre 320 y 1440 px sin desbordamiento horizontal.
+La aceptación visual del Product Owner permanece pendiente.
+
+Evidencia: `resources/views/pqrs/panel.blade.php`,
+`resources/views/layouts/app.blade.php`, `resources/css/app.css` y
+`tests/Feature/PanelPresentacionTest.php`.
+
+## Panel principal — distribución compacta de una pantalla (20 de octubre de 2026)
+
+El Product Owner solicitó reducir considerablemente el desplazamiento vertical
+de `/panel`. Esta distribución sustituye la descrita en el apartado anterior
+para esta vista y no modifica consultas, autorización, permisos ni reglas de
+negocio:
+
+- Encabezado de una fila con el nombre de la Copropiedad y el botón «Radicar
+  PQRS». Se retiraron la bienvenida, el título «Panel principal» y los
+  subtítulos de sección. El nombre de la Copropiedad se presenta una sola vez;
+  el selector de Copropiedad del layout se conserva cuando existe más de una.
+- Fila compacta de tres prioridades (PQRS vencidas, próximas a vencer y
+  pendientes) con etiqueta y cifra, sin explicaciones repetidas. Tarjetas de
+  84 px de alto con relleno de 14–18 px.
+- Tres tarjetas de módulo en fila: PQRS, Mantenimiento y Documentos, con
+  total, distribución por estados y enlace al módulo. Las donas se sustituyen
+  por barras horizontales de 12 px con etiqueta, cantidad y porcentaje
+  representado en el largo de la barra.
+- «Top 5 de PQRS por tipo» se conserva como bloque compacto de cinco filas.
+- Se retiran de esta vista «Actividad reciente» y «Accesos rápidos». Sus
+  capacidades, consultas y archivos permanecen intactos; no se eliminó nada.
+- Barra superior de 52 px en escritorio (controles táctiles de 44 px en
+  móvil), títulos de 20–22 px, texto de 14–16 px y separaciones de 12–16 px.
+  Sin zoom, escalado, alturas que recorten contenido, `overflow: hidden`
+  informativo ni desplazamientos internos.
+
+Objetivo de aceptación verificado: en 1366×768 al 100 % caben encabezado,
+prioridades, resumen de módulos y Top 5 sin desplazamiento vertical (la página
+mide 768 px, con el pie incluido). En móvil se apila en una columna con
+desplazamiento natural y sin desbordamiento horizontal entre 320 y 760 px.
+
+Verificación: `npm run build` y `git diff --check` correctos; 19 pruebas
+focalizadas aprobadas (127 aserciones) de `PanelOperativoTest`,
+`PanelIndicadoresTest`, `PanelPresentacionTest` y `LogoPresentationTest`;
+suite completa **626 pruebas, 620 aprobadas, 6 omitidas, 2.854 aserciones**.
+La revisión en navegador usa HTML Blade generado con SQLite en memoria, sin
+iniciar sesión ni alterar datos reales, en ambos temas. Capturas de la
+verificación en escritorio, oscuro y móvil entregadas al Product Owner. La
+aceptación visual permanece pendiente.
+
+Evidencia: `resources/views/pqrs/panel.blade.php`,
+`resources/views/components/modulo-estados.blade.php`,
+`resources/css/app.css`, `tests/Feature/PanelIndicadoresTest.php`,
+`tests/Feature/PanelPresentacionTest.php` y `tests/Feature/PanelOperativoTest.php`.

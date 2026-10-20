@@ -1191,3 +1191,115 @@ td small {
 @media(min-width:901px){.tools-grid>.tool-card:first-child:nth-last-child(2):not(.tag-catalog){grid-column:1/-1}}
 .report-filters .filter-fields{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 
+
+/* Panel principal — distribución compacta de una pantalla, sin alterar otros módulos. */
+:root{--modulo-pqrs:#2563eb;--modulo-mantenimiento:#16a34a;--modulo-documentos:#7c3aed}
+
+/* Barra superior compacta, limitada al panel. */
+.panel-page .top-navbar-inner{min-height:52px;padding:4px 20px;gap:10px}
+.panel-page .top-navbar .brand .brand-mark.image-mark{width:32px;height:32px;flex-basis:32px;padding:3px}
+.panel-page .top-navbar .brand strong{font-size:16px}
+.panel-page .top-navbar :is(.nav-item,.nav-toggle){min-height:34px;padding:6px 10px;font-size:14px;line-height:20px}
+.panel-page .top-navbar :is(.notification-button,.theme-toggle){width:34px;height:34px;min-width:34px;min-height:34px}
+.panel-page .top-navbar .logout-text{font-size:14px;line-height:20px;padding:6px 12px}
+.panel-page .page-content{padding:16px 20px}
+
+/* La Copropiedad se identifica una sola vez, en el encabezado del panel. */
+.panel-page .app-shell{display:flex;flex-direction:column}
+.panel-page .main-content{flex:1 1 auto;min-height:0}
+.panel-page .operational-context{margin:0 0 8px;padding-bottom:8px;gap:8px}
+.panel-page .operational-context-label{display:none}
+.panel-page .operational-context:not(:has(.contexto-selector-form)){display:none}
+.panel-page .operational-context select{max-width:100%;font-size:14px}
+.panel-page .contexto-selector-form{min-width:0;max-width:100%}
+
+/* Encabezado de una fila: Copropiedad activa y acción principal. */
+.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px}
+.panel-heading h1{font-size:22px;line-height:1.25;letter-spacing:-.02em;margin:0;min-width:0;overflow-wrap:anywhere}
+.panel-heading .heading-actions{flex-shrink:0}
+.panel-heading .button{height:40px;min-height:40px;padding:8px 16px;font-size:14px;line-height:24px;white-space:nowrap}
+
+/* Prioridades: etiqueta y cifra en tarjetas compactas. */
+.atencion-grid{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 12px}
+.atencion-grid .metric-card{flex:1 1 200px;align-items:center;gap:12px;min-width:0;min-height:0;padding:14px 18px}
+.atencion-grid .metric-card>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.atencion-grid .metric-card small{font-size:14px;line-height:1.4}
+.atencion-grid .metric-card strong{font-size:26px;line-height:1.25;margin:0}
+.atencion-grid .metric-card-symbol{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px}
+.atencion-grid .metric-card-symbol svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* Módulos: total, barras por estados y acceso. */
+.operativo-grid{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 12px}
+.operativo-grid>.panel{display:flex;flex:1 1 280px;flex-direction:column;min-width:0}
+.operativo-grid .panel-header{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;min-width:0}
+.operativo-grid .panel-header h2{font-size:20px;line-height:1.3;margin:0;min-width:0;overflow-wrap:anywhere}
+.operativo-grid .panel-footer{margin-top:auto;justify-content:flex-end;padding:10px 14px;gap:8px;font-size:14px;line-height:1.4}
+.operativo-total{margin-left:auto;font-size:16px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.modulo-estados{display:grid;gap:6px;padding:12px 14px}
+.modulo-estado-row{display:grid;grid-template-columns:minmax(0,112px) minmax(0,1fr) 30px;gap:8px;align-items:center}
+.modulo-estado-label{font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.modulo-estado-track{height:12px;border-radius:6px;background:var(--paper);overflow:hidden}
+.modulo-estado-fill{display:block;height:100%;border-radius:6px}
+.modulo-estado-cantidad{font-size:14px;font-weight:800;text-align:right}
+.modulo-estado-vacio{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+
+/* Top 5 de PQRS por tipo: cinco filas compactas. */
+.panel-page .top-tipos{margin:0}
+.panel-page .top-tipos .panel-header{padding:12px 14px}
+.panel-page .top-tipos .panel-header h2{font-size:20px;line-height:1.3;margin:0}
+.panel-page .stats-bars-container{padding:12px 14px;gap:6px}
+.panel-page .stats-bar-row{grid-template-columns:minmax(0,180px) minmax(0,1fr) 32px;gap:10px}
+.panel-page .stats-bar-track{height:12px}
+.panel-page :is(.stats-bar-label,.stats-bar-value){font-size:14px}
+
+/* Identidad visual por módulo. */
+.modulo-pqrs-accent{border-left:4px solid var(--modulo-pqrs)}
+.modulo-mantenimiento-accent{border-left:4px solid var(--modulo-mantenimiento)}
+.modulo-documentos-accent{border-left:4px solid var(--modulo-documentos)}
+.metric-icon.violet{background:#f1e9ff;color:var(--modulo-documentos)}
+.dashboard-section-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:0 0 32px;font-size:15px}
+.dashboard-heading-info{display:flex;gap:8px;align-items:center;min-width:0}
+.operativo-pqrs-panel{background:#f4f7ff}
+.operativo-mantenimiento-panel{background:#f2faf4}
+.operativo-documentos-panel{background:#f7f4ff}
+.operativo-total-pqrs{color:var(--modulo-pqrs)}
+.operativo-total-mantenimiento{color:var(--modulo-mantenimiento)}
+.operativo-total-documentos{color:var(--modulo-documentos)}
+.modulo-ir{display:inline-flex;align-items:center;gap:8px;border-radius:20px;padding:8px 12px;font-size:14px;font-weight:800;text-decoration:none;border:1px solid transparent}
+.modulo-ir-pqrs{background:#e3ecff;color:var(--modulo-pqrs)}
+.modulo-ir-mantenimiento{background:#dcf3e3;color:var(--modulo-mantenimiento)}
+.modulo-ir-documentos{background:#efe7ff;color:var(--modulo-documentos)}
+.modulo-ir:hover{filter:brightness(.97)}
+[data-theme="dark"] .operativo-pqrs-panel{background:#152237}
+[data-theme="dark"] .operativo-mantenimiento-panel{background:#14291d}
+[data-theme="dark"] .operativo-documentos-panel{background:#221a38}
+[data-theme="dark"] .operativo-total-pqrs{color:#93c5fd}
+[data-theme="dark"] .operativo-total-mantenimiento{color:#86efac}
+[data-theme="dark"] .operativo-total-documentos{color:#c4b5fd}
+[data-theme="dark"] .modulo-ir-pqrs{background:rgba(37,99,235,.18);color:#93c5fd}
+[data-theme="dark"] .modulo-ir-mantenimiento{background:rgba(22,163,74,.18);color:#86efac}
+[data-theme="dark"] .modulo-ir-documentos{background:rgba(124,58,237,.2);color:#c4b5fd}
+[data-theme="dark"] .metric-icon.violet{background:rgba(124,58,237,.18);color:#c4b5fd}
+[data-theme="dark"] .modulo-estado-track{background:rgba(255,255,255,.08)}
+
+/* Móvil: apilado natural, sin desbordamiento horizontal. */
+@media(max-width:760px){
+    .panel-page .top-navbar-inner{grid-template-columns:minmax(0,1fr) auto;padding:8px 12px 0;gap:8px}
+    .panel-page .top-navbar .brand{min-height:44px}
+    .panel-page .top-navbar :is(.nav-item,.nav-toggle,.notification-button,.theme-toggle){min-height:44px}
+    .panel-page .top-navbar :is(.notification-button,.theme-toggle){width:44px;min-width:44px}
+    .panel-page .navbar-actions{grid-column:1/-1;grid-row:2;justify-content:flex-end;border-left:0;padding:0 0 8px}
+    .panel-page .top-navbar .logout-text{min-height:44px}
+    .panel-page .top-navbar .main-nav{grid-row:3}
+    .panel-page .page-content{padding:12px}
+    .panel-heading{align-items:flex-start;flex-direction:column;gap:12px}
+    .panel-heading .heading-actions{width:100%}
+    .panel-heading .button{width:100%;height:44px;min-height:44px}
+    .atencion-grid .metric-card,.operativo-grid>.panel{flex-basis:100%}
+}
+@media(max-width:480px){
+    .panel-page .stats-bar-row,.panel-page .modulo-estado-row{grid-template-columns:minmax(0,1fr) 32px;gap:4px 8px}
+    .panel-page :is(.stats-bar-label,.modulo-estado-label){grid-column:1;grid-row:1}
+    .panel-page :is(.stats-bar-value,.modulo-estado-cantidad){grid-column:2;grid-row:1}
+    .panel-page :is(.stats-bar-track,.modulo-estado-track){grid-column:1/-1}
+}
