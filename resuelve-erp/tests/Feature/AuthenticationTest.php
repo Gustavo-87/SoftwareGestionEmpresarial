@@ -84,24 +84,31 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_login_allows_attempts_within_the_limit_and_then_returns_429(): void
+    public function test_el_tercer_intento_fallido_activa_el_bloqueo_temporal(): void
     {
-        $credentials = ['email' => 'limit@example.com', 'password' => 'incorrecta'];
+        User::factory()->create(['email' => 'limit@example.com', 'password' => 'clave-correcta']);
+        $incorrectas = ['email' => 'limit@example.com', 'password' => 'incorrecta'];
 
-        foreach (range(1, 5) as $attempt) {
-            $this->post(route('login.store'), $credentials)
+        foreach (range(1, 3) as $attempt) {
+            $this->post(route('login.store'), $incorrectas)
                 ->assertRedirect()
                 ->assertSessionHasErrors('email');
         }
 
-        $this->post(route('login.store'), $credentials)
-            ->assertTooManyRequests()
-            ->assertHeader('Retry-After');
+        // Bloqueo temporal: ni siquiera la contraseña correcta ingresa.
+        $respuesta = $this->post(route('login.store'), [
+            'email' => 'limit@example.com',
+            'password' => 'clave-correcta',
+        ]);
+
+        $respuesta->assertRedirect()->assertSessionHasErrors('email');
+        $this->assertStringContainsString('Podrás intentarlo de nuevo en', session('errors')->first('email'));
+        $this->assertGuest();
     }
 
     public function test_login_limit_is_isolated_by_normalized_email_and_ip(): void
     {
-        foreach (range(1, 5) as $attempt) {
+        foreach (range(1, 3) as $attempt) {
             $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.10'])
                 ->post(route('login.store'), [
                     'email' => '  LIMIT@EXAMPLE.COM ',
@@ -109,17 +116,21 @@ class AuthenticationTest extends TestCase
                 ]);
         }
 
+        // Otra cuenta desde la misma IP sigue disponible (el control por IP es
+        // más amplio para no bloquear a una red por un único error).
         $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.10'])
             ->post(route('login.store'), [
                 'email' => 'otro@example.com',
                 'password' => 'incorrecta',
             ])->assertRedirect();
 
+        // La cuenta bloqueada lo sigue estando desde otra IP.
         $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.11'])
             ->post(route('login.store'), [
                 'email' => 'limit@example.com',
                 'password' => 'incorrecta',
-            ])->assertRedirect();
+            ])->assertSessionHasErrors('email');
+        $this->assertStringContainsString('Podrás intentarlo de nuevo en', session('errors')->first('email'));
     }
 
     public function test_successful_login_clears_previous_failed_attempts(): void
@@ -129,7 +140,7 @@ class AuthenticationTest extends TestCase
             'password' => 'clave-correcta',
         ]);
 
-        foreach (range(1, 4) as $attempt) {
+        foreach (range(1, 2) as $attempt) {
             $this->post(route('login.store'), [
                 'email' => $user->email,
                 'password' => 'incorrecta',
@@ -139,10 +150,12 @@ class AuthenticationTest extends TestCase
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'clave-correcta',
-        ])->assertRedirect(route('panel'));
+        ])->assertRedirect();
+        $this->assertAuthenticated();
         $this->post(route('logout'));
 
-        foreach (range(1, 5) as $attempt) {
+        // El ingreso correcto limpió los intentos: empieza de cero.
+        foreach (range(1, 3) as $attempt) {
             $this->post(route('login.store'), [
                 'email' => $user->email,
                 'password' => 'incorrecta',
@@ -152,7 +165,8 @@ class AuthenticationTest extends TestCase
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'incorrecta',
-        ])->assertTooManyRequests();
+        ])->assertSessionHasErrors('email');
+        $this->assertStringContainsString('Podrás intentarlo de nuevo en', session('errors')->first('email'));
     }
 
     public function test_user_can_request_a_password_reset_link(): void

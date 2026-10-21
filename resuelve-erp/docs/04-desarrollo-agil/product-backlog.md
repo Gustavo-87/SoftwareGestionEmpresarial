@@ -164,7 +164,7 @@ Como Usuario con varios Roles en una Copropiedad
 Quiero elegir un Rol activo cuyos permisos, junto con mis permisos directos, definan mis permisos efectivos  
 Para concentrar mis responsabilidades sin mezclar las capacidades de todos mis Roles.
 
-**Estado: Aprobada (Sprint 18).**
+**Estado: Completada (Sprint 18, cerrado y aprobado el 21 de octubre de 2026).**
 
 ### HU-USR-05 — Permisos directos por usuario
 
@@ -172,7 +172,7 @@ Como Administrador
 Quiero conceder y revocar permisos directos a un usuario en la Copropiedad activa, con anti-escalada, origen visible y auditoría  
 Para atender excepciones puntuales sin crear roles adicionales.
 
-**Estado: Aprobada (Sprint 18).**
+**Estado: Completada (Sprint 18, cerrado y aprobado el 21 de octubre de 2026).**
 
 ### HU-USR-06 — Matriz global de permisos "ver como usuario"
 
@@ -180,7 +180,7 @@ Como Administrador
 Quiero consultar la matriz global de permisos de un usuario y el origen de cada permiso  
 Para verificar qué capacidades efectivas tiene y por qué.
 
-**Estado: Aprobada (Sprint 18).**
+**Estado: Completada (Sprint 18, cerrado y aprobado el 21 de octubre de 2026).**
 
 ### HU-USR-07 — Administración de permisos (CRUD)
 
@@ -188,7 +188,7 @@ Como Autoridad de plataforma
 Quiero administrar los permisos del catálogo desde la web, con clave por módulo y reglas de uso  
 Para mantener el catálogo alineado con los módulos sin modificar código.
 
-**Estado: Aprobada (Sprint 18).**
+**Estado: Completada (Sprint 18, cerrado y aprobado el 21 de octubre de 2026).**
 
 ### HU-USR-08 — Usuarios inactivos
 
@@ -209,7 +209,7 @@ Product Owner: restaurar exclusivamente las suspendidas por la desactivación y
 conservar las suspensiones por otros motivos). Ver
 [Sprint 18 — Seguridad de acceso](sprint-18-seguridad-acceso.md).
 
-**Estado: Aprobada (Sprint 18).**
+**Estado: Completada (Sprint 18, cerrado y aprobado el 21 de octubre de 2026).**
 
 ### HU-USR-09 — Endurecimiento de reglas de roles y fixture de demostración
 
@@ -217,7 +217,7 @@ Como Administrador
 Quiero que se endurezcan las reglas de eliminación y edición de roles y contar con un fixture de demostración  
 Para prevenir escaladas y evidenciar el modelo de permisos en la entrega académica.
 
-**Estado: Aprobada (Sprint 18).**
+**Estado: Completada (Sprint 18, cerrado y aprobado el 21 de octubre de 2026).**
 
 # 4. Épica: Residentes y Propietarios
 

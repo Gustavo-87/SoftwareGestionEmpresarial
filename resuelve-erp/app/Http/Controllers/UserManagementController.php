@@ -6,7 +6,10 @@ use App\Application\Contexto\ContextResolver;
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Roles\AsignarRolUsuario;
 use App\Application\Roles\CapacidadAdministrativa;
+use App\Application\Roles\ConsultaMatrizPermisosUsuario;
+use App\Application\Roles\ConsultaPermisosCatalogo;
 use App\Application\Roles\ConsultaRolesGestionables;
+use App\Application\Roles\GestionarPermisosDirectos;
 use App\Application\Roles\RevocarRolUsuario;
 use App\Application\Usuarios\DesactivarUsuarioGlobal;
 use App\Models\AuditLog;
@@ -19,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use RuntimeException;
+use Spatie\Permission\Models\Permission;
 class UserManagementController extends Controller {
     public function __construct(private readonly SincronizarIdentidadContextualUsuario $sincronizarIdentidad) {}
     private function autorizar(): void { abort_unless(app(AutorizacionContextual::class)->tienePermiso(app(ContextoOperativo::class), 'usuarios.gestionar'), 403); }
@@ -48,7 +53,14 @@ class UserManagementController extends Controller {
         $disponibles = app(ConsultaRolesGestionables::class)->asignablesEn($equipoId)
             ->reject(fn ($rol) => $asignados->contains('id', $rol->id))
             ->values();
-        return view('users.edit',compact('user','asignados','disponibles'));
+        $membresia = $this->membresiaContextual($user);
+        $directos = $membresia === null ? collect() : app(GestionarPermisosDirectos::class)->directos($membresia);
+        $catalogoPermisos = collect(app(ConsultaPermisosCatalogo::class)->catalogoAgrupado())
+            ->flatten(1)
+            ->filter(fn ($permiso) => ($permiso->estado ?? 'activo') === 'activo')
+            ->reject(fn ($permiso) => $directos->contains('id', $permiso->id))
+            ->values();
+        return view('users.edit',compact('user','asignados','disponibles','directos','catalogoPermisos'));
     }
 
     public function asignarRol(Request $request, User $user): RedirectResponse {
@@ -77,16 +89,70 @@ class UserManagementController extends Controller {
     }
 
     private function membresiaDelContexto(User $user): MembresiaCopropiedad {
-        $contexto = app(ContextoOperativo::class);
-        $membresia = MembresiaCopropiedad::query()
-            ->where('usuario_id', $user->id)
-            ->where('organizacion_id', $contexto->organizacion->id)
-            ->where('copropiedad_id', $contexto->copropiedad->id)
-            ->first();
+        $membresia = $this->membresiaContextual($user);
         if ($membresia === null) {
             throw ValidationException::withMessages(['usuario' => 'El usuario no tiene Membresía en la Copropiedad activa.']);
         }
         return $membresia;
+    }
+
+    private function membresiaContextual(User $user): ?MembresiaCopropiedad {
+        $contexto = app(ContextoOperativo::class);
+        return MembresiaCopropiedad::query()
+            ->where('usuario_id', $user->id)
+            ->where('organizacion_id', $contexto->organizacion->id)
+            ->where('copropiedad_id', $contexto->copropiedad->id)
+            ->first();
+    }
+
+    /**
+     * Permisos directos del usuario en la Copropiedad activa (HU-USR-05).
+     * La autoridad de plataforma queda exenta y el resto exige
+     * usuarios.gestionar del contexto (403 en backend).
+     */
+    public function asignarPermisoDirecto(Request $request, User $user): RedirectResponse {
+        $data = $request->validate(['permiso' => ['required', 'string', 'max:150']]);
+        try {
+            app(GestionarPermisosDirectos::class)->asignar(
+                $request->user(),
+                app(ContextoOperativo::class),
+                $this->membresiaDelContexto($user),
+                $data['permiso'],
+            );
+        } catch (RuntimeException $e) {
+            abort(422, $e->getMessage());
+        }
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        return back()->with('success', 'Permiso directo asignado correctamente.');
+    }
+
+    public function revocarPermisoDirecto(Request $request, User $user, Permission $permiso): RedirectResponse {
+        try {
+            app(GestionarPermisosDirectos::class)->revocar(
+                $request->user(),
+                app(ContextoOperativo::class),
+                $this->membresiaDelContexto($user),
+                $permiso->name,
+            );
+        } catch (RuntimeException $e) {
+            abort(422, $e->getMessage());
+        }
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        return back()->with('success', 'Permiso directo revocado correctamente.');
+    }
+
+    /**
+     * Matriz global de permisos "ver como usuario" (HU-USR-06). Solo lectura;
+     * la autorización (usuarios.gestionar o autoridad de plataforma) reside en
+     * ConsultaMatrizPermisosUsuario.
+     */
+    public function matriz(Request $request, User $user): View {
+        $matriz = app(ConsultaMatrizPermisosUsuario::class)->para(
+            $request->user(),
+            app(ContextoOperativo::class),
+            $user,
+        );
+        return view('users.permisos', ['user' => $user, 'matriz' => $matriz]);
     }
     public function update(Request $request,User $user): RedirectResponse {
         $this->autorizar();
@@ -246,7 +312,7 @@ class UserManagementController extends Controller {
         $this->autorizar();
         $this->membresiaDelContexto($user);
         try {
-            app(DesactivarUsuarioGlobal::class)->reactivar($user);
+            $resultado = app(DesactivarUsuarioGlobal::class)->reactivar($user);
         } catch (InvalidArgumentException $e) {
             abort(422, $e->getMessage());
         }
@@ -258,7 +324,7 @@ class UserManagementController extends Controller {
             'ip_address' => $request->ip(),
         ]);
         $request->attributes->set('auditoria_especifica_registrada', true);
-        return back()->with('success','Usuario reactivado correctamente.');
+        return back()->with('success', 'Usuario reactivado correctamente. '.DesactivarUsuarioGlobal::resumen($resultado));
     }
 
     /**

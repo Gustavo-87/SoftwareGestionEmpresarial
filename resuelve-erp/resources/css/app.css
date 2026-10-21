@@ -1209,7 +1209,7 @@ td small {
 .panel-page .main-content{flex:1 1 auto;min-height:0}
 .panel-page .operational-context{margin:0 0 8px;padding-bottom:8px;gap:8px}
 .panel-page .operational-context-label{display:none}
-.panel-page .operational-context:not(:has(.contexto-selector-form)){display:none}
+.panel-page .operational-context:not(:has(form)){display:none}
 .panel-page .operational-context select{max-width:100%;font-size:14px}
 .panel-page .contexto-selector-form{min-width:0;max-width:100%}
 
@@ -1303,3 +1303,24 @@ td small {
     .panel-page :is(.stats-bar-value,.modulo-estado-cantidad){grid-column:2;grid-row:1}
     .panel-page :is(.stats-bar-track,.modulo-estado-track){grid-column:1/-1}
 }
+
+/* Sprint 18 — Rol activo (HU-USR-04), permisos directos (HU-USR-05) y
+   matriz "ver como usuario" (HU-USR-06). */
+.rol-activo-selector-form{display:flex;align-items:center;gap:8px;margin:0;min-width:0}
+.rol-activo-label{font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
+.rol-activo-selector-form select{max-width:180px;font-size:12px}
+.navbar-role-indicator{font-size:11px;font-weight:700;color:#bdd0ca;white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.matriz-modulo td{background:var(--paper);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+@media(max-width:520px){.navbar-role-indicator{display:none}.rol-activo-selector-form select{max-width:140px}}
+
+/* Selección de Copropiedad y Rol activo al ingresar (ampliación Sprint 18). */
+.acceso-form{gap:14px}
+.acceso-opciones{display:grid;gap:8px;border:0;padding:0;margin:0;min-width:0}
+.acceso-opcion{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;min-height:44px}
+.acceso-opcion:hover{border-color:#94a3b8}
+.acceso-opcion input{width:18px;height:18px;flex:0 0 18px;accent-color:#1e3a5f}
+.acceso-opcion span{display:grid;gap:2px;min-width:0}
+.acceso-opcion strong{font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.acceso-opcion small{font-size:11px;color:var(--muted)}
+.acceso-opcion:has(input:checked){border-color:#1e3a5f;box-shadow:inset 0 0 0 1px #1e3a5f}
+.acceso-cancelar{margin-top:10px;display:flex;justify-content:center}

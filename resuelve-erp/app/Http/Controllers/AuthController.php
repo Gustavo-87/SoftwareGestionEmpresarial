@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\Roles\GestionarRolActivo;
+use App\Models\MembresiaCopropiedad;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,9 +16,21 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    private const MAX_LOGIN_ATTEMPTS = 5;
+    /** Intentos fallidos permitidos por cuenta antes del bloqueo temporal. */
+    private const INTENTOS_CUENTA = 3;
 
-    private const LOGIN_DECAY_SECONDS = 60;
+    /** Intentos fallidos permitidos por IP: limita intentos distribuidos sin
+     * bloquear a toda una red por un único error. */
+    private const INTENTOS_IP = 20;
+
+    /** Solicitudes de recuperación de contraseña permitidas por cuenta. */
+    private const SOLICITUDES_CONTRASENA = 3;
+
+    /** Solicitudes de recuperación de contraseña permitidas por IP. */
+    private const SOLICITUDES_CONTRASENA_IP = 10;
+
+    /** Duración del bloqueo temporal: 15 minutos. */
+    private const BLOQUEO_SEGUNDOS = 900;
 
     public function create(): View
     {
@@ -35,24 +48,26 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $rateLimitKey = $this->loginRateLimitKey($credentials['email'], $request->ip());
+        $claveCuenta = $this->loginRateLimitKey('cuenta', $credentials['email']);
+        $claveIp = $this->loginRateLimitKey('ip', (string) $request->ip());
 
-        if (RateLimiter::tooManyAttempts($rateLimitKey, self::MAX_LOGIN_ATTEMPTS)) {
-            $retryAfter = RateLimiter::availableIn($rateLimitKey);
+        if (RateLimiter::tooManyAttempts($claveCuenta, self::INTENTOS_CUENTA)
+            || RateLimiter::tooManyAttempts($claveIp, self::INTENTOS_IP)) {
+            $espera = max(RateLimiter::availableIn($claveCuenta), RateLimiter::availableIn($claveIp));
+            $minutos = max(1, (int) ceil($espera / 60));
 
-            throw new ThrottleRequestsException(
-                'Demasiados intentos de inicio de sesión. Inténtalo nuevamente más tarde.',
-                null,
-                [
-                    'Retry-After' => $retryAfter,
-                    'X-RateLimit-Limit' => self::MAX_LOGIN_ATTEMPTS,
-                    'X-RateLimit-Remaining' => 0,
-                ]
-            );
+            // Mensaje idéntico exista o no la cuenta: no revela su existencia.
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => 'Demasiados intentos fallidos de inicio de sesión. '
+                        .'Podrás intentarlo de nuevo en '.$minutos.' '.($minutos === 1 ? 'minuto' : 'minutos').'.',
+                ]);
         }
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            RateLimiter::hit($rateLimitKey, self::LOGIN_DECAY_SECONDS);
+            RateLimiter::hit($claveCuenta, self::BLOQUEO_SEGUNDOS);
+            RateLimiter::hit($claveIp, self::BLOQUEO_SEGUNDOS);
 
             return back()
                 ->withErrors(['email' => 'El correo o la contraseña no son correctos.'])
@@ -70,17 +85,68 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
-        RateLimiter::clear($rateLimitKey);
+        // Los ingresos correctos no acumulan intentos ni quedan limitados.
+        RateLimiter::clear($claveCuenta);
+        RateLimiter::clear($claveIp);
         $request->session()->regenerate();
 
-        $defaultRoute = Auth::user()->esAdministradorSistema() ? route('admin.index') : route('panel');
+        $usuario = Auth::user();
 
-        return redirect()->intended($defaultRoute);
+        // Flujo específico del administrador de plataforma.
+        if ($usuario->esAdministradorSistema()) {
+            return redirect()->intended(route('admin.index'));
+        }
+
+        $membresias = $this->membresiasVigentes($usuario);
+
+        // Flujo específico de usuarios sin membresía operativa.
+        if ($membresias->isEmpty()) {
+            return redirect()->intended(route('panel'));
+        }
+
+        $membresia = $membresias->count() === 1 ? $membresias->first() : null;
+        if ($membresia !== null) {
+            $request->session()->put('copropiedad_activa_id', $membresia->copropiedad_id);
+            $roles = collect(app(GestionarRolActivo::class)->rolesAsignados($usuario, $membresia));
+
+            if ($roles->isEmpty()) {
+                return redirect()->intended(route('panel'));
+            }
+
+            // Con un único Rol autorizado se selecciona automáticamente.
+            if ($roles->count() === 1) {
+                $rol = $roles->first();
+                if ((int) $membresia->rol_activo_id !== (int) $rol->id) {
+                    app(GestionarRolActivo::class)->ejecutar($usuario, $membresia, (int) $rol->id);
+                }
+
+                return redirect()->intended(route('panel'));
+            }
+        }
+
+        // Varios Roles o varias Copropiedades: se exige elegir antes de operar.
+        $request->session()->put('acceso_seleccion_pendiente', true);
+
+        return redirect()->route('acceso.seleccion');
     }
 
-    private function loginRateLimitKey(string $email, string $ip): string
+    private function loginRateLimitKey(string $alcance, string $valor): string
     {
-        return 'login:'.sha1($email.'|'.$ip);
+        return 'login:'.$alcance.':'.sha1($valor);
+    }
+
+    /** @return \Illuminate\Support\Collection<int, MembresiaCopropiedad> */
+    private function membresiasVigentes($usuario): \Illuminate\Support\Collection
+    {
+        return MembresiaCopropiedad::query()
+            ->where('usuario_id', $usuario->id)
+            ->where('estado', 'activa')
+            ->where('vigente_desde', '<=', now())
+            ->where(fn ($query) => $query
+                ->whereNull('vigente_hasta')
+                ->orWhere('vigente_hasta', '>', now()))
+            ->orderBy('id')
+            ->get();
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -99,12 +165,24 @@ class AuthController extends Controller
 
     public function sendResetLink(Request $request): RedirectResponse
     {
+        $request->merge([
+            'email' => Str::lower(trim((string) $request->input('email'))),
+        ]);
         $request->validate(['email' => ['required', 'email']]);
-        $status = Password::sendResetLink($request->only('email'));
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('success', __($status))
-            : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
+        $claveCuenta = 'password.email:cuenta:'.sha1((string) $request->input('email'));
+        $claveIp = 'password.email:ip:'.sha1((string) $request->ip());
+
+        if (! RateLimiter::tooManyAttempts($claveCuenta, self::SOLICITUDES_CONTRASENA)
+            && ! RateLimiter::tooManyAttempts($claveIp, self::SOLICITUDES_CONTRASENA_IP)) {
+            RateLimiter::hit($claveCuenta, self::BLOQUEO_SEGUNDOS);
+            RateLimiter::hit($claveIp, self::BLOQUEO_SEGUNDOS);
+            Password::sendResetLink($request->only('email'));
+        }
+
+        // Respuesta única: no revela si la cuenta existe ni si se superó el
+        // límite de solicitudes.
+        return back()->with('success', 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer la contraseña en unos minutos.');
     }
 
     public function resetPassword(Request $request, string $token): View
@@ -130,8 +208,14 @@ class AuthController extends Controller
             ])->save();
         });
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('success', __($status))
-            : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Tu contraseña fue actualizada correctamente. Ya puedes iniciar sesión.');
+        }
+
+        // Mensaje único: no revela si la cuenta existe. El enlace ya utilizado
+        // o caducado queda inutilizable y se orienta a solicitar uno nuevo.
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'El enlace no es válido o ha caducado. Solicita uno nuevo.']);
     }
 }

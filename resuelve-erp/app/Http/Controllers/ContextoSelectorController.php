@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\Roles\GestionarRolActivo;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,7 @@ final class ContextoSelectorController extends Controller
     {
         $request->validate([
             'copropiedad_id' => ['required', 'integer'],
+            'rol_activo_id' => ['nullable', 'integer'],
         ]);
 
         $usuario = Auth::user();
@@ -33,6 +35,18 @@ final class ContextoSelectorController extends Controller
         }
 
         $request->session()->put('copropiedad_activa_id', $membresia->copropiedad_id);
+
+        // HU-USR-04: el Rol activo se elige y persiste por Membresía/Copropiedad
+        // junto con el cambio de contexto. Sin el campo, la selección de la
+        // Membresía destino se conserva (y se revalida al resolver el contexto).
+        if ($request->has('rol_activo_id')) {
+            $rolId = $request->input('rol_activo_id');
+            app(GestionarRolActivo::class)->ejecutar(
+                $usuario,
+                $membresia,
+                $rolId === null || $rolId === '' ? null : (int) $rolId,
+            );
+        }
 
         return redirect()->route('panel')->with('success', 'Contexto cambiado a '.$membresia->copropiedad->nombre.'.');
     }

@@ -157,7 +157,7 @@ final class UsuarioGlobalController extends Controller
     public function reactivar(Request $request, User $usuario): RedirectResponse
     {
         try {
-            $this->desactivarUsuario->reactivar($usuario);
+            $resultado = $this->desactivarUsuario->reactivar($usuario);
         } catch (\InvalidArgumentException $e) {
             return back()->withErrors(['estado' => $e->getMessage()])->withInput();
         }
@@ -171,6 +171,6 @@ final class UsuarioGlobalController extends Controller
         ]);
 
         return redirect()->route('admin.usuarios-globales.show', $usuario)
-            ->with('success', 'Usuario reactivado correctamente.');
+            ->with('success', 'Usuario reactivado correctamente. '.\App\Application\Usuarios\DesactivarUsuarioGlobal::resumen($resultado));
     }
 }

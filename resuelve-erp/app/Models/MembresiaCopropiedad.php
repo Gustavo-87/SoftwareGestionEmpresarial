@@ -18,6 +18,7 @@ class MembresiaCopropiedad extends Model
         'usuario_id',
         'organizacion_id',
         'copropiedad_id',
+        'rol_activo_id',
         'estado',
         'vigente_desde',
         'vigente_hasta',
@@ -51,6 +52,16 @@ class MembresiaCopropiedad extends Model
     public function creador(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creada_por');
+    }
+
+    /**
+     * Rol activo elegido por el usuario en esta Copropiedad (HU-USR-04).
+     * `null` conserva la compatibilidad por defecto: unión de los roles
+     * asignados.
+     */
+    public function rolActivo(): BelongsTo
+    {
+        return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'rol_activo_id');
     }
 
     public function roles(): BelongsToMany

@@ -56,6 +56,19 @@ final class SincronizarPermisosRol
             throw ValidationException::withMessages(['permisos' => 'Permisos desconocidos: '.implode(', ', $desconocidas).'.']);
         }
 
+        // HU-USR-07: un permiso desactivado no admite nuevas asignaciones.
+        $inactivas = Permission::query()
+            ->where('guard_name', AutorizacionGestionRoles::GUARD)
+            ->whereIn('name', $claves)
+            ->where('estado', '!=', GestionarCatalogoPermisos::ESTADO_ACTIVO)
+            ->pluck('name')
+            ->all();
+        if ($inactivas !== []) {
+            throw ValidationException::withMessages([
+                'permisos' => 'Permisos desactivados que no admiten nuevas asignaciones: '.implode(', ', $inactivas).'.',
+            ]);
+        }
+
         $this->autorizacion->autorizarPermisosOtorgables($operador, $contexto, $claves);
 
         $actuales = $rol->permissions()->pluck('name')->all();

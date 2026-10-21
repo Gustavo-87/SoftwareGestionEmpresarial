@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', AuditMutations::class);
         $middleware->alias([
             'admin.sistema' => \App\Http\Middleware\EsAdministradorSistema::class,
+            'acceso.pendiente' => \App\Http\Middleware\SeleccionAccesoPendiente::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

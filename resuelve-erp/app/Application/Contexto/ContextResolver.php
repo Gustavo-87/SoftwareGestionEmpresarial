@@ -145,12 +145,39 @@ final class ContextResolver
         // Fuente efectiva desde el Bloque 2B: RBAC de Spatie por Copropiedad.
         // La Membresía vigente sigue siendo requisito obligatorio: sin ella no
         // se resuelven roles ni permisos, aunque existan asignaciones en Spatie.
-        // Los permisos se derivan de los roles del equipo activo (equivalente al
-        // modelo legado); los permisos directos de Spatie quedan reservados.
+        // HU-USR-04: con Rol activo seleccionado los permisos efectivos son los
+        // del Rol activo más los permisos directos; sin selección se conserva la
+        // unión de los Roles asignados (compatibilidad por defecto). HU-USR-05:
+        // los permisos directos de Spatie se suman en ambos casos. Un permiso
+        // desactivado nunca concede acceso (HU-USR-07).
         $roles = [];
+        $rolesAsignados = [];
         $permisos = [];
+        $rolActivoClave = null;
         if ($membresia !== null && $usuario !== null) {
-            foreach ($usuario->roles()->with('permissions')->get() as $rolSpatie) {
+            $rolesSpatie = $usuario->roles()->with('permissions')->get();
+            foreach ($rolesSpatie as $rolSpatie) {
+                $rolesAsignados[] = new Rol([
+                    'clave' => $rolSpatie->name,
+                    'nombre' => $rolSpatie->name,
+                    'ambito_aplicable' => 'copropiedad',
+                    'estado' => 'activo',
+                ]);
+            }
+
+            $rolActivo = null;
+            if ($membresia->rol_activo_id !== null) {
+                $rolActivo = $rolesSpatie->first(
+                    fn ($rolSpatie) => (int) $rolSpatie->id === (int) $membresia->rol_activo_id
+                );
+                if ($rolActivo === null) {
+                    // Revalidación de ADR-013: la selección caducó (el Rol ya no
+                    // está asignado) y la Membresía recupera la unión de Roles.
+                    $membresia->forceFill(['rol_activo_id' => null])->saveQuietly();
+                }
+            }
+
+            foreach ($rolActivo !== null ? [$rolActivo] : $rolesSpatie as $rolSpatie) {
                 $roles[] = new Rol([
                     'clave' => $rolSpatie->name,
                     'nombre' => $rolSpatie->name,
@@ -159,6 +186,9 @@ final class ContextResolver
                 ]);
 
                 foreach ($rolSpatie->permissions as $permisoSpatie) {
+                    if (($permisoSpatie->estado ?? 'activo') !== 'activo') {
+                        continue;
+                    }
                     $clave = (string) $permisoSpatie->name;
                     if (isset($permisos[$clave])) {
                         continue;
@@ -173,6 +203,27 @@ final class ContextResolver
                     ]);
                 }
             }
+
+            if ($rolActivo !== null) {
+                $rolActivoClave = $rolActivo->name;
+            }
+
+            // Permisos directos del Usuario (model_has_permissions, equipo =
+            // Copropiedad activa). Solo conceden acceso los activos.
+            foreach ($usuario->permissions()->where('permissions.estado', 'activo')->get() as $permisoSpatie) {
+                $clave = (string) $permisoSpatie->name;
+                if (isset($permisos[$clave])) {
+                    continue;
+                }
+                [$modulo, $accion] = array_pad(explode('.', $clave, 2), 2, 'usar');
+                $permisos[$clave] = new Permiso([
+                    'clave' => $clave,
+                    'modulo' => $modulo,
+                    'accion' => $accion,
+                    'ambito_aplicable' => 'copropiedad',
+                    'estado' => 'activo',
+                ]);
+            }
             $permisos = array_values($permisos);
         }
 
@@ -184,6 +235,8 @@ final class ContextResolver
             $roles,
             $permisos,
             (string) Str::uuid(),
+            $rolActivoClave,
+            $rolesAsignados,
         );
     }
 

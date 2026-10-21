@@ -21,7 +21,9 @@ final class CapacidadAdministrativa
 
     /**
      * Miembros vigentes que conservarían la capacidad tras retirar un Rol de
-     * la Membresía objetivo y/o excluir por completo un Usuario.
+     * la Membresía objetivo, excluir por completo un Usuario o revocar su
+     * permiso directo (HU-USR-05). Evalúa la capacidad efectiva: con Rol
+     * activo seleccionado solo cuenta ese Rol más los permisos directos.
      *
      * @param  Collection<int, MembresiaCopropiedad>  $membresias
      */
@@ -30,6 +32,7 @@ final class CapacidadAdministrativa
         MembresiaCopropiedad $objetivo,
         ?SpatieRole $rolRetirado = null,
         ?int $usuarioExcluido = null,
+        ?string $permisoDirectoRevocado = null,
     ): int {
         setPermissionsTeamId((int) $objetivo->copropiedad_id);
 
@@ -51,7 +54,28 @@ final class CapacidadAdministrativa
             if ($rolRetirado !== null && $membresia->id === $objetivo->id) {
                 $roles = $roles->reject(fn (SpatieRole $rol) => (int) $rol->id === (int) $rolRetirado->id);
             }
-            if ($roles->contains(fn (SpatieRole $rol) => $rol->permissions->contains('name', self::PERMISO))) {
+            if ($membresia->rol_activo_id !== null) {
+                $rolActivo = $roles->first(fn (SpatieRole $rol) => (int) $rol->id === (int) $membresia->rol_activo_id);
+                if ($rolActivo !== null) {
+                    $roles = collect([$rolActivo]);
+                }
+            }
+            $tiene = $roles->contains(fn (SpatieRole $rol) => $rol->permissions->contains(
+                fn ($permiso) => $permiso->name === self::PERMISO && ($permiso->estado ?? 'activo') === 'activo'
+            ));
+            if (! $tiene) {
+                $directo = $usuario->permissions()
+                    ->where('permissions.name', self::PERMISO)
+                    ->where('permissions.estado', 'activo')
+                    ->lockForUpdate()
+                    ->exists();
+                if ($permisoDirectoRevocado === self::PERMISO
+                    && (int) $membresia->usuario_id === (int) $objetivo->usuario_id) {
+                    $directo = false;
+                }
+                $tiene = $directo;
+            }
+            if ($tiene) {
                 $capacidades++;
             }
         }

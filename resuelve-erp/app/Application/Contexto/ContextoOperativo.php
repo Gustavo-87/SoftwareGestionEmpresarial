@@ -14,6 +14,7 @@ final readonly class ContextoOperativo
     /**
      * @param  list<Rol>  $roles
      * @param  list<Permiso>  $permisos
+     * @param  list<Rol>  $rolesAsignados
      */
     public function __construct(
         public ?User $usuario,
@@ -23,6 +24,8 @@ final readonly class ContextoOperativo
         public array $roles,
         public array $permisos,
         public string $identificadorCorrelacion,
+        public ?string $rolActivoClave = null,
+        public array $rolesAsignados = [],
     ) {}
 
     public function tieneMembresiaContextual(): bool
@@ -30,10 +33,21 @@ final readonly class ContextoOperativo
         return $this->membresiaCopropiedad !== null;
     }
 
+    public function tieneRolActivo(): bool
+    {
+        return $this->rolActivoClave !== null;
+    }
+
     /** @return list<string> */
     public function clavesRoles(): array
     {
         return array_values(array_map(fn (Rol $rol) => $rol->clave, $this->roles));
+    }
+
+    /** Claves de todos los Roles asignados, con o sin Rol activo seleccionado. */
+    public function clavesRolesAsignados(): array
+    {
+        return array_values(array_map(fn (Rol $rol) => $rol->clave, $this->rolesAsignados));
     }
 
     /** @return list<string> */

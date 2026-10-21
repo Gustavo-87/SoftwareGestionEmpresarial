@@ -25,6 +25,7 @@
                 ['id' => 'access', 'label' => 'Usuarios y acceso', 'icon' => 'users', 'items' => [
                     ['label' => 'Usuarios', 'route' => 'admin.usuarios-globales.index', 'match' => 'admin.usuarios-globales.*', 'icon' => 'users'],
                     ['label' => 'Roles y permisos', 'route' => 'roles.index', 'match' => 'roles.*', 'icon' => 'shield'],
+                    ['label' => 'Catálogo de permisos', 'route' => 'admin.permisos.index', 'match' => 'admin.permisos.*', 'icon' => 'shield'],
                 ]],
                 ['id' => 'administration', 'label' => 'Administración', 'icon' => 'settings', 'items' => [
                     ['label' => 'Auditoría', 'route' => 'management.audit', 'match' => 'management.audit', 'icon' => 'audit'],

@@ -268,6 +268,97 @@ eliminación requiere justificación explícita.
 (HU-USR-08) usará `usuario.desactivar`/`usuario.activar` (convención registrada
 en [ADR-013](../10-adr/ADR-013-rol-activo-segregacion-funciones.md)).
 
+### 7.4.1 Reactivación de Membresías suspendidas (decisión del Product Owner, 21 de octubre de 2026)
+
+Regla de reactivación de Membresías, por caso de suspensión:
+
+1. **Suspendida manualmente** (Administración → Membresías → Suspender, motivo
+   libre): puede reactivarse desde la propia ficha de la Membresía. La
+   suspensión manual corta `vigente_hasta`; al reactivar se conserva la
+   vigencia si sigue siendo válida y, si fue cortada, se restituye la vigencia
+   previa conocida por la auditoría (`membresia.suspend` → `before`) o se
+   reabre de forma indefinida.
+2. **Suspendida por desactivación de la cuenta** (motivo canónico
+   `desactivacion_cuenta`): se restaura al reactivar la cuenta (regla HU-USR-08)
+   y también puede reactivarse desde la ficha de la Membresía con el usuario ya
+   activo. Su vigencia no se alteró al suspender y se conserva tal cual.
+3. **Finalizada o vencida**: nunca se convierte automáticamente en activa. La
+   ficha explica el motivo y no ofrece la acción.
+
+La reactivación exige autoridad de plataforma, usuario activo, coherencia de
+contexto (la Membresía pertenece a la Organización de su Copropiedad),
+Organización y Copropiedad activas y vigencia no finalizada. Conserva los
+Roles asignados, limpia `motivo_terminacion` y se audita como
+`membresia.reactivate`. Cuando la operación se bloquea, el motivo concreto se
+muestra en la interfaz. La reactivación de una cuenta **no** restaura
+suspensiones manuales ni convierte finalizadas o vencidas en activas; su
+resultado informa cuántas Membresías se restauraron y por qué se conservaron
+las demás.
+
+## 7.5 Rol activo con segregación de funciones (HU-USR-04)
+
+Los permisos efectivos de un usuario en la Copropiedad activa son los permisos
+del **Rol activo** más sus **permisos directos**. Sin selección explícita se
+conserva la compatibilidad por defecto: la unión de los Roles asignados más los
+permisos directos. La selección persiste en
+`membresias_copropiedad.rol_activo_id` (una por Membresía/Copropiedad), se
+elige desde `/cambiar-contexto` y se revalida al resolver el contexto: si el
+Rol ya no está asignado, la selección se descarta y la Membresía recupera la
+unión de Roles. El usuario solo puede seleccionar su propio Rol activo; el rol
+efectivo se indica en la navegación.
+
+**Al inicio de sesión (ampliación del Sprint 18):** después de validar las
+credenciales se resuelven la Copropiedad y los Roles autorizados. Con varias
+Copropiedades se selecciona primero una (Paso 1 de 2); con varios Roles se
+exige elegir uno antes de acceder a la operación (Paso 2 de 2); con un único
+Rol se selecciona automáticamente. El middleware `acceso.pendiente` impide
+operar omitiendo la selección. El administrador de plataforma y los usuarios
+sin membresía operativa conservan sus flujos específicos.
+
+## 7.6 Permisos directos por usuario (HU-USR-05)
+
+Se administran sobre `model_has_permissions` con `team` igual a la Copropiedad
+activa (alta, baja y listado) desde la edición del usuario. Aplican la misma
+anti-escalada que los Roles: ningún operador concede permisos que no posee y la
+autoridad de plataforma queda exenta. Cada mutación se audita
+(`usuario.permiso_directo.asignar`/`.revocar`) y exige `usuarios.gestionar` del
+contexto (403 en backend). El permiso `usuarios.gestionar` no puede revocarse
+si deja a la Copropiedad sin ningún miembro vigente que conserve la capacidad
+administrativa efectiva (`CapacidadAdministrativa`, que contabiliza Roles y
+permisos directos conforme al Rol activo). Un permiso desactivado no admite
+nuevas asignaciones.
+
+## 7.7 Matriz global de permisos "ver como usuario" (HU-USR-06)
+
+`GET /usuarios/{user}/permisos` presenta, agrupada por módulo, la matriz del
+catálogo con el origen de cada permiso: `rol activo`, `rol {nombre}` o
+`directo`. Respeta la Membresía vigente del usuario consultado, la Copropiedad
+activa y su Rol activo si está seleccionado (con Rol activo solo son efectivos
+el Rol activo y los permisos directos). Es de solo lectura, requiere
+`usuarios.gestionar` o autoridad de plataforma y responde 403 en backend. La
+agrupación reutiliza la consulta del catálogo de `ConsultaPermisosCatalogo`
+(`catalogoAgrupado()`), la misma que expone `porModulo()` con su autorización
+de `roles.gestionar`.
+
+## 7.8 Catálogo de permisos (HU-USR-07)
+
+Solo la autoridad de plataforma administra el catálogo desde
+`admin.permisos.*`. El alta exige clave `modulo.accion` (minúsculas, unicidad),
+nombre, descripción y módulo coherente con el prefijo de la clave; el Rol base
+`admin` hereda los permisos nuevos (invariante del catálogo base,
+`CatalogoPermisosBase`). La eliminación es **lógica y auditada** (decisión del
+Product Owner, 20 de octubre de 2026):
+
+1. los permisos base del catálogo inicial están protegidos contra eliminación;
+2. un permiso personalizado no puede desactivarse mientras esté asignado a
+   otros Roles o directamente a usuarios, y el mensaje identifica su uso;
+3. la asignación automática al Rol base `admin` no cuenta como uso;
+4. si únicamente conserva esa asignación, se desactiva y se retira en la misma
+   transacción;
+5. el registro y su auditoría (`permiso.crear`, `permiso.desactivar`,
+   `permiso.activar`) se conservan: la fila nunca se borra;
+6. un permiso inactivo no concede acceso ni admite nuevas asignaciones.
+
 ## 8. Protección de rutas y recursos
 
 ### 8.1 Invitados

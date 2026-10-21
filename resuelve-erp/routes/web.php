@@ -38,7 +38,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/restablecer-contrasena', [AuthController::class, 'updatePassword'])->name('password.update');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'acceso.pendiente'])->group(function () {
+    Route::get('/seleccionar-acceso', [\App\Http\Controllers\AccesoSeleccionController::class, 'index'])->name('acceso.seleccion');
+    Route::post('/seleccionar-acceso/copropiedad', [\App\Http\Controllers\AccesoSeleccionController::class, 'copropiedad'])->name('acceso.copropiedad');
+    Route::post('/seleccionar-acceso/rol', [\App\Http\Controllers\AccesoSeleccionController::class, 'rol'])->name('acceso.rol');
     Route::get('/panel', [PqrController::class, 'panel'])->name('panel');
     Route::post('/cerrar-sesion', [AuthController::class, 'destroy'])->name('logout');
     Route::post('/cambiar-contexto', [ContextoSelectorController::class, 'cambiar'])->name('contexto.cambiar');
@@ -89,6 +92,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/usuarios/{user}/rol', [UserManagementController::class, 'updateRole'])->name('users.role.update');
     Route::patch('/usuarios/{user}/desactivar', [UserManagementController::class, 'desactivar'])->name('users.desactivar');
     Route::patch('/usuarios/{user}/reactivar', [UserManagementController::class, 'reactivar'])->name('users.reactivar');
+    Route::get('/usuarios/{user}/permisos', [UserManagementController::class, 'matriz'])->name('users.permisos');
+    Route::post('/usuarios/{user}/permisos-directos', [UserManagementController::class, 'asignarPermisoDirecto'])->name('users.permisos-directos.store');
+    Route::delete('/usuarios/{user}/permisos-directos/{permiso}', [UserManagementController::class, 'revocarPermisoDirecto'])->name('users.permisos-directos.destroy');
     Route::post('/usuarios/{user}/roles', [UserManagementController::class, 'asignarRol'])->name('users.roles.store');
     Route::delete('/usuarios/{user}/roles/{rol}', [UserManagementController::class, 'revocarRol'])->name('users.roles.destroy');
     Route::get('/informes/pqrs.csv', [ReportController::class, 'csv'])->name('reports.csv');
@@ -116,6 +122,7 @@ Route::middleware('auth')->group(function () {
         Route::post('membresias/{membresia}/suspender', [MembresiaController::class, 'suspender'])->name('membresias.suspend');
         Route::patch('membresias/{membresia}/suspender', [MembresiaController::class, 'suspender'])->name('membresias.suspend');
         Route::patch('membresias/{membresia}/finalizar', [MembresiaController::class, 'finalizar'])->name('membresias.finalize');
+        Route::patch('membresias/{membresia}/reactivar', [MembresiaController::class, 'reactivar'])->name('membresias.reactivate');
         Route::post('membresias/{membresia}/roles', [MembresiaRolController::class, 'store'])->name('membresias.roles.store');
         Route::delete('membresias/{membresia}/roles/{rol}', [MembresiaRolController::class, 'destroy'])->name('membresias.roles.destroy');
         Route::resource('organizaciones', OrganizacionController::class)->parameters(['organizaciones' => 'organizacion'])->except(['destroy']);
@@ -133,6 +140,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('usuarios-globales', UsuarioGlobalController::class)->parameters(['usuarios-globales' => 'usuario'])->except(['destroy']);
         Route::patch('usuarios-globales/{usuario}/desactivar', [UsuarioGlobalController::class, 'desactivar'])->name('usuarios-globales.desactivar');
         Route::patch('usuarios-globales/{usuario}/reactivar', [UsuarioGlobalController::class, 'reactivar'])->name('usuarios-globales.reactivar');
+        Route::get('permisos', [\App\Http\Controllers\Admin\PermisoCatalogoController::class, 'index'])->name('permisos.index');
+        Route::get('permisos/crear', [\App\Http\Controllers\Admin\PermisoCatalogoController::class, 'create'])->name('permisos.create');
+        Route::post('permisos', [\App\Http\Controllers\Admin\PermisoCatalogoController::class, 'store'])->name('permisos.store');
+        Route::patch('permisos/{permiso}/desactivar', [\App\Http\Controllers\Admin\PermisoCatalogoController::class, 'desactivar'])->name('permisos.desactivar');
+        Route::patch('permisos/{permiso}/reactivar', [\App\Http\Controllers\Admin\PermisoCatalogoController::class, 'reactivar'])->name('permisos.reactivar');
     });
 });
 // Agregar rutas de copropiedades

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Application\Membresias\CrearMembresia;
 use App\Application\Membresias\EditarMembresia;
+use App\Application\Membresias\ReactivarMembresia;
 use App\Application\Membresias\SuspenderMembresia;
 use App\Application\Membresias\FinalizarMembresia;
 use App\Models\MembresiaCopropiedad;
@@ -22,6 +23,7 @@ final class MembresiaController extends Controller
         private readonly CrearMembresia $crearMembresia,
         private readonly EditarMembresia $editarMembresia,
         private readonly SuspenderMembresia $suspenderMembresia,
+        private readonly ReactivarMembresia $reactivarMembresia,
         private readonly FinalizarMembresia $finalizarMembresia,
     ) {}
 
@@ -169,6 +171,54 @@ final class MembresiaController extends Controller
 
         return redirect()->route('admin.membresias.show', $membresia)
             ->with('success', 'Membresía suspendida correctamente.');
+    }
+
+    public function reactivar(Request $request, MembresiaCopropiedad $membresia): RedirectResponse
+    {
+        $before = $membresia->toArray();
+        $vigenciaAnterior = $this->vigenciaAnterior($membresia);
+
+        try {
+            $this->reactivarMembresia->ejecutar($membresia, $vigenciaAnterior);
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['estado' => $e->getMessage()])->withInput();
+        }
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'membresia.reactivate',
+            'auditable_type' => MembresiaCopropiedad::class,
+            'auditable_id' => $membresia->id,
+            'ip_address' => $request->ip(),
+            'metadata' => [
+                'before' => $before,
+                'after' => $membresia->fresh()->toArray(),
+                'motivo_suspension' => $before['motivo_terminacion'] ?? null,
+                'vigencia_restaurada' => $vigenciaAnterior,
+            ],
+        ]);
+
+        return redirect()->route('admin.membresias.show', $membresia)
+            ->with('success', 'Membresía reactivada correctamente.');
+    }
+
+    /**
+     * `vigente_hasta` previo a la suspensión, según la auditoría de
+     * `membresia.suspend` (before). Permite restaurar la vigencia que la
+     * suspensión manual cortó al aplicarse.
+     */
+    private function vigenciaAnterior(MembresiaCopropiedad $membresia): ?string
+    {
+        $auditoria = AuditLog::query()
+            ->where('action', 'membresia.suspend')
+            ->where('auditable_type', MembresiaCopropiedad::class)
+            ->where('auditable_id', $membresia->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $antes = $auditoria?->metadata['before']['vigente_hasta'] ?? null;
+
+        return is_string($antes) && $antes !== '' ? $antes : null;
     }
 
     public function finalizar(Request $request, MembresiaCopropiedad $membresia): RedirectResponse

@@ -80,5 +80,14 @@ El alcance, los criterios de aceptación y la adaptación de la guía al proyect
 `usuarios.gestionar`" y rutas en español) se documentan en
 [Sprint 18 — Seguridad de acceso](04-desarrollo-agil/sprint-18-seguridad-acceso.md)
 y en [ADR-013](10-adr/ADR-013-rol-activo-segregacion-funciones.md). Estas
-capacidades están aprobadas y en implementación (Sprint 18, en curso); no se
-presentan como implementadas.
+capacidades fueron implementadas y verificadas el 20 de octubre de 2026
+(HU-USR-04 a HU-USR-09, Sprint 18): rol activo persistido por
+Membresía/Copropiedad y revalidado, permisos directos con anti-escalada y
+auditoría, matriz global "ver como usuario" con origen de cada permiso,
+catálogo de permisos con eliminación lógica protegida, ciclo de vida de
+cuentas por desactivación y reglas de roles endurecidas con fixture de
+demostración (`DemoRbacFixtureSeeder`). La verificación registró 88 pruebas
+del sprint y una suite completa de 699 pruebas sin fallos; el cierre formal
+del Sprint 18 fue aprobado por el Product Owner el 21 de octubre de 2026 (ver
+[Sprint 18](04-desarrollo-agil/sprint-18-seguridad-acceso.md)), con la entrega
+real de la recuperación de contraseña pendiente de un proveedor de correo.

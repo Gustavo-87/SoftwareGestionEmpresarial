@@ -108,6 +108,14 @@ class AppServiceProvider extends ServiceProvider
                         'organizacion' => $contexto->organizacion,
                         'copropiedad' => $contexto->copropiedad,
                         'roles' => $contexto->clavesRoles(),
+                        'rolActivo' => $contexto->rolActivoClave,
+                        'rolesAsignados' => $contexto->clavesRolesAsignados(),
+                        'rolActivoOpciones' => $contexto->membresiaCopropiedad === null
+                            ? []
+                            : collect(app(\App\Application\Roles\GestionarRolActivo::class)->rolesAsignados(Auth::user(), $contexto->membresiaCopropiedad))
+                                ->map(fn ($rol) => ['id' => (int) $rol->id, 'nombre' => $rol->name])
+                                ->values()
+                                ->all(),
                     ];
                     if ($navegacion['notificaciones']) {
                         $contador = app(ConsultaNotificacionesContextuales::class)->contarNoLeidas(

@@ -100,6 +100,19 @@
                             </select>
                         </form>
                     @endif
+                    @if(($navegacion['rolActivoOpciones'] ?? []) !== [] && (count($navegacion['rolActivoOpciones'] ?? []) > 1 || ($navegacion['rolActivo'] ?? null) !== null))
+                        <form method="POST" action="{{ route('contexto.cambiar') }}" class="rol-activo-selector-form">
+                            @csrf
+                            <input type="hidden" name="copropiedad_id" value="{{ $navegacion['copropiedad']->id ?? '' }}">
+                            <label class="rol-activo-label" for="rol_activo_selector">Rol activo</label>
+                            <select id="rol_activo_selector" name="rol_activo_id" aria-label="Cambiar rol activo" onchange="this.form.submit()">
+                                <option value="">Todos los roles</option>
+                                @foreach($navegacion['rolActivoOpciones'] as $opcion)
+                                    <option value="{{ $opcion['id'] }}" {{ ($navegacion['rolActivo'] ?? null) === $opcion['nombre'] ? 'selected' : '' }}>{{ $opcion['nombre'] }}</option>
+                                @endforeach
+                            </select>
+                        </form>
+                    @endif
                 </div>
                 @if(session('success'))
                     <x-notice variant="success">{{ session('success') }}</x-notice>

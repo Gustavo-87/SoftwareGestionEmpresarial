@@ -12,7 +12,7 @@
 <div class="field"><label for="edit-tower">Torre o bloque</label><input id="edit-tower" name="tower" value="{{ old('tower',$user->tower) }}"></div><div class="field"><label for="edit-unit">Apartamento o unidad</label><input id="edit-unit" name="unit" value="{{ old('unit',$user->unit) }}"></div>
 <div class="field"><label for="edit-password">Nueva contraseña</label><input id="edit-password" name="password" type="password" minlength="8" autocomplete="new-password">@error('password')<span class="field-error">{{ $message }}</span>@enderror</div><div class="field"><label for="edit-password-confirmation">Confirmar nueva contraseña</label><input id="edit-password-confirmation" name="password_confirmation" type="password" minlength="8" autocomplete="new-password"></div>
 </div><div class="form-actions"><div><a class="button ghost" href="{{ route('users.index') }}">Cancelar</a><button class="button primary" type="submit">Guardar cambios</button></div></div></form></section>
-<section class="form-panel"><div class="form-intro"><span class="form-step">02</span><div><h2>Roles en esta Copropiedad</h2><p>Roles efectivos del usuario en la Copropiedad activa. Solo puedes conceder roles cuyos permisos posees.</p></div></div>
+<section class="form-panel"><div class="form-intro"><span class="form-step">02</span><div><h2>Roles de la Copropiedad activa</h2><p>Roles efectivos del usuario en la Copropiedad activa. Puedes agregar y revocar roles individualmente; solo puedes conceder roles cuyos permisos posees.</p></div></div>
 <div class="form-grid">
     <div class="field"><label for="asignar-rol">Asignar rol</label>
         <form method="POST" action="{{ route('users.roles.store', $user) }}">@csrf
@@ -40,5 +40,37 @@
         @error('rol')<span class="field-error">{{ $message }}</span>@enderror
     </div>
 </div>
+</section>
+
+<section class="form-panel"><div class="form-intro"><span class="form-step">03</span><div><h2>Permisos directos en esta Copropiedad</h2><p>Excepciones puntuales sobre el catálogo, con anti-escalada: solo puedes conceder permisos que posees. El origen «directo» queda visible en la matriz.</p></div></div>
+
+<div class="form-grid">
+    <div class="field"><label for="asignar-permiso">Asignar permiso directo</label>
+        <form method="POST" action="{{ route('users.permisos-directos.store', $user) }}">@csrf
+            <select id="asignar-permiso" name="permiso" required>
+                <option value="">Selecciona un permiso</option>
+                @foreach($catalogoPermisos as $permisoCatalogo)
+                <option value="{{ $permisoCatalogo->name }}" @selected(old('permiso') == $permisoCatalogo->name)>{{ $permisoCatalogo->name }}{{ $permisoCatalogo->descripcion ? ' — '.$permisoCatalogo->descripcion : '' }}</option>
+                @endforeach
+            </select>
+            @error('permiso')<span class="field-error">{{ $message }}</span>@enderror
+            @error('usuario')<span class="field-error">{{ $message }}</span>@enderror
+            <div class="form-actions"><button class="button primary" type="submit">Asignar permiso</button></div>
+        </form>
+    </div>
+    <div class="field"><span class="field-label">Permisos directos asignados</span>
+        <div class="role-guide">
+            @forelse($directos as $permisoDirecto)
+            <span><b>{{ $permisoDirecto->name }}</b> (directo)
+                <form method="POST" action="{{ route('users.permisos-directos.destroy', [$user, $permisoDirecto->id]) }}" data-confirm="Revocar permiso directo" data-confirm-message="El usuario perderá este permiso directo en la Copropiedad activa.">@csrf @method('DELETE')<button class="button subtle danger" type="submit">Revocar</button></form>
+            </span>
+            @empty
+            <span>Sin permisos directos en esta Copropiedad.</span>
+            @endforelse
+        </div>
+        <div class="form-actions"><a class="button ghost" href="{{ route('users.permisos', $user) }}">Ver matriz de permisos</a></div>
+    </div>
+</div>
+
 </section>
 @endsection

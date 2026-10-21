@@ -142,6 +142,31 @@
         <div class="metadata-card">
             <h2>Acciones</h2>
 
+            @error('estado')
+                <p class="field-error" style="margin:0 0 12px" role="alert">{{ $message }}</p>
+            @enderror
+
+            @if($membresia->estado === 'suspendida')
+                <div style="margin-bottom:18px">
+                    <form method="POST" action="{{ route('admin.membresias.reactivate', $membresia) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="button primary"
+                                onclick="return confirm('¿Está seguro de reactivar esta membresía? Se conservarán sus roles asignados.')">
+                            ▶ Reactivar membresía
+                        </button>
+                        <p class="field-hint" style="margin:8px 0 0">
+                            @if($membresia->motivo_terminacion === \App\Application\Usuarios\DesactivarUsuarioGlobal::MOTIVO_SUSPENSION)
+                                Suspendida por desactivación de la cuenta: se restaura su vigencia anterior.
+                            @else
+                                Suspendida manualmente: se restaura la vigencia anterior o se reabre de forma indefinida.
+                            @endif
+                        </p>
+                    </form>
+                </div>
+                <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+            @endif
+
             @if($membresia->estado === 'activa')
                 <div style="margin-top:18px">
                     <form method="POST" action="{{ route('admin.membresias.suspend', $membresia) }}">
@@ -179,7 +204,14 @@
                 </div>
             @else
                 <div class="empty-state" style="padding:14px">
-                    <p>No hay acciones disponibles para esta membresía.</p>
+                    <p>
+                        @if($membresia->estado === 'finalizada')
+                            La membresía está finalizada{{ $membresia->motivo_terminacion ? ' (motivo: '.$membresia->motivo_terminacion.')' : '' }}.
+                            El diseño aprobado no permite reactivar membresías finalizadas.
+                        @else
+                            No hay acciones disponibles para esta membresía.
+                        @endif
+                    </p>
                 </div>
             @endif
         </div>

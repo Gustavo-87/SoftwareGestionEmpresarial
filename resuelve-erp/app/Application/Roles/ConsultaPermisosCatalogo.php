@@ -20,6 +20,18 @@ final class ConsultaPermisosCatalogo
     {
         $this->autorizacion->autorizarGestion($operador, $contexto);
 
+        return $this->catalogoAgrupado();
+    }
+
+    /**
+     * Misma agrupación por módulo sin autorizar la gestión de Roles: los
+     * consumidores con otra capacidad (por ejemplo la matriz "ver como
+     * usuario", HU-USR-06) autorizan antes de reutilizar esta consulta.
+     *
+     * @return array<string, list<Permission>>
+     */
+    public function catalogoAgrupado(): array
+    {
         return Permission::query()
             ->where('guard_name', AutorizacionGestionRoles::GUARD)
             ->orderBy('name')

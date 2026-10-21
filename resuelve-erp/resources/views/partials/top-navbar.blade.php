@@ -39,6 +39,11 @@
         </nav>
         <div class="navbar-actions">
             @if($showNotifications ?? false)<a class="notification-button" href="{{ route('notifications.index') }}" aria-label="Notificaciones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 6-3 7-3 9h18c0-2-3-3-3-9ZM10 21h4"/></svg>@if($unreadNotificationsCount ?? 0)<b>{{ $unreadNotificationsCount }}</b>@endif</a>@endif
+            @if(($navegacion['rolActivo'] ?? null) !== null || ($navegacion['roles'] ?? []) !== [])
+                <span class="navbar-role-indicator" title="Rol efectivo en la Copropiedad activa">
+                    {{ ($navegacion['rolActivo'] ?? null) !== null ? 'Rol activo: '.$navegacion['rolActivo'] : 'Roles: '.implode(', ', $navegacion['roles'] ?? []) }}
+                </span>
+            @endif
             <button class="theme-toggle" id="themeToggle" type="button" aria-label="Activar modo oscuro"><span class="sun">☀</span><span class="moon">☾</span></button>
             <span class="avatar navbar-avatar" title="{{ auth()->user()->name }}">{{ Str::upper(Str::substr(auth()->user()->name, 0, 2)) }}</span>
             <form method="POST" action="{{ route('logout') }}" class="logout-form">@csrf<button class="logout-text" type="submit">Cerrar sesión</button></form>

@@ -143,9 +143,13 @@ class RolesAsignacionTest extends TestCase
         // Único titular (vía caso de uso con autoridad de plataforma).
         app(\App\Application\Roles\AsignarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolCapacidad->id);
 
-        // Autorrevocación del último titular: bloqueada.
+        // Con varios Roles se exige seleccionar el Rol activo antes de operar.
         $this->actingAsContextual($target)
-            ->delete(route('users.roles.destroy', [$target, $rolCapacidad->id]))
+            ->post(route('acceso.rol'), ['rol_id' => $rolCapacidad->id])
+            ->assertRedirect();
+
+        // Autorrevocación del último titular: bloqueada.
+        $this->delete(route('users.roles.destroy', [$target, $rolCapacidad->id]))
             ->assertSessionHasErrors('rol');
 
         // Con dos titulares, revocar uno es válido.
@@ -178,6 +182,33 @@ class RolesAsignacionTest extends TestCase
         $this->actingAsContextual($sinPermiso);
         $this->post(route('users.roles.store', $target), ['rol_id' => $rol->id])->assertForbidden();
         $this->delete(route('users.roles.destroy', [$target, $rol->id]))->assertForbidden();
+    }
+
+    public function test_usuarios_editar_muestra_roles_asignados_y_controles_individuales(): void
+    {
+        [$organizacion, $copropiedad] = $this->createInstitutionalContext();
+        $plataforma = User::factory()->create(['es_administrador_sistema' => true]);
+        Permission::findOrCreate('pqrs.listar', 'web');
+        $rolExtra = app(CrearRol::class)->ejecutar($plataforma, null, [
+            'nombre' => 'Gestión de usuarios', 'permisos' => ['pqrs.listar'],
+        ]);
+
+        $operador = User::factory()->create(['role' => 'gestor']);
+        $this->createContextualIdentity($operador, $organizacion, $copropiedad, 'gestor', ['usuarios.gestionar', 'pqrs.listar']);
+
+        $target = User::factory()->create();
+        [$membresiaTarget] = $this->createContextualIdentity($target, $organizacion, $copropiedad, 'residente', ['pqrs.listar']);
+        app(\App\Application\Roles\AsignarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolExtra->id);
+
+        $this->actingAsContextual($operador)
+            ->get(route('users.edit', $target))
+            ->assertOk()
+            ->assertSee('Roles de la Copropiedad activa')
+            ->assertSee('Asignar rol')
+            ->assertSee('Roles asignados')
+            ->assertSee('Gestión de usuarios')
+            ->assertSee('residente')
+            ->assertSee('Revocar');
     }
 
     private function contextoDe(User $usuario, $organizacion, Copropiedad $copropiedad)

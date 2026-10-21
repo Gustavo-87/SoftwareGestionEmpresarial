@@ -373,7 +373,12 @@ Las migraciones reflejan esta evolución:
 13. personas, unidades privadas y vínculos;
 14. documentos, versiones y actuaciones documentales;
 15. protección de respuestas, control de operaciones duplicadas y retiro lógico de borradores;
-16. prioridad de las PQRS y estado de las cuentas de usuario.
+16. prioridad de las PQRS y estado de las cuentas de usuario;
+17. rol activo por Membresía (`membresias_copropiedad.rol_activo_id`) y
+    catálogo administrable de permisos (`permissions.nombre`,
+    `permissions.modulo`, `permissions.descripcion`, `permissions.estado`, con
+    eliminación lógica); los permisos directos por usuario se asignan en
+    `model_has_permissions` con equipo igual a la Copropiedad activa (Sprint 18).
 
 La migración `2026_07_24_260000_promote_primary_manager_to_admin.php` modifica
 datos buscando el correo `gestionpqrs7@gmail.com`. No es una modificación
