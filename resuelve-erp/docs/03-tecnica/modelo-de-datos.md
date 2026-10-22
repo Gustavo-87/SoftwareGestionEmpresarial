@@ -307,6 +307,41 @@ compatible acompañada por validación de aplicación.
 `documento_actuaciones` conserva contexto, Documento, Versión opcional, acción,
 detalle y actor histórico. No tiene `updated_at` ni eliminación operativa.
 
+### 3.18 mantenimientos
+
+`mantenimientos` registra las solicitudes de mantenimiento de la copropiedad:
+título, descripción, responsable, fecha programada y estado (`pendiente`,
+`en_proceso`, `finalizado`), con contexto redundante de Organización y
+Copropiedad. La integración con PQRS y documentos (Sprint 19) añade:
+
+| Columna | Tipo | Descripción |
+| --- | --- | --- |
+| `pqr_id` | FK nullable → `pqrs` | PQRS de origen del mantenimiento (varios mantenimientos por PQRS; restrict al borrar). |
+| `idempotency_key` | varchar(36) nullable, única | Clave de idempotencia por solicitud: doble clic, reenvío o concurrencia no duplican; cada acción explícita usa una clave nueva. |
+| `resultado_publico` | texto nullable | Resultado comunicable al radicador (separado de la información interna). |
+| `resultado_interno` | texto nullable | Información reservada al personal con gestión. |
+| `resultado_registrado_por_user_id` | FK nullable → `users` | Actor que registró el resultado. |
+| `resultado_registrado_at` | timestamp nullable | Fecha de registro del resultado. |
+| `finalizado_at` | timestamp nullable | Fecha de finalización (trazabilidad del ciclo). |
+
+Índices: único sobre `idempotency_key`; compuesto `(pqr_id, estado)`.
+
+### 3.19 mantenimiento_documento_evidencia
+
+Puente N–M entre mantenimientos y documentos que fija la **versión exacta**
+utilizada como evidencia (`documento_version_id`), sin alterar el ciclo
+documental del documento.
+
+| Columna | Tipo | Descripción |
+| --- | --- | --- |
+| `mantenimiento_id` | FK → `mantenimientos` | Mantenimiento evidenciado (restrict al borrar). |
+| `documento_id` | FK → `documentos` | Documento de la evidencia (restrict al borrar). |
+| `documento_version_id` | FK → `documento_versiones` | Versión exacta utilizada como prueba (restrict al borrar). |
+| `vinculado_por_user_id` | FK nullable → `users` | Actor que vinculó la evidencia. |
+
+Restricción única `(mantenimiento_id, documento_version_id)`: impide vínculos
+duplicados por doble clic, reenvío o concurrencia.
+
 ## 4. Tablas de infraestructura
 
 ### 4.1 Autenticación y sesión
@@ -379,6 +414,10 @@ Las migraciones reflejan esta evolución:
     `permissions.modulo`, `permissions.descripcion`, `permissions.estado`, con
     eliminación lógica); los permisos directos por usuario se asignan en
     `model_has_permissions` con equipo igual a la Copropiedad activa (Sprint 18).
+18. integración de PQRS, mantenimiento y documentos (Sprint 19):
+    `mantenimientos.pqr_id`, `mantenimientos.idempotency_key`, separación de
+    resultado público/interno con trazabilidad de registro y finalización, y el
+    puente `mantenimiento_documento_evidencia` con versión exacta de evidencia.
 
 La migración `2026_07_24_260000_promote_primary_manager_to_admin.php` modifica
 datos buscando el correo `gestionpqrs7@gmail.com`. No es una modificación
@@ -402,7 +441,10 @@ La contraseña de las cuentas de demostración se obtiene de
 El seeder principal bloquea su ejecución en producción.
 
 **Pendiente para el primer corte:** los seeders actuales no garantizan
-el mínimo de diez registros por tabla solicitado en la guía.
+el mínimo de diez registros por tabla solicitado en la guía. Para la
+demostración del segundo corte, el fixture opt-in
+`DemoIntegracionFixtureSeeder` (solo sobre base aislada) garantiza ≥10
+registros reales en los módulos principales: PQRS, mantenimientos y documentos.
 
 ## 7. Hallazgos del esquema
 

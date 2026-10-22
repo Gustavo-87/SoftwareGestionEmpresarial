@@ -50,6 +50,7 @@
                         <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon blue">✉</span><h2>PQRS</h2></div>
                         <span class="operativo-total operativo-total-pqrs">{{ $indicadores['pqrs']['total'] }} solicitudes</span>
                     </div>
+                    <p class="modulo-integracion">{{ $indicadores['pqrs']['con_mantenimiento'] ?? 0 }} con mantenimiento vinculado</p>
                     <x-modulo-estados :estados="$indicadores['pqrs']['estados']" :total="$indicadores['pqrs']['total']" vacio="Sin solicitudes en este contexto." />
                     <div class="panel-footer"><a class="modulo-ir modulo-ir-pqrs" href="{{ route('pqrs.index') }}">Ir a PQRS <span aria-hidden="true">›</span></a></div>
                 </div>
@@ -60,6 +61,7 @@
                         <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon mint">⚙</span><h2>Mantenimiento</h2></div>
                         <span class="operativo-total operativo-total-mantenimiento">{{ $indicadores['mantenimiento']['total'] }} registros</span>
                     </div>
+                    <p class="modulo-integracion">{{ $indicadores['mantenimiento']['vinculados'] ?? 0 }} vinculados · {{ $indicadores['mantenimiento']['abiertos'] ?? 0 }} abiertos · {{ $indicadores['mantenimiento']['con_evidencia'] ?? 0 }} con evidencia</p>
                     <x-modulo-estados :estados="$indicadores['mantenimiento']['estados']" :total="$indicadores['mantenimiento']['total']" vacio="Sin registros de mantenimiento en este contexto." />
                     <div class="panel-footer"><a class="modulo-ir modulo-ir-mantenimiento" href="{{ route('mantenimiento.index') }}">Ir a Mantenimiento <span aria-hidden="true">›</span></a></div>
                 </div>

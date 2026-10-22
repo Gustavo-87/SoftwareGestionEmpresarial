@@ -31,6 +31,7 @@ erDiagram
     users o|--o{ documento_actuaciones : realiza
     ordenes_trabajo ||--o{ orden_documento : vincula
     documentos ||--o{ orden_documento : respalda
+    documento_versiones o|--o{ orden_documento : fija_version_exacta
 
     organizaciones {
         bigint id PK

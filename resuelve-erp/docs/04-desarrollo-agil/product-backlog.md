@@ -469,6 +469,117 @@ funcionalidades adicionales ni modifica la arquitectura.
 implementadas en el Sprint 14 y cerradas formalmente el 2 de octubre de 2026
 (ver [Sprint 14 — Gestión de mantenimiento](sprint-14-gestion-mantenimiento.md)).
 
+## Sprint 19: Integración de PQRS, mantenimiento y documentos
+
+Historias propuestas el 21 de octubre de 2026 para el segundo corte académico
+(ERP con tres módulos integrados mediante un proceso completo), aprobadas por
+el Product Owner el mismo día con tres ajustes obligatorios (idempotencia,
+autorización sobre ambos recursos y separación público/interno sin filtrado de
+metadatos). **Estado: Completada — cierre técnico aprobado el 22 de octubre de
+2026** (video académico pendiente de grabación y versionado pendiente de
+autorización). Su detalle completo, decisiones,
+reglas y registro de implementación se encuentran en
+[Sprint 19 — Integración de PQRS, mantenimiento y documentos](sprint-19-integracion-pqrs-mantenimiento-documentos.md).
+
+### HU-PQRS-03 — Generar mantenimiento desde una PQRS (Épica 5. PQRS)
+
+Como Gestor
+Quiero generar un mantenimiento vinculado a una PQRS desde su expediente
+Para intervenir la falla sin duplicar solicitudes.
+
+**Permisos:** `pqrs.gestionar` y `mantenimiento.crear`. **Criterios:** vínculo
+en la misma Organización/Copropiedad dentro de una transacción; operación
+idempotente mediante clave única por solicitud (doble clic, reenvío o
+concurrencia no duplican; una acción explícita nueva crea un mantenimiento
+legítimo adicional); confirmación ante mismo título en mantenimiento activo y
+auditoría; estados vacíos y errores comprensibles; trazabilidad
+`mantenimiento.desde_pqr`. **Experiencia visible:** botón «Generar
+mantenimiento» en el expediente y formulario compacto con confirmación del
+vínculo.
+
+### HU-MAN-03 — Vínculos entre PQRS y mantenimiento (Gestión de mantenimiento)
+
+Como Gestor
+Quiero consultar y administrar los vínculos entre PQRS y mantenimientos
+Para comprender la relación entre la solicitud y su intervención.
+
+**Permisos:** `mantenimiento.gestionar` y `pqrs.gestionar` sobre ambos recursos
+(`pqrs.listar` **no** es suficiente). **Criterios:** consulta bidireccional
+(PQRS → mantenimientos; mantenimiento → PQRS de origen); vinculación posterior
+permitida antes de finalizar, en el mismo contexto, con autorización efectiva
+sobre ambos recursos y auditada; la consulta no amplía la visibilidad de
+ningún recurso; estados vacíos explícitos. **Experiencia visible:** bloque
+«Mantenimientos vinculados» en PQRS, bloque «PQRS de origen» en mantenimiento y
+acción «Vincular a PQRS».
+
+### HU-DOC-03 — Evidencia documental de mantenimientos (Épica 6. Gestión Documental)
+
+Como Gestor
+Quiero vincular un documento y una versión específica como evidencia del mantenimiento
+Para conservar la prueba exacta del trabajo realizado.
+
+**Permisos:** `mantenimiento.gestionar`, `documentos.consultar` (+ política del
+documento). **Criterios:** la evidencia fija `documento_version_id` sin alterar
+el ciclo documental; solo versiones `aprobada` de documentos `activo` sirven
+como evidencia de finalización; vincular no amplía la visibilidad; retirada
+solo antes de finalizar y siempre auditada; estados vacíos y motivos
+concretos. **Experiencia visible:** sección «Evidencia documental» con versión
+fijada, acciones condicionadas y validaciones comprensibles.
+
+### HU-MAN-04 — Resultado y finalización del mantenimiento (Gestión de mantenimiento)
+
+Como Gestor
+Quiero registrar el resultado y finalizar el mantenimiento
+Para comunicar lo actuado y cerrar la intervención.
+
+**Permisos:** `mantenimiento.gestionar`. **Criterios:** resultado público
+obligatorio para finalizar y resultado interno opcional, separados en la
+interfaz y en las consultas; al menos una evidencia válida; responsable activo
+con membresía vigente; **finalizar no responde ni cierra automáticamente la
+PQRS**; trazabilidad de actor, fecha, estado y evidencias; operación atómica e
+idempotente. **Experiencia visible:** formulario de resultado (público/interno),
+confirmación que aclara que la PQRS no se cerrará y estado finalizado con
+fechas.
+
+### HU-REP-03 — Expediente integrado y exportación PDF (Épica 9. Reportes e Indicadores)
+
+Como Gestor o Auditor
+Quiero consultar el expediente integrado y exportarlo a PDF
+Para compartir el proceso completo con autorización.
+
+**Permisos:** `pqrs.ver_todas` o `pqrs.ver_propias`, `informes.exportar`.
+**Criterios:** expediente con PQRS, mantenimientos vinculados y evidencia;
+autorización por políticas existentes, rol activo y permisos directos; el PDF
+nunca revela contenido no autorizado («Evidencia restringida»); reutiliza el
+patrón DomPDF existente; auditoría de la exportación; estados vacíos.
+**Experiencia visible:** bloque «Expediente integrado» y «Descargar PDF».
+
+### HU-REP-05 — Visibilidad del residente (Épica 9. Reportes e Indicadores)
+
+Como Residente
+Quiero consultar el estado del mantenimiento asociado a mi PQRS
+Para saber cómo avanza la falla.
+
+**Permisos:** visibilidad de la propia PQRS (`pqrs.ver_propias`) sin nuevas
+capacidades de mutación. **Criterios:** estado, fechas y **resultado público**
+(«información expresamente autorizada»); el resultado interno, los comentarios
+internos y la evidencia no autorizada no son visibles; los documentos
+restringidos **no filtran metadatos** (título, versión, archivo ni fechas);
+visibilidad resuelta por `PqrPolicy`/`DocumentoPolicy` y `nivel_acceso`;
+estados vacíos y mensajes neutros. **Experiencia visible:** resumen del
+mantenimiento vinculado dentro del expediente del residente.
+
+### HU-REP-04 — Indicadores de integración en el panel compacto (Épica 9. Reportes e Indicadores)
+
+Como Usuario autorizado
+Quiero ver los indicadores imprescindibles de la integración en el panel
+Para seguir el proceso sin ampliar la pantalla.
+
+**Permisos:** permisos de consulta existentes. **Criterios:** sin nuevas
+secciones ni lógica de negocio en vistas; consultas reutilizadas sin N+1;
+respeto de autorización, rol activo y permisos directos; panel compacto
+conservado (una pantalla en escritorio). **Experiencia visible:**
+microindicadores dentro de las tarjetas existentes.
 Este Product Backlog evolucionará durante el desarrollo de Resuelve. Las
 Épicas y las Historias de Usuario podrán ser refinadas, ampliadas o ajustadas
 únicamente a partir de decisiones de producto aprobadas por el Product Owner.

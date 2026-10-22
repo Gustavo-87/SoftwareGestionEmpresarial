@@ -4,6 +4,15 @@
 
 El modelo representa las entidades y relaciones de la plataforma para la administración de copropiedades. El avance de implementación se documenta por separado.
 
+> **Implementación física (Sprint 19).** La integración operativa usa las
+> tablas `mantenimientos` (con `pqr_id` para la PQRS de origen,
+> `idempotency_key` única para la idempotencia y los campos de resultado
+> público/interno con trazabilidad) y el puente
+> `mantenimiento_documento_evidencia`, que fija la versión exacta de la
+> evidencia (`documento_version_id`). Equivalen al agregado conceptual
+> `solicitudes_mantenimiento`/`ordenes_trabajo`/`orden_documento` del diagrama;
+> el detalle completo está en [modelo-de-datos.md](modelo-de-datos.md).
+
 ```mermaid
 erDiagram
     organizaciones ||--o{ copropiedades : administra
@@ -38,6 +47,7 @@ erDiagram
     users o|--o{ documento_actuaciones : realiza
     ordenes_trabajo ||--o{ orden_documento : vincula
     documentos ||--o{ orden_documento : respalda
+    documento_versiones o|--o{ orden_documento : fija_version_exacta
 
     organizaciones {
         bigint id PK

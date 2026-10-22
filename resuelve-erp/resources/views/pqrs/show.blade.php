@@ -18,7 +18,7 @@
 
     <section class="expediente-heading" aria-labelledby="expediente-title">
         <div class="expediente-heading-copy"><a class="back-link" href="{{ route('pqrs.index') }}">← Volver a PQRS</a><p class="eyebrow">Expediente · PQR-{{ str_pad($pqr->id, 4, '0', STR_PAD_LEFT) }}</p><h1 id="expediente-title">{{ $pqr->asunto }}</h1><p class="expediente-heading-meta">Radicada por {{ $pqr->user?->name ?? 'Usuario no disponible' }} · {{ str_replace('.', '', $pqr->fecha_radicacion->locale('es')->translatedFormat('d M Y')) }}</p></div>
-        <div class="expediente-heading-actions">@if($puedeGestionar)<span class="priority-badge prioridad-{{ $pqr->prioridad }}" aria-label="Prioridad {{ $pqr->prioridad_label }}">{{ $pqr->prioridad_label }}</span>@endif<span class="status {{ $pqr->estado }}"><i></i>{{ $pqr->estado_label }}</span></div>
+        <div class="expediente-heading-actions">@if($puedeExportarExpediente)<a class="button secondary" href="{{ route('pqrs.expediente.pdf', $pqr) }}">Expediente PDF</a>@endif @if($puedeGestionar)<span class="priority-badge prioridad-{{ $pqr->prioridad }}" aria-label="Prioridad {{ $pqr->prioridad_label }}">{{ $pqr->prioridad_label }}</span>@endif<span class="status {{ $pqr->estado }}"><i></i>{{ $pqr->estado_label }}</span></div>
     </section>
 
     <div class="expediente-layout">
@@ -61,6 +61,51 @@
 
         <main class="expediente-content" aria-label="Contenido del expediente">
             <section class="expediente-section" aria-labelledby="descripcion-title"><p class="eyebrow">Información principal</p><h2 id="descripcion-title">Descripción de la PQRS</h2><p class="description-text">{{ $pqr->descripcion }}</p></section>
+
+<section class="expediente-section" aria-labelledby="mantenimientos-title">
+    <div class="expediente-section-heading"><div><p class="eyebrow">Integración de módulos</p><h2 id="mantenimientos-title">Mantenimientos vinculados</h2></div><span>{{ count($expediente['mantenimientos']) }} {{ count($expediente['mantenimientos']) === 1 ? 'vinculado' : 'vinculados' }}</span></div>
+    @forelse($expediente['mantenimientos'] as $item)
+        <article class="reply-card official" aria-label="Mantenimiento vinculado">
+            <div class="reply-heading">
+                <div>
+                    <strong><a href="{{ route('mantenimiento.show', $item['datos']['id']) }}">{{ $item['datos']['titulo'] ?? 'Mantenimiento vinculado' }}</a></strong>
+                    <small>{{ $item['datos']['estado_label'] }}@if(($item['datos']['fecha_programada'] ?? null)) · Programado {{ $item['datos']['fecha_programada']->format('d/m/Y') }}@endif @if(($item['datos']['finalizado_at'] ?? null)) · Finalizado {{ $item['datos']['finalizado_at']->format('d/m/Y') }}@endif</small>
+                </div>
+            </div>
+            @if(($item['datos']['resultado_publico'] ?? null))<p><strong>Resultado:</strong> {{ $item['datos']['resultado_publico'] }}</p>@endif
+            @if($item['puede_gestionar'] && ($item['datos']['resultado_interno'] ?? null))<p><span class="type-label">Interno</span> {{ $item['datos']['resultado_interno'] }}</p>@endif
+            @if(count($item['evidencias']) > 0 || $item['evidencias_restringidas'])
+                <div class="reply-files" role="list" aria-label="Evidencia documental del mantenimiento">
+                    @foreach($item['evidencias'] as $evidencia)
+                        <span role="listitem">Evidencia: {{ $evidencia['documento'] }} · versión {{ $evidencia['version'] ?? '—' }}</span>
+                    @endforeach
+                    @if($item['evidencias_restringidas'])
+                        <span role="listitem">Evidencia documental disponible solo para personal autorizado.</span>
+                    @endif
+                </div>
+            @endif
+        </article>
+    @empty
+        <div class="expediente-empty" role="status"><p>Sin mantenimientos vinculados a esta PQRS.</p></div>
+    @endforelse
+
+    @if($puedeGenerarMantenimiento)
+        <details class="reply-card draft" style="margin-top:12px">
+            <summary class="button primary">Generar mantenimiento</summary>
+            @error('titulo')<small class="field-error" role="alert">{{ $message }}</small>@enderror
+            @error('idempotency_key')<small class="field-error" role="alert">{{ $message }}</small>@enderror
+            <form method="POST" action="{{ route('pqrs.mantenimientos.store', $pqr) }}">@csrf
+                <input type="hidden" name="idempotency_key" value="{{ Str::uuid() }}">
+                <input type="hidden" name="confirmar_duplicado" value="0">
+                <div class="field"><label for="mantenimiento-titulo">Título del mantenimiento</label><input id="mantenimiento-titulo" name="titulo" value="{{ old('titulo') }}" required maxlength="180"></div>
+                <div class="field"><label for="mantenimiento-descripcion">Descripción</label><textarea id="mantenimiento-descripcion" name="descripcion" rows="3" required>{{ old('descripcion') }}</textarea></div>
+                <div class="field"><label for="mantenimiento-fecha">Fecha programada (opcional)</label><input id="mantenimiento-fecha" type="date" name="fecha_programada" value="{{ old('fecha_programada') }}"></div>
+                <button class="button primary">Generar mantenimiento vinculado</button>
+                <p class="field-hint">La operación es idempotente: repetir el envío del mismo formulario no crea duplicados.</p>
+            </form>
+        </details>
+    @endif
+</section>
 
             <section class="expediente-section" aria-labelledby="respuestas-oficiales-title"><div class="expediente-section-heading"><div><p class="eyebrow">Comunicación con el radicador</p><h2 id="respuestas-oficiales-title">Respuestas oficiales</h2></div><span>{{ $respuestasEnviadas }} {{ $respuestasEnviadas === 1 ? 'enviada' : 'enviadas' }}</span></div>@php($oficiales = $respuestasVisibles->where('is_draft', false))@forelse($oficiales as $reply)<article class="reply-card official" aria-label="Respuesta oficial enviada"><div class="reply-heading"><span class="avatar small" aria-hidden="true">{{ Str::upper(Str::substr($reply->user?->name ?? 'NA', 0, 2)) }}</span><div><strong>{{ $reply->user?->name ?? 'Usuario' }}</strong><small>{{ $reply->sent_at?->locale('es')->diffForHumans() }}</small></div><span class="official-badge" aria-label="Respuesta oficial, inmutable">Respuesta oficial</span></div><p>{{ $reply->body }}</p>@if($reply->attachments)<div class="reply-files" role="list" aria-label="Archivos adjuntos de la respuesta oficial">@foreach($reply->attachments as $index => $file)<a href="{{ route('pqrs.replies.download', [$pqr, $reply, $index]) }}" role="listitem">Descargar {{ $file['name'] }}</a>@endforeach</div>@endif</article>@empty<div class="expediente-empty" role="status"><p>Aún no se han enviado respuestas oficiales al radicador.</p></div>@endforelse</section>
 

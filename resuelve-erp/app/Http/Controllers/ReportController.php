@@ -6,8 +6,10 @@ use App\Application\Contexto\ContextoOperativo;
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Documentos\ConsultaDocumentosContextuales;
 use App\Application\Mantenimiento\ConsultaMantenimientos;
+use App\Application\Pqrs\ConsultaExpedienteIntegrado;
 use App\Application\Pqrs\ConsultaPqrsContextuales;
 use App\Domain\GestionDocumental\Enums\EstadoDocumentoEnum;
+use App\Models\AuditLog;
 use App\Models\Documento;
 use App\Models\Mantenimiento;
 use App\Models\Pqr;
@@ -76,6 +78,41 @@ class ReportController extends Controller
         $data = $this->mantenimientoReportData($filtros, $contexto, $consulta);
 
         return Pdf::loadView('reports.mantenimiento', $data)->setPaper('a4', 'landscape')->download('informe-mantenimiento-'.now()->format('Ymd').'.pdf');
+    }
+
+    /**
+     * Expediente integrado de una PQRS en PDF (HU-REP-03, Sprint 19).
+     * Reutiliza la consulta del expediente: el PDF nunca revela contenido ni
+     * metadatos que el usuario no puede ver.
+     */
+    public function expedientePdf(
+        Request $request,
+        Pqr $pqr,
+        ContextoOperativo $contexto,
+        ConsultaExpedienteIntegrado $consulta
+    ): Response
+    {
+        abort_unless(app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar'), 403);
+        $this->authorize('view', $pqr);
+
+        $data = $consulta->para($request->user(), $contexto, $pqr);
+        $data['settings'] = SiteSetting::current();
+        $data['copropiedad'] = $contexto->copropiedad;
+        $data['generatedAt'] = now();
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'informe.expediente.pdf',
+            'auditable_type' => Pqr::class,
+            'auditable_id' => $pqr->id,
+            'ip_address' => $request->ip(),
+            'metadata' => [
+                'organizacion_id' => $contexto->organizacion->id,
+                'copropiedad_id' => $contexto->copropiedad->id,
+            ],
+        ]);
+
+        return Pdf::loadView('reports.expediente', $data)->setPaper('a4', 'landscape')->download('expediente-pqrs-'.$pqr->id.'-'.now()->format('Ymd').'.pdf');
     }
 
     public function documentosPdf(

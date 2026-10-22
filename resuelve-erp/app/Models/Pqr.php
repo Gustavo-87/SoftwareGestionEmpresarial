@@ -67,6 +67,7 @@ class Pqr extends Model
     public function assignee() { return $this->belongsTo(User::class, 'assigned_to_id'); }
     public function activities() { return $this->hasMany(PqrActivity::class)->latest(); }
     public function replies() { return $this->hasMany(PqrReply::class)->latest(); }
+    public function mantenimientos() { return $this->hasMany(\App\Models\Mantenimiento::class)->orderBy('created_at'); }
     public function internalComments() { return $this->hasMany(PqrInternalComment::class)->latest(); }
     public function communicationOperations() { return $this->hasMany(PqrCommunicationOperation::class); }
     public function tags(): BelongsToMany

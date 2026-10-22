@@ -1324,3 +1324,7 @@ td small {
 .acceso-opcion small{font-size:11px;color:var(--muted)}
 .acceso-opcion:has(input:checked){border-color:#1e3a5f;box-shadow:inset 0 0 0 1px #1e3a5f}
 .acceso-cancelar{margin-top:10px;display:flex;justify-content:center}
+
+/* Integración de módulos (Sprint 19): microindicadores del panel compacto. */
+.modulo-integracion{margin:0;padding:2px 14px 0;font-size:12px;line-height:1.4;color:var(--muted)}
+[data-theme="dark"] .modulo-integracion{color:var(--muted)}

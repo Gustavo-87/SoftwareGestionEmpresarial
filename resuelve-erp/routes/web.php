@@ -54,6 +54,13 @@ Route::middleware(['auth', 'acceso.pendiente'])->group(function () {
     })->name('attachments.download');
     Route::resource('pqrs', PqrController::class);
     Route::resource('mantenimiento', \App\Http\Controllers\MantenimientoController::class)->only(['index', 'create', 'store', 'show', 'update']);
+    Route::post('/pqrs/{pqr}/mantenimientos', [\App\Http\Controllers\MantenimientoController::class, 'storeDesdePqr'])->name('pqrs.mantenimientos.store');
+    Route::patch('/mantenimiento/{mantenimiento}/pqr', [\App\Http\Controllers\MantenimientoController::class, 'vincularPqr'])->name('mantenimiento.pqr.update');
+    Route::patch('/mantenimiento/{mantenimiento}/resultado', [\App\Http\Controllers\MantenimientoController::class, 'resultado'])->name('mantenimiento.resultado.update');
+    Route::patch('/mantenimiento/{mantenimiento}/finalizar', [\App\Http\Controllers\MantenimientoController::class, 'finalizar'])->name('mantenimiento.finalizar');
+    Route::post('/mantenimiento/{mantenimiento}/evidencia', [\App\Http\Controllers\MantenimientoController::class, 'vincularEvidencia'])->name('mantenimiento.evidencia.store');
+    Route::delete('/mantenimiento/{mantenimiento}/evidencia/{evidencia}', [\App\Http\Controllers\MantenimientoController::class, 'retirarEvidencia'])->name('mantenimiento.evidencia.destroy');
+    Route::get('/pqrs/{pqr}/expediente.pdf', [\App\Http\Controllers\ReportController::class, 'expedientePdf'])->name('pqrs.expediente.pdf');
     Route::get('/roles', [\App\Http\Controllers\RolesCatalogoController::class, 'index'])->name('roles.index');
     Route::get('/roles/crear', [\App\Http\Controllers\RolesCatalogoController::class, 'create'])->name('roles.create');
     Route::post('/roles', [\App\Http\Controllers\RolesCatalogoController::class, 'store'])->name('roles.store');

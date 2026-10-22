@@ -130,10 +130,12 @@ class PqrController extends Controller
                 'total' => $resumen['total'],
                 'pendientes' => $resumen['pendientes'], // radicada + en_revision
                 'en_tramite' => (int) $porEstado->get('en_revision', 0),
+                'con_mantenimiento' => (int) (clone $baseQuery)->whereHas('mantenimientos')->count(),
                 'estados' => $estadisticasEstados,
             ];
         }
         if ($request->user()->can('viewAny', Mantenimiento::class)) {
+            $integracionMantenimiento = $consultaMantenimientos->para($contexto);
             $porEstadoMantenimiento = $consultaMantenimientos->para($contexto)
                 ->select('estado', DB::raw('count(*) as total'))
                 ->groupBy('estado')
@@ -144,6 +146,9 @@ class PqrController extends Controller
                 'pendientes' => (int) $porEstadoMantenimiento->get('pendiente', 0),
                 'en_proceso' => (int) $porEstadoMantenimiento->get('en_proceso', 0),
                 'finalizados' => (int) $porEstadoMantenimiento->get('finalizado', 0),
+                'vinculados' => (int) (clone $integracionMantenimiento)->whereNotNull('pqr_id')->count(),
+                'abiertos' => (int) (clone $integracionMantenimiento)->whereNotNull('pqr_id')->where('estado', '!=', 'finalizado')->count(),
+                'con_evidencia' => (int) (clone $integracionMantenimiento)->whereNotNull('pqr_id')->whereHas('evidencias')->count(),
                 'estados' => array_map(fn (array $estado) => [
                     'label' => $estado['label'],
                     'cantidad' => (int) $porEstadoMantenimiento->get($estado['key'], 0),
@@ -374,6 +379,7 @@ class PqrController extends Controller
         ContextoOperativo $contexto,
         ConsultaParticipacionContextual $consultaParticipacion,
         VisibilidadBorradoresPqrs $visibilidadBorradores,
+        \App\Application\Pqrs\ConsultaExpedienteIntegrado $consultaExpediente,
     ) {
         $this->authorize('view', $pqr);
         $puedeGestionar = app(AutorizacionContextual::class)->puedeGestionarPqr($contexto, $pqr);
@@ -416,7 +422,14 @@ class PqrController extends Controller
             'cerrada' => 'La PQRS está cerrada; consulta el historial si necesitas verificar la gestión.',
         };
 
-        return view('pqrs.show', compact('pqr', 'participacion', 'templates', 'availableTags', 'puedeGestionar', 'proximoPaso', 'replyOperationKeys'));
+        // Integración de módulos (Sprint 19): expediente integrado, generación
+        // de mantenimiento desde la PQRS y exportación del expediente.
+        $expediente = $consultaExpediente->para($request->user(), $contexto, $pqr);
+        $puedeGenerarMantenimiento = $puedeGestionar
+            && $request->user()->can('create', \App\Models\Mantenimiento::class);
+        $puedeExportarExpediente = app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar');
+
+        return view('pqrs.show', compact('pqr', 'participacion', 'templates', 'availableTags', 'puedeGestionar', 'proximoPaso', 'replyOperationKeys', 'expediente', 'puedeGenerarMantenimiento', 'puedeExportarExpediente'));
     }
 
     public function edit(Pqr $pqr, ContextoOperativo $contexto)
