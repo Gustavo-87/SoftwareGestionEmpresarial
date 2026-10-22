@@ -57,6 +57,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Documento::class, DocumentoPolicy::class);
         Gate::policy(\App\Models\Mantenimiento::class, \App\Policies\MantenimientoPolicy::class);
         Route::bind('mantenimiento', fn (string $value) => app(\App\Application\Mantenimiento\ConsultaMantenimientos::class)->resolver(app(ContextoOperativo::class), $value));
+        Route::bind('unidad', fn (string $value) => app(\App\Application\Residencia\ConsultaUnidadesPrivadasContextuales::class)->resolver(app(ContextoOperativo::class), $value));
+        Route::bind('persona', fn (string $value) => app(\App\Application\Residencia\ConsultaPersonasContextuales::class)->resolver(app(ContextoOperativo::class), $value));
         Gate::define('administrar-sistema', fn ($user) => $user->esAdministradorSistema());
         Route::bind('pqr', fn (string $value) => app(ConsultaPqrsContextuales::class)
             ->resolver(app(ContextoOperativo::class), $value));

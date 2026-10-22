@@ -35,6 +35,10 @@ directos) son conceptos distintos:
 
 ### HU-RYP-01 — Gestión visible de Unidades Privadas y vínculos (P1)
 
+**Estado (Sprint 20):** implementada en tres bloques y **cerrada
+funcionalmente el 22 de octubre de 2026** (revisión manual aprobada). Cierre
+formal del sprint pendiente junto con HU-RYP-02 y HU-AUD-01.
+
 **Backend reutilizado:** `UnidadPrivada`, `VinculoUnidad`, `Persona` (Sprint 6,
 con contexto excluido de `$fillable`), permiso `residentes.gestionar`.
 

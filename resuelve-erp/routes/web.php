@@ -121,6 +121,21 @@ Route::middleware(['auth', 'acceso.pendiente'])->group(function () {
     Route::post('/pqrs/{pqr}/satisfaccion', [ComplementaryController::class, 'survey'])->name('pqrs.survey.store');
     Route::get('/residentes', [ComplementaryController::class, 'residents'])->name('management.residents');
     Route::patch('/residentes/{user}/unidad', [ComplementaryController::class, 'resident'])->name('management.residents.update');
+    Route::get('/residentes/unidades', [\App\Http\Controllers\UnidadPrivadaController::class, 'index'])->name('management.unidades.index');
+    Route::get('/residentes/unidades/crear', [\App\Http\Controllers\UnidadPrivadaController::class, 'create'])->name('management.unidades.create');
+    Route::post('/residentes/unidades', [\App\Http\Controllers\UnidadPrivadaController::class, 'store'])->name('management.unidades.store');
+    Route::get('/residentes/unidades/{unidad}/editar', [\App\Http\Controllers\UnidadPrivadaController::class, 'edit'])->name('management.unidades.edit');
+    Route::put('/residentes/unidades/{unidad}', [\App\Http\Controllers\UnidadPrivadaController::class, 'update'])->name('management.unidades.update');
+    Route::get('/residentes/unidades/{unidad}', [\App\Http\Controllers\UnidadPrivadaController::class, 'show'])->name('management.unidades.show');
+    Route::post('/residentes/unidades/{unidad}/vinculos', [\App\Http\Controllers\UnidadPrivadaController::class, 'vincular'])->name('management.unidades.vinculos.store');
+    Route::patch('/residentes/unidades/{unidad}/vinculos/{vinculo}/concluir', [\App\Http\Controllers\UnidadPrivadaController::class, 'concluirVinculo'])->name('management.unidades.vinculos.concluir');
+    Route::post('/residentes/personas', [\App\Http\Controllers\PersonaController::class, 'store'])->name('management.personas.store');
+    Route::get('/residentes/personas', [\App\Http\Controllers\PersonaController::class, 'index'])->name('management.personas.index');
+    Route::patch('/residentes/personas/{persona}/desactivar', [\App\Http\Controllers\PersonaController::class, 'desactivar'])->name('management.personas.desactivar');
+    Route::patch('/residentes/personas/{persona}/reactivar', [\App\Http\Controllers\PersonaController::class, 'reactivar'])->name('management.personas.reactivar');
+    Route::patch('/residentes/unidades/{unidad}/desactivar', [\App\Http\Controllers\UnidadPrivadaController::class, 'desactivar'])->name('management.unidades.desactivar');
+    Route::patch('/residentes/unidades/{unidad}/reactivar', [\App\Http\Controllers\UnidadPrivadaController::class, 'reactivar'])->name('management.unidades.reactivar');
+    Route::patch('/residentes/unidades/{unidad}/vinculos/{vinculo}', [\App\Http\Controllers\UnidadPrivadaController::class, 'corregirVinculo'])->name('management.unidades.vinculos.corregir');
     Route::get('/auditoria', [ComplementaryController::class, 'audit'])->name('management.audit');
 
     Route::middleware('admin.sistema')->prefix('admin')->name('admin.')->group(function () {

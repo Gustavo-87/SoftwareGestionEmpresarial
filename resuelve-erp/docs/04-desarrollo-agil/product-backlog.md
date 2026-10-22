@@ -610,6 +610,9 @@ reutilizando componentes. **Experiencia visible:** módulo de Residentes con
 unidades, personas y vínculos, sin exponer campos legados como fuente de
 verdad.
 
+**Estado: Completada (Sprint 20, cierre funcional aprobado el 22 de octubre
+de 2026).**
+
 ### HU-RYP-02 — Consulta de unidad y vínculos desde el perfil del residente (Épica 4. Residentes y Propietarios)
 
 Como Residente o Propietario
