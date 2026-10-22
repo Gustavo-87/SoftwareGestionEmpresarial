@@ -580,6 +580,64 @@ secciones ni lógica de negocio en vistas; consultas reutilizadas sin N+1;
 respeto de autorización, rol activo y permisos directos; panel compacto
 conservado (una pantalla en escritorio). **Experiencia visible:**
 microindicadores dentro de las tarjetas existentes.
+
+## Sprint 20 (plan): Residentes, Unidades y Auditoría
+
+Plan aprobado para su elaboración por el Product Owner el 22 de octubre de
+2026 sobre las HU pendientes del backlog. **Estado: plan presentado — pendiente
+de aprobación para iniciar la implementación.** HU-CONF-02 queda fuera del
+Sprint 20 por decisión del Product Owner. Regla de dominio transversal: los
+**vínculos residenciales** (`vinculos_unidad`: propietario/residente de una
+Unidad Privada) son una noción distinta de las **Membresías y permisos de
+acceso** (`membresias_copropiedad`, roles y permisos); ninguna operación de
+vínculos concede, modifica ni retira acceso al sistema.
+
+### HU-RYP-01 — Gestión visible de Unidades Privadas y vínculos (Épica 4. Residentes y Propietarios)
+
+Como Administrador
+Quiero relacionar Propietarios y Residentes con sus Unidades Privadas
+Para mantener organizado el contexto de las personas de cada Copropiedad.
+
+**Permisos:** `residentes.gestionar` (existente) para gestión; consulta
+contextual para el personal autorizado. **Criterios:** alta/edición de Unidades
+Privadas y vinculación de Personas con tipo de vínculo, estado y vigencia
+(modelos `UnidadPrivada`, `VinculoUnidad`, `Persona` existentes, Sprint 6);
+aislamiento por Organización/Copropiedad; terminación de vínculos por vigencia
+sin eliminación física; **crear, editar o terminar un vínculo no altera
+Membresías, Roles ni permisos** (verificado por pruebas); trazabilidad de
+actuaciones; estados vacío/éxito/error, confirmaciones y responsive
+reutilizando componentes. **Experiencia visible:** módulo de Residentes con
+unidades, personas y vínculos, sin exponer campos legados como fuente de
+verdad.
+
+### HU-RYP-02 — Consulta de unidad y vínculos desde el perfil del residente (Épica 4. Residentes y Propietarios)
+
+Como Residente o Propietario
+Quiero utilizar las capacidades que tenga autorizadas en mi Copropiedad
+Para participar en los servicios ofrecidos por Resuelve.
+
+**Permisos:** visibilidad de lo propio (sin permiso nuevo). **Criterios:** en
+«Mi perfil» se consultan las unidades y vínculos propios vigentes (tipo y
+vigencia); solo lectura para el residente (la edición usa HU-RYP-01); sin
+datos de acceso (roles, permisos o membresías) en esa vista; consulta
+contextual sin ampliar visibilidad de otras personas, PQRS ni documentos;
+estados vacíos y responsive. **Experiencia visible:** sección de residencia en
+el perfil del residente.
+
+### HU-AUD-01 — Consulta contextual del historial de auditoría (Épica 12. Auditoría y Trazabilidad)
+
+Como Administrador
+Quiero consultar el Historial de las actuaciones importantes de una Copropiedad
+Para hacer seguimiento a su gestión.
+
+**Permisos:** `auditoria.ver` (existente) sobre la vista `management.audit`
+actual. **Criterios:** escopo por Organización/Copropiedad activas (hoy el
+listado es global); filtros por actor, acción, recurso y rango de fechas con
+paginación; detalle con actor, acción, recurso, contexto y fecha sin secretos;
+solo lectura (sin exportación); 403 en backend y registros de otros contextos
+invisibles (pruebas de cruce de contexto); sin N+1; estados vacío/filtrado y
+responsive. **Experiencia visible:** módulo de Auditoría con filtros y detalle.
+
 Este Product Backlog evolucionará durante el desarrollo de Resuelve. Las
 Épicas y las Historias de Usuario podrán ser refinadas, ampliadas o ajustadas
 únicamente a partir de decisiones de producto aprobadas por el Product Owner.
