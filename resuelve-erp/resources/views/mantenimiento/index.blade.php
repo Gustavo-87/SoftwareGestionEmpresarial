@@ -26,7 +26,7 @@
         <x-slot name="icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></x-slot>
     </x-metric-card>
 </section>
-<section class="panel"><div class="table-wrap"><table><thead><tr><th>Solicitud</th><th>Solicitante</th><th>Responsable</th><th>Fecha programada</th><th>Estado</th></tr></thead><tbody>
+<section class="panel maintenance-list"><div class="table-wrap"><table><thead><tr><th>Solicitud</th><th>Solicitante</th><th>Responsable</th><th>Fecha programada</th><th>Estado</th></tr></thead><tbody>
 @forelse($mantenimientos as $mantenimiento)
 <tr><td><a href="{{ route('mantenimiento.show', $mantenimiento) }}">{{ $mantenimiento->titulo }}</a></td><td>{{ $mantenimiento->solicitante->name }}</td><td>{{ $mantenimiento->responsable?->name ?? 'Sin asignar' }}</td><td>{{ $mantenimiento->fecha_programada?->format('d/m/Y') ?? 'Sin programar' }}</td><td>{{ $mantenimiento->etiquetaEstado() }}</td></tr>
 @empty

@@ -1306,11 +1306,18 @@ td small {
 
 /* Sprint 18 — Rol activo (HU-USR-04), permisos directos (HU-USR-05) y
    matriz "ver como usuario" (HU-USR-06). */
-.rol-activo-selector-form{display:flex;align-items:center;gap:8px;margin:0;min-width:0}
+.rol-activo-selector-form{display:flex;align-items:center;gap:8px;margin:8px 0;min-width:0}
 .rol-activo-label{font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
-.rol-activo-selector-form select{max-width:180px;font-size:12px}
+.rol-activo-selector-form select{max-width:180px;min-width:0;min-height:40px;padding:8px 28px 8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;line-height:1.3;cursor:pointer;color-scheme:light}
+.rol-activo-selector-form select option{background:var(--surface);color:var(--ink)}
+[data-theme="dark"] .rol-activo-selector-form select,[data-theme="dark"] .rol-activo-selector-form select option{background:var(--paper);border-color:var(--line);color:var(--ink);color-scheme:dark}
+.table-wrap td a:not(.button):not(.status):link,.table-wrap td a:not(.button):not(.status):visited{color:var(--blue)}
+.table-wrap td a:not(.button):not(.status):hover,.table-wrap td a:not(.button):not(.status):focus-visible{color:#1d4ed8;text-decoration:underline}
+[data-theme="dark"] .table-wrap td a:not(.button):not(.status):link,[data-theme="dark"] .table-wrap td a:not(.button):not(.status):visited{color:#93c5fd}
+[data-theme="dark"] .table-wrap td a:not(.button):not(.status):hover,[data-theme="dark"] .table-wrap td a:not(.button):not(.status):focus-visible{color:#bfdbfe}
 .navbar-role-indicator{font-size:11px;font-weight:700;color:#bdd0ca;white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
 .matriz-modulo td{background:var(--paper);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+@media(max-width:760px){.maintenance-list .table-wrap{display:block}.rol-activo-selector-form select{min-height:44px}}
 @media(max-width:520px){.navbar-role-indicator{display:none}.rol-activo-selector-form select{max-width:140px}}
 
 /* Selección de Copropiedad y Rol activo al ingresar (ampliación Sprint 18). */

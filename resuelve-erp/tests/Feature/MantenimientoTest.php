@@ -41,7 +41,9 @@ class MantenimientoTest extends TestCase
             'total' => 5, 'pendientes' => 2, 'en_proceso' => 2, 'finalizados' => 1,
             'programados' => 4, 'atrasados' => 2,
         ]);
-        $respuesta->assertSee('Resumen de mantenimientos')->assertSee('Atrasados')->assertSee('Programados');
+        $respuesta->assertSee('Resumen de mantenimientos')->assertSee('Atrasados')->assertSee('Programados')
+            ->assertSee('class="panel maintenance-list"', false)
+            ->assertSee('Pendiente atrasada');
 
         // El resumen respeta el mismo alcance del listado (solo lo propio sin ver_todas).
         $v = User::factory()->create();

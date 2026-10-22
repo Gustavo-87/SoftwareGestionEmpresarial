@@ -663,3 +663,30 @@ Evidencia: `resources/views/pqrs/panel.blade.php`,
 `resources/views/components/modulo-estados.blade.php`,
 `resources/css/app.css`, `tests/Feature/PanelIndicadoresTest.php`,
 `tests/Feature/PanelPresentacionTest.php` y `tests/Feature/PanelOperativoTest.php`.
+
+## Ajuste visual previo al cierre del Sprint 19 — rol activo y enlaces
+
+El selector nativo de rol activo del contexto operativo usa la paleta y el
+borde de los campos del ERP en claro y oscuro, con texto y opciones legibles,
+flecha nativa, etiqueta asociada y foco visible para teclado. El mismo control
+se verifica en Reportes, Panel, PQRS y Mantenimiento sin modificar el cambio de
+rol ni su autorización.
+
+Los enlaces de texto en las celdas de tablas, tanto normales como visitados,
+usan el azul existente (`--blue` en claro; `#93c5fd` en oscuro), con hover y
+foco subrayados y más claros. No cambian los estados, indicadores ni los enlaces
+de navegación. La tabla de Mantenimiento conserva el desplazamiento horizontal
+en móvil para mantener accesibles los enlaces de las solicitudes (antes quedaba
+oculta por la regla genérica de `.table-wrap`). Los contrastes de los enlaces
+contra los fondos correspondientes son, respectivamente, 5,17:1 y 6,70:1 en
+claro y 8,11:1 y 10,30:1 en oscuro (normal y hover).
+
+Verificación: `npm run build`, pruebas focalizadas y comprobación en navegador
+de estilos calculados, foco, enlaces visitados, escritorio (1440×900) y móvil
+(390×844) sin desbordamiento horizontal de la página. Capturas locales (no
+versionadas) en `storage/evidence/sprint19-visual/` para revisión del Product
+Owner. **Cierre formal y aceptación visual aún pendientes.**
+
+Evidencia de código: `resources/css/app.css`,
+`resources/views/mantenimiento/index.blade.php` y
+`tests/Feature/MantenimientoTest.php`.
