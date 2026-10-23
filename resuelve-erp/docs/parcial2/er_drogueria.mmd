@@ -1,0 +1,81 @@
+erDiagram
+    PROVEEDORES ||--o{ COMPRAS : suministra
+    COMPRAS ||--|{ DETALLE_COMPRAS : contiene
+    PRODUCTOS ||--o{ DETALLE_COMPRAS : solicitado
+    PRODUCTOS ||--o{ LOTES : tiene
+    CLIENTES ||--o{ VENTAS : realiza
+    USUARIOS ||--o{ VENTAS : registra
+    VENTAS ||--|{ DETALLE_VENTAS : contiene
+    PRODUCTOS ||--o{ DETALLE_VENTAS : vendido
+    LOTES ||--o{ DETALLE_VENTAS : dispensado
+    USUARIOS }o--o{ ROLES : asignado
+    ROLES }o--o{ PERMISOS : concede
+
+    PRODUCTOS {
+        bigint id PK
+        string name
+        string sku UK
+        decimal price
+        int stock
+    }
+    LOTES {
+        bigint id PK
+        bigint product_id FK
+        string lot_number
+        date expiration_date
+        int quantity
+    }
+    PROVEEDORES {
+        bigint id PK
+        string nombre
+        string nit
+    }
+    COMPRAS {
+        bigint id PK
+        bigint proveedor_id FK
+        bigint usuario_id FK
+        string estado
+        date fecha
+    }
+    DETALLE_COMPRAS {
+        bigint id PK
+        bigint purchase_id FK
+        bigint product_id FK
+        int quantity
+        decimal unit_cost
+    }
+    CLIENTES {
+        bigint id PK
+        string nombre
+        string identificacion
+    }
+    VENTAS {
+        bigint id PK
+        bigint cliente_id FK
+        bigint usuario_id FK
+        string estado
+        decimal total
+    }
+    DETALLE_VENTAS {
+        bigint id PK
+        bigint sale_id FK
+        bigint product_id FK
+        bigint lot_id FK
+        int quantity
+        decimal unit_price
+    }
+    USUARIOS {
+        bigint id PK
+        string name
+        string email
+    }
+    ROLES {
+        bigint id PK
+        string name
+        string guard_name
+    }
+    PERMISOS {
+        bigint id PK
+        string name
+        string guard_name
+    }
