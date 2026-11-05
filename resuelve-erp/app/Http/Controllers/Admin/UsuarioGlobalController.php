@@ -9,6 +9,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 final class UsuarioGlobalController extends Controller
@@ -26,7 +27,7 @@ final class UsuarioGlobalController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -103,7 +104,7 @@ final class UsuarioGlobalController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email', 'max:150', 'unique:users,email,' . $usuario->id],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email,'.$usuario->id],
             'tower' => ['nullable', 'string', 'max:50'],
             'unit' => ['nullable', 'string', 'max:50'],
             'es_administrador_sistema' => ['nullable', 'boolean'],
@@ -113,7 +114,7 @@ final class UsuarioGlobalController extends Controller
         if (blank($data['password'] ?? null)) {
             unset($data['password']);
         } else {
-            $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+            $data['password'] = Hash::make($data['password']);
         }
 
         $data['email'] = strtolower($data['email']);
@@ -171,6 +172,6 @@ final class UsuarioGlobalController extends Controller
         ]);
 
         return redirect()->route('admin.usuarios-globales.show', $usuario)
-            ->with('success', 'Usuario reactivado correctamente. '.\App\Application\Usuarios\DesactivarUsuarioGlobal::resumen($resultado));
+            ->with('success', 'Usuario reactivado correctamente. '.DesactivarUsuarioGlobal::resumen($resultado));
     }
 }

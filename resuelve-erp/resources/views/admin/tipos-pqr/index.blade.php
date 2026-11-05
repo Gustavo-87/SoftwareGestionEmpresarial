@@ -5,7 +5,7 @@
 
 @section('contenido')
 <x-page-heading title="Tipos de PQRS" eyebrow="Configuración PQRS">
-    <x-slot name="actions"><a class="button primary" href="{{ route('admin.tipos-pqr.create') }}">✚ Nuevo tipo</a></x-slot>
+    <x-slot name="actions"><a class="button subtle" href="{{ route('admin.tipos-pqr.papelera') }}">Papelera</a><a class="button primary" href="{{ route('admin.tipos-pqr.create') }}">✚ Nuevo tipo</a></x-slot>
 </x-page-heading>
 
 <p>Catálogo global de Tipos de PQRS (Petición, Queja, Reclamo, Sugerencia, …),
@@ -43,7 +43,7 @@ compartido por todas las Organizaciones de la plataforma.</p>
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="button danger"
-                                            onclick="return confirm('¿Eliminar definitivamente el tipo «{{ $tipo->nombre }}»?\n\nNo puede eliminarse si está siendo utilizado por alguna PQRS.')">Eliminar</button>
+                                            onclick="return confirm('¿Desactivar el tipo «{{ $tipo->nombre }}»?\n\nNo se elimina ningún registro: la fila se conserva y el tipo pasará a la papelera. No puede desactivarse si está siendo utilizado por alguna PQRS.')">Desactivar</button>
                                 </form>
                             </div>
                         </td>

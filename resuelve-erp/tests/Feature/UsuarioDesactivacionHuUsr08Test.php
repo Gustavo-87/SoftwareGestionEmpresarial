@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextoOperativo;
 use App\Application\Roles\CapacidadAdministrativa;
 use App\Application\Usuarios\DesactivarUsuarioGlobal;
 use App\Models\AuditLog;
@@ -32,7 +33,7 @@ class UsuarioDesactivacionHuUsr08Test extends TestCase
         ));
     }
 
-    /** @return array{0: User, 1: \App\Application\Contexto\ContextoOperativo} */
+    /** @return array{0: User, 1: ContextoOperativo} */
     private function identidadConGestion($organizacion, Copropiedad $copropiedad, string $rol = 'admin'): array
     {
         $usuario = User::factory()->create();

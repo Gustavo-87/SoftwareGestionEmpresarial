@@ -2,13 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Application\Contexto\ContextResolver;
 use App\Application\Contexto\ContextoOperativo;
+use App\Application\Contexto\ContextResolver;
 use App\Application\Mantenimiento\GenerarMantenimientoDesdePqr;
 use App\Models\Mantenimiento;
 use App\Models\Pqr;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
@@ -121,7 +122,7 @@ class MantenimientoIdempotencyMysqlConcurrencyTest extends TestCase
                         $clave,
                     );
                     $this->fail('La reutilización de la clave con datos incompatibles debía ser rechazada.');
-                } catch (\Illuminate\Validation\ValidationException $exception) {
+                } catch (ValidationException $exception) {
                     $this->assertArrayHasKey('idempotency_key', $exception->errors());
                 }
             }
@@ -138,7 +139,7 @@ class MantenimientoIdempotencyMysqlConcurrencyTest extends TestCase
                     $clave,
                 );
                 $this->fail('La reutilización de la clave con otra PQRS debía ser rechazada.');
-            } catch (\Illuminate\Validation\ValidationException $exception) {
+            } catch (ValidationException $exception) {
                 $this->assertArrayHasKey('idempotency_key', $exception->errors());
             }
 

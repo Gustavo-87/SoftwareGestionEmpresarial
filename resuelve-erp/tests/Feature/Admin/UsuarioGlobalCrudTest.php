@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Copropiedad;
+use App\Models\MembresiaCopropiedad;
+use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class UsuarioGlobalCrudTest extends TestCase
@@ -189,13 +191,13 @@ class UsuarioGlobalCrudTest extends TestCase
     public function test_desactivar_suspende_membresias(): void
     {
         $user = User::factory()->create(['estado' => 'activo']);
-        $org = \App\Models\Organizacion::factory()->create(['estado' => 'activa']);
-        $cop = \App\Models\Copropiedad::factory()->create([
+        $org = Organizacion::factory()->create(['estado' => 'activa']);
+        $cop = Copropiedad::factory()->create([
             'organizacion_id' => $org->id,
             'estado' => 'activa',
         ]);
 
-        \App\Models\MembresiaCopropiedad::create([
+        MembresiaCopropiedad::create([
             'usuario_id' => $user->id,
             'organizacion_id' => $org->id,
             'copropiedad_id' => $cop->id,

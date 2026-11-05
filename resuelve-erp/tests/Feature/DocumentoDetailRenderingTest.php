@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
@@ -81,7 +82,7 @@ class DocumentoDetailRenderingTest extends TestCase
         $actuacion = $actuacion->fresh();
 
         self::assertNotNull($actuacion->getRawOriginal('created_at'));
-        self::assertInstanceOf(\Carbon\CarbonInterface::class, $actuacion->created_at);
+        self::assertInstanceOf(CarbonInterface::class, $actuacion->created_at);
 
         $this->actingAsContextual($manager)->get(route('documentos.show', $documento))
             ->assertOk()

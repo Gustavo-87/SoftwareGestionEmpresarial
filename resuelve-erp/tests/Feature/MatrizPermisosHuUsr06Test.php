@@ -2,7 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextResolver;
 use App\Application\Roles\ConsultaMatrizPermisosUsuario;
+use App\Application\Roles\GestionarRolActivo;
+use App\Models\Copropiedad;
+use App\Models\MembresiaCopropiedad;
+use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,7 +47,7 @@ class MatrizPermisosHuUsr06Test extends TestCase
         [$operador, $objetivo] = $this->operadorYObjetivo($organizacion, $copropiedad);
         $rolExtra = $this->asignarRolExtra($objetivo, $copropiedad, 'auditor', ['auditoria.ver']);
         $membresia = $this->membresiaDe($objetivo, $copropiedad);
-        app(\App\Application\Roles\GestionarRolActivo::class)->ejecutar($objetivo, $membresia, (int) $rolExtra->id);
+        app(GestionarRolActivo::class)->ejecutar($objetivo, $membresia, (int) $rolExtra->id);
 
         $matriz = app(ConsultaMatrizPermisosUsuario::class)->para($operador, $this->contexto($operador), $objetivo);
 
@@ -147,7 +152,7 @@ class MatrizPermisosHuUsr06Test extends TestCase
 
     private function membresiaDe(User $user, $copropiedad)
     {
-        return \App\Models\MembresiaCopropiedad::query()
+        return MembresiaCopropiedad::query()
             ->where('usuario_id', $user->id)
             ->where('copropiedad_id', $copropiedad->id)
             ->firstOrFail();
@@ -155,10 +160,10 @@ class MatrizPermisosHuUsr06Test extends TestCase
 
     private function contexto(User $user)
     {
-        return app(\App\Application\Contexto\ContextResolver::class)
+        return app(ContextResolver::class)
             ->resolverExplicito(
-                \App\Models\Organizacion::query()->value('id'),
-                \App\Models\Copropiedad::query()->value('id'),
+                Organizacion::query()->value('id'),
+                Copropiedad::query()->value('id'),
                 $user->id,
             );
     }

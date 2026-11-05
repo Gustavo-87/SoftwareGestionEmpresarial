@@ -3,10 +3,15 @@
 namespace Tests\Feature;
 
 use App\Application\Autorizacion\VerificadorEquivalenciaRbacSpatie;
+use App\Application\Contexto\ContextResolver;
+use App\Application\Roles\AsignarRolUsuario;
 use App\Application\Roles\CrearRol;
+use App\Application\Roles\RevocarRolUsuario;
 use App\Models\Copropiedad;
+use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\Concerns\CreatesInstitutionalContext;
@@ -56,7 +61,7 @@ class RolesAsignacionTest extends TestCase
 
         // Rol base con contraparte legada (matriz contenida en la del operador): asignación con espejo.
         $auditor = SpatieRole::findByName('auditor', 'web');
-        $auditorLegado = (int) \App\Models\Rol::query()->where('clave', 'auditor')->value('id');
+        $auditorLegado = (int) Rol::query()->where('clave', 'auditor')->value('id');
         $this->post(route('users.roles.store', $target), ['rol_id' => $auditor->id])
             ->assertRedirect()->assertSessionHas('success');
         $this->assertDatabaseHas('membresia_copropiedad_rol', [
@@ -141,7 +146,7 @@ class RolesAsignacionTest extends TestCase
         [$membresiaSegundo] = $this->createContextualIdentity($segundo, $organizacion, $copropiedad, 'lector', ['pqrs.listar']);
 
         // Único titular (vía caso de uso con autoridad de plataforma).
-        app(\App\Application\Roles\AsignarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolCapacidad->id);
+        app(AsignarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolCapacidad->id);
 
         // Con varios Roles se exige seleccionar el Rol activo antes de operar.
         $this->actingAsContextual($target)
@@ -160,9 +165,9 @@ class RolesAsignacionTest extends TestCase
 
         // El último titular vuelve a quedar protegido (autoridad de plataforma incluida).
         try {
-            app(\App\Application\Roles\RevocarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolCapacidad->id);
+            app(RevocarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolCapacidad->id);
             $this->fail('Debía bloquearse la revocación de la última capacidad administrativa.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->assertArrayHasKey('rol', $e->errors());
         }
         $this->assertDatabaseHas('model_has_roles', ['model_id' => $target->id, 'role_id' => $rolCapacidad->id]);
@@ -198,7 +203,7 @@ class RolesAsignacionTest extends TestCase
 
         $target = User::factory()->create();
         [$membresiaTarget] = $this->createContextualIdentity($target, $organizacion, $copropiedad, 'residente', ['pqrs.listar']);
-        app(\App\Application\Roles\AsignarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolExtra->id);
+        app(AsignarRolUsuario::class)->ejecutar($plataforma, null, $membresiaTarget, (int) $rolExtra->id);
 
         $this->actingAsContextual($operador)
             ->get(route('users.edit', $target))
@@ -213,7 +218,7 @@ class RolesAsignacionTest extends TestCase
 
     private function contextoDe(User $usuario, $organizacion, Copropiedad $copropiedad)
     {
-        return app(\App\Application\Contexto\ContextResolver::class)
+        return app(ContextResolver::class)
             ->resolverExplicito($organizacion->id, $copropiedad->id, $usuario->id);
     }
 }

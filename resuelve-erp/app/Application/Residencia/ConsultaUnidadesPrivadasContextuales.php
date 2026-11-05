@@ -25,7 +25,7 @@ final class ConsultaUnidadesPrivadasContextuales
 
     public function resolver(ContextoOperativo $contexto, int|string $identificador): UnidadPrivada
     {
-        $modelo = new UnidadPrivada();
+        $modelo = new UnidadPrivada;
 
         return $this->para($contexto)
             ->where($modelo->getRouteKeyName(), $identificador)

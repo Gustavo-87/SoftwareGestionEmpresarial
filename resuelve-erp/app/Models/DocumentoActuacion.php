@@ -13,6 +13,7 @@ class DocumentoActuacion extends Model
     use HasFactory;
 
     protected $table = 'documento_actuaciones';
+
     public $timestamps = false;
 
     protected $fillable = ['documento_version_id', 'organizacion_id', 'copropiedad_id', 'accion', 'detalle', 'actor_user_id', 'nombre_actor'];
@@ -24,7 +25,18 @@ class DocumentoActuacion extends Model
         ];
     }
 
-    public function documento(): BelongsTo { return $this->belongsTo(Documento::class); }
-    public function version(): BelongsTo { return $this->belongsTo(DocumentoVersion::class, 'documento_version_id'); }
-    public function actor(): BelongsTo { return $this->belongsTo(User::class, 'actor_user_id'); }
+    public function documento(): BelongsTo
+    {
+        return $this->belongsTo(Documento::class);
+    }
+
+    public function version(): BelongsTo
+    {
+        return $this->belongsTo(DocumentoVersion::class, 'documento_version_id');
+    }
+
+    public function actor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'actor_user_id');
+    }
 }

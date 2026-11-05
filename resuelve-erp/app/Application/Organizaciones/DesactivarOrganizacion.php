@@ -3,7 +3,6 @@
 namespace App\Application\Organizaciones;
 
 use App\Models\Organizacion;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 final class DesactivarOrganizacion

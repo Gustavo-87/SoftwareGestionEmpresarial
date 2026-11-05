@@ -244,7 +244,19 @@ La interfaz implementa:
 - selección de plantillas de respuesta;
 - contador de caracteres y listado previo de adjuntos.
 
-## 4. Funciones no encontradas
+## 4. Ciclo de vida de catálogos maestros (HU-CONF-03, Sprint 24)
+
+Tipos de PQRS, Etiquetas, Unidades Privadas y Personas disponen de Form
+Requests para alta y edición (autorización antes de la validación; reglas
+reutilizadas de los casos de uso sin duplicar) y de ciclo de vida con baja
+lógica, papelera y restauración sobre los campos existentes
+(`estado`/`desactivada_at`/`activo`), sin eliminación física. Para Tipos de
+PQRS, la columna `desactivada_at` se añadió mediante la migración autorizada
+por el Product Owner; el catálogo normal y los selectores excluyen los
+desactivados y las guardas por uso conservan sus respuestas (ver
+[Sprint 24](../04-desarrollo-agil/sprint-24-catalogos-ciclo-vida.md)).
+
+## 5. Funciones no encontradas
 
 No forman parte del catálogo actual:
 
@@ -258,7 +270,7 @@ No forman parte del catálogo actual:
 - edición o eliminación de plantillas, etiquetas y reglas;
 - gestión individual de borradores después de crearlos.
 
-## 5. Evidencias utilizadas
+## 6. Evidencias utilizadas
 
 ### Modelos y autorización
 

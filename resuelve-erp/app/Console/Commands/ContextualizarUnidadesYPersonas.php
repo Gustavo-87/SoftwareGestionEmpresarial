@@ -69,7 +69,7 @@ class ContextualizarUnidadesYPersonas extends Command
                         ->first();
                     $personaCreada = $persona === null;
                     if ($personaCreada && ! $dryRun) {
-                        $persona = new Persona();
+                        $persona = new Persona;
                         $persona->forceFill([
                             'organizacion_id' => $contexto->organizacion->id,
                             'usuario_id' => $usuarioBloqueado->id,
@@ -129,7 +129,7 @@ class ContextualizarUnidadesYPersonas extends Command
     private function crearUnidadManejandoDuplicidad(int $organizacionId, int $copropiedadId, string $codigo, string $numeroNombre, string $torre): UnidadPrivada
     {
         try {
-            $unidad = new UnidadPrivada();
+            $unidad = new UnidadPrivada;
             $unidad->forceFill([
                 'organizacion_id' => $organizacionId,
                 'copropiedad_id' => $copropiedadId,

@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Copropiedad, Documento, DocumentoVersion, Organizacion, User};
+use App\Models\Copropiedad;
+use App\Models\Documento;
+use App\Models\DocumentoVersion;
+use App\Models\Organizacion;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\CreatesInstitutionalContext;

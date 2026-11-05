@@ -12,7 +12,8 @@ use Tests\TestCase;
 
 /**
  * Administración global del catálogo de Tipos de PQRS: CRUD con validaciones,
- * eliminación protegida si está en uso, auditoría y solo autoridad de plataforma.
+ * baja lógica protegida si está en uso (HU-CONF-03), papelera y restauración,
+ * auditoría y solo autoridad de plataforma.
  */
 class TipoPqrCatalogoTest extends TestCase
 {
@@ -49,12 +50,13 @@ class TipoPqrCatalogoTest extends TestCase
         $this->put(route('admin.tipos-pqr.update', $tipo), ['nombre' => 'Queja'])
             ->assertSessionHasErrors('nombre');
 
-        // Eliminación segura del tipo sin uso.
+        // Baja lógica del tipo sin uso (HU-CONF-03): la fila se conserva.
         $this->delete(route('admin.tipos-pqr.destroy', $otro))
             ->assertRedirect(route('admin.tipos-pqr.index'))->assertSessionHas('success');
-        $this->assertDatabaseMissing('tipo_pqrs', ['id' => $otro->id]);
+        $this->assertDatabaseHas('tipo_pqrs', ['id' => $otro->id]);
+        $this->assertNotNull($otro->fresh()->desactivada_at);
 
-        foreach (['tipo_pqr.store', 'tipo_pqr.update', 'tipo_pqr.delete'] as $accion) {
+        foreach (['tipo_pqr.store', 'tipo_pqr.update', 'tipo_pqr.deactivate'] as $accion) {
             $this->assertDatabaseHas('audit_logs', ['user_id' => $plataforma->id, 'action' => $accion]);
         }
     }
@@ -72,11 +74,43 @@ class TipoPqrCatalogoTest extends TestCase
         $this->assertStringContainsString('en uso', session('errors')->first('tipo'));
         $this->assertDatabaseHas('tipo_pqrs', ['id' => $tipo->id]);
         $this->assertDatabaseHas('pqrs', ['id' => $pqr->id]);
+        // Los tipos asociados a registros existentes conservan su relación.
+        $this->assertSame('Reclamo', $pqr->fresh()->tipoPqr?->nombre);
+    }
+
+    public function test_baja_logica_papelera_y_restauracion(): void
+    {
+        [$organizacion, $copropiedad] = $this->createInstitutionalContext();
+        $plataforma = $this->plataforma();
+        $tipo = TipoPqr::create(['nombre' => 'Aviso especial']);
+
+        // Desactivar: la fila persiste y el catálogo normal la excluye.
+        $this->actingAs($plataforma)->delete(route('admin.tipos-pqr.destroy', $tipo))
+            ->assertRedirect(route('admin.tipos-pqr.index'))->assertSessionHas('success');
+        $this->assertDatabaseCount('tipo_pqrs', 1);
+        $this->assertNotNull($tipo->fresh()->desactivada_at);
+        $this->actingAs($plataforma)->get(route('admin.tipos-pqr.index'))
+            ->assertOk()->assertDontSee('Aviso especial');
+
+        // Los selectores normales también la excluyen (herramientas del equipo).
+        $gestor = User::factory()->create();
+        $this->createContextualIdentity($gestor, $organizacion, $copropiedad, 'gestor', ['gestion.herramientas_gestionar']);
+        $this->actingAs($gestor)->get(route('management.tools'))
+            ->assertOk()->assertDontSee('Aviso especial');
+
+        // La papelera la lista y restaurar limpia la desactivación.
+        $this->actingAs($plataforma)->get(route('admin.tipos-pqr.papelera'))
+            ->assertOk()->assertSee('Aviso especial');
+        $this->actingAs($plataforma)->patch(route('admin.tipos-pqr.reactivar', $tipo))
+            ->assertSessionHas('success');
+        $this->assertNull($tipo->fresh()->desactivada_at);
+        $this->actingAs($plataforma)->get(route('admin.tipos-pqr.index'))
+            ->assertOk()->assertSee('Aviso especial');
     }
 
     public function test_eliminacion_bloqueada_si_una_regla_automatica_lo_utiliza(): void
     {
-        $tipo = TipoPqr::create(['nombre' => 'Sugerencia']);
+        $tipo = TipoPqr::create(['nombre' => 'Aviso especial']);
         AutomationRule::create(['name' => 'Regla con tipo', 'tipo_pqr_id' => $tipo->id]);
 
         $this->actingAs($this->plataforma())

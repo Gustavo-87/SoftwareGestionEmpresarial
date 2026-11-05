@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextResolver;
 use App\Application\Roles\CrearRol;
 use App\Application\Roles\GestionarPermisosDirectos;
 use App\Application\Roles\GestionarRolActivo;
@@ -195,7 +196,7 @@ class RolActivoPermisosDirectosMysqlConcurrencyTest extends TestCase
             $this->assertSame('permitido', $resultado);
 
             // Invariante: la selección caducada nunca aporta permisos.
-            $contexto = app(\App\Application\Contexto\ContextResolver::class)
+            $contexto = app(ContextResolver::class)
                 ->resolverExplicito($organizacion->id, $copropiedad->id, $usuario->id);
             $this->assertNull($contexto->rolActivoClave);
             $this->assertNotContains($rol->name, $contexto->clavesRoles());

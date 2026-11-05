@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Pqr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
@@ -235,7 +237,7 @@ class PqrsComunicacionesVisualTest extends TestCase
 
         $response = $this->actingAsContextual($gestor)->post(route('pqrs.replies.store', $pqr), [
             'action' => 'send',
-            'send_reply_key' => (string) \Illuminate\Support\Str::uuid(),
+            'send_reply_key' => (string) Str::uuid(),
             'body' => str_repeat('x', 10001),
         ]);
 
@@ -256,13 +258,13 @@ class PqrsComunicacionesVisualTest extends TestCase
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create(['user_id' => $residente->id]);
 
         $files = array_map(
-            fn () => \Illuminate\Http\UploadedFile::fake()->create('doc.pdf', 100),
+            fn () => UploadedFile::fake()->create('doc.pdf', 100),
             range(1, 6)
         );
 
         $response = $this->actingAsContextual($gestor)->post(route('pqrs.replies.store', $pqr), [
             'action' => 'draft',
-            'create_draft_key' => (string) \Illuminate\Support\Str::uuid(),
+            'create_draft_key' => (string) Str::uuid(),
             'body' => 'Texto válido.',
             'attachments' => $files,
         ]);

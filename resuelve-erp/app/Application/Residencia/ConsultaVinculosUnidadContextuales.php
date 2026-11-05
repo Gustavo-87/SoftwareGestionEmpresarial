@@ -25,7 +25,7 @@ final class ConsultaVinculosUnidadContextuales
 
     public function resolver(ContextoOperativo $contexto, int|string $identificador): VinculoUnidad
     {
-        $modelo = new VinculoUnidad();
+        $modelo = new VinculoUnidad;
 
         return $this->para($contexto)
             ->where($modelo->getRouteKeyName(), $identificador)

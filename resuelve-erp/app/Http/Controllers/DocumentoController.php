@@ -9,7 +9,6 @@ use App\Application\Documentos\ConsultaDocumentosContextuales;
 use App\Application\Documentos\CrearDocumento;
 use App\Models\Documento;
 use App\Models\MembresiaCopropiedad;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -63,8 +62,10 @@ class DocumentoController extends Controller
             if ($archivo) {
                 $cargar->ejecutar($contexto, $request->user(), $documento, $archivo, 'usuario', null);
             }
+
             return $documento;
         });
+
         return redirect()->route('documentos.show', $documento)->with('success', 'Documento creado correctamente.');
     }
 
@@ -72,12 +73,14 @@ class DocumentoController extends Controller
     {
         $this->authorize('view', $documento);
         $documento->load(['propietarioDocumental', 'versiones.sustituyeVersion', 'actuaciones.actor']);
+
         return view('documentos.show', compact('documento'));
     }
 
     public function archive(Documento $documento, ContextoOperativo $contexto, ArchivarDocumento $archivar): RedirectResponse
     {
         $archivar->ejecutar($contexto, request()->user(), $documento);
+
         return back()->with('success', 'Documento archivado correctamente.');
     }
 }

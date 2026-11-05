@@ -23,7 +23,7 @@ final class ConsultaPersonasContextuales
 
     public function resolver(ContextoOperativo $contexto, int|string $identificador): Persona
     {
-        $modelo = new Persona();
+        $modelo = new Persona;
 
         return $this->para($contexto)
             ->where($modelo->getRouteKeyName(), $identificador)

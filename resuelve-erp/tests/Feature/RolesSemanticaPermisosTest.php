@@ -3,8 +3,9 @@
 namespace Tests\Feature;
 
 use App\Application\Autorizacion\AutorizacionContextual;
-use App\Application\Roles\CapacidadAdministrativa;
 use App\Application\Pqrs\VisibilidadBorradoresPqrs;
+use App\Application\Roles\CapacidadAdministrativa;
+use App\Models\Copropiedad;
 use App\Models\Pqr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -90,7 +91,7 @@ class RolesSemanticaPermisosTest extends TestCase
         $this->assertFalse($autorizacion->puedeGestionarPqr($contextoSin, $pqr));
 
         // Aislamiento: la PQR de otra Copropiedad no es gestionable desde A.
-        $otra = \App\Models\Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra', 'estado' => 'activa']);
+        $otra = Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra', 'estado' => 'activa']);
         $pqrOtra = Pqr::factory()->paraContexto($organizacion, $otra)->create(['user_id' => User::factory()->create()->id]);
         $gestor = User::factory()->create();
         [, , $contextoGestor] = $this->createContextualIdentity(

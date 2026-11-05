@@ -21,7 +21,7 @@ final class RegistrarComentarioInternoPqrs
     {
         $pqr = $this->consultaPqrs->resolver($contexto, $pqr->getKey());
         if (! $this->autorizacion->puedeGestionarPqr($contexto, $pqr)) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         DB::transaction(function () use ($usuario, $pqr, $cuerpo): void {

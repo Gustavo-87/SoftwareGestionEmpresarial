@@ -2,16 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Application\Pqrs\Idempotency\PqrCommunicationOperationRepository;
+use App\Enums\PqrCommunicationOperation as OperationType;
 use App\Models\Pqr;
 use App\Models\PqrCommunicationOperation;
 use App\Models\User;
-use App\Application\Pqrs\Idempotency\PqrCommunicationOperationRepository;
-use App\Enums\PqrCommunicationOperation as OperationType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use RuntimeException;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Tests\TestCase;
 
 class PqrSafeDraftMigrationRecoveryTest extends TestCase
@@ -20,7 +20,9 @@ class PqrSafeDraftMigrationRecoveryTest extends TestCase
 
     public function test_sqlite_failure_boundaries_retry_without_row_loss_or_early_backup_drop(): void
     {
-        if (DB::getDriverName() !== 'sqlite') $this->markTestSkipped('Requiere SQLite.');
+        if (DB::getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Requiere SQLite.');
+        }
         $migration = $this->migration();
         $migration->down();
         $user = User::factory()->create();
@@ -49,10 +51,12 @@ class PqrSafeDraftMigrationRecoveryTest extends TestCase
 
     public function test_sqlite_preserves_both_tables_when_deleted_at_or_row_content_differs(): void
     {
-        if (DB::getDriverName() !== 'sqlite') $this->markTestSkipped('Requiere SQLite.');
+        if (DB::getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Requiere SQLite.');
+        }
         $migration = $this->migration();
         DB::statement('ALTER TABLE pqr_replies RENAME TO pqr_replies_c351b2_previous');
-        DB::statement("CREATE TABLE pqr_replies AS SELECT id,pqr_id,user_id,body,is_draft,attachments,sent_at,created_at,updated_at,deleted_at FROM pqr_replies_c351b2_previous");
+        DB::statement('CREATE TABLE pqr_replies AS SELECT id,pqr_id,user_id,body,is_draft,attachments,sent_at,created_at,updated_at,deleted_at FROM pqr_replies_c351b2_previous');
         $user = User::factory()->create();
         $pqr = Pqr::factory()->create();
         DB::table('pqr_replies_c351b2_previous')->insert(['pqr_id' => $pqr->id, 'user_id' => $user->id, 'body' => 'original', 'is_draft' => 1]);
@@ -69,7 +73,9 @@ class PqrSafeDraftMigrationRecoveryTest extends TestCase
 
     public function test_interrupted_down_with_only_backup_never_reactivates_deleted_draft(): void
     {
-        if (DB::getDriverName() !== 'sqlite') $this->markTestSkipped('Requiere SQLite.');
+        if (DB::getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Requiere SQLite.');
+        }
         $migration = $this->migration();
         $user = User::factory()->create();
         $pqr = Pqr::factory()->create();
@@ -90,7 +96,9 @@ class PqrSafeDraftMigrationRecoveryTest extends TestCase
 
     public function test_interrupted_up_with_only_b2_backup_preserves_deleted_at_exactly(): void
     {
-        if (DB::getDriverName() !== 'sqlite') $this->markTestSkipped('Requiere SQLite.');
+        if (DB::getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Requiere SQLite.');
+        }
         $migration = $this->migration();
         $user = User::factory()->create();
         $pqr = Pqr::factory()->create();
@@ -108,7 +116,9 @@ class PqrSafeDraftMigrationRecoveryTest extends TestCase
 
     public function test_interrupted_down_with_only_ledger_backup_preserves_b2_operations(): void
     {
-        if (DB::getDriverName() !== 'sqlite') $this->markTestSkipped('Requiere SQLite.');
+        if (DB::getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Requiere SQLite.');
+        }
         $migration = $this->migration();
         $user = User::factory()->create();
         $pqr = Pqr::factory()->create();
@@ -128,7 +138,9 @@ class PqrSafeDraftMigrationRecoveryTest extends TestCase
 
     public function test_sqlite_requires_exact_ledger_equality_before_dropping_backup(): void
     {
-        if (DB::getDriverName() !== 'sqlite') $this->markTestSkipped('Requiere SQLite.');
+        if (DB::getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Requiere SQLite.');
+        }
         $migration = $this->migration();
         $user = User::factory()->create();
         $pqr = Pqr::factory()->create();

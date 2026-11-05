@@ -38,20 +38,46 @@ class Documento extends Model
         ];
     }
 
-    public function organizacion(): BelongsTo { return $this->belongsTo(Organizacion::class); }
-    public function copropiedad(): BelongsTo { return $this->belongsTo(Copropiedad::class); }
-    public function propietarioDocumental(): BelongsTo { return $this->belongsTo(User::class, 'propietario_documental_user_id'); }
-    public function creador(): BelongsTo { return $this->belongsTo(User::class, 'creado_por_user_id'); }
-    public function archivador(): BelongsTo { return $this->belongsTo(User::class, 'archivado_por_user_id'); }
-    public function versiones(): HasMany { return $this->hasMany(DocumentoVersion::class); }
+    public function organizacion(): BelongsTo
+    {
+        return $this->belongsTo(Organizacion::class);
+    }
+
+    public function copropiedad(): BelongsTo
+    {
+        return $this->belongsTo(Copropiedad::class);
+    }
+
+    public function propietarioDocumental(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'propietario_documental_user_id');
+    }
+
+    public function creador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creado_por_user_id');
+    }
+
+    public function archivador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'archivado_por_user_id');
+    }
+
+    public function versiones(): HasMany
+    {
+        return $this->hasMany(DocumentoVersion::class);
+    }
 
     public function versionVigente(): ?DocumentoVersion
     {
-        return $this->versiones->first(fn (DocumentoVersion $version) =>
-            $version->estado->value === 'aprobada'
+        return $this->versiones->first(fn (DocumentoVersion $version) => $version->estado->value === 'aprobada'
             && (! $version->vigente_desde || $version->vigente_desde->isToday() || $version->vigente_desde->isPast())
             && (! $version->vigente_hasta || $version->vigente_hasta->isToday() || $version->vigente_hasta->isFuture())
         );
     }
-    public function actuaciones(): HasMany { return $this->hasMany(DocumentoActuacion::class); }
+
+    public function actuaciones(): HasMany
+    {
+        return $this->hasMany(DocumentoActuacion::class);
+    }
 }

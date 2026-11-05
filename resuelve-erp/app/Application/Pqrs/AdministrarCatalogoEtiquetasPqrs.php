@@ -34,6 +34,7 @@ final class AdministrarCatalogoEtiquetasPqrs
                 $this->conflictoNombre($e);
             }
             $this->auditar($contexto, $actor, $tag, 'etiqueta.creada', null, ['name' => $tag->name, 'color' => $tag->color, 'activo' => true]);
+
             return $tag;
         });
     }
@@ -43,23 +44,42 @@ final class AdministrarCatalogoEtiquetasPqrs
         return DB::transaction(function () use ($contexto, $actor, $tag, $datos): bool {
             $antes = $tag->only(['name', 'color']);
             $tag->fill($datos);
-            if (! $tag->isDirty(['name', 'color'])) { request()?->attributes->set('auditoria_especifica_registrada', true); return false; }
-            try { $tag->save(); } catch (QueryException $e) { $this->conflictoNombre($e); }
+            if (! $tag->isDirty(['name', 'color'])) {
+                request()?->attributes->set('auditoria_especifica_registrada', true);
+
+                return false;
+            }
+            try {
+                $tag->save();
+            } catch (QueryException $e) {
+                $this->conflictoNombre($e);
+            }
             $eventos = [];
-            if ($antes['name'] !== $tag->name) $eventos[] = 'nombre';
-            if ($antes['color'] !== $tag->color) $eventos[] = 'color';
+            if ($antes['name'] !== $tag->name) {
+                $eventos[] = 'nombre';
+            }
+            if ($antes['color'] !== $tag->color) {
+                $eventos[] = 'color';
+            }
             $this->auditar($contexto, $actor, $tag, 'etiqueta.actualizada', $antes, $tag->only(['name', 'color']), ['campos' => $eventos]);
+
             return true;
         });
     }
 
     public function cambiarEstado(ContextoOperativo $contexto, User $actor, PqrTag $tag, bool $activo): bool
     {
-        if ($tag->activo === $activo) { request()?->attributes->set('auditoria_especifica_registrada', true); return false; }
+        if ($tag->activo === $activo) {
+            request()?->attributes->set('auditoria_especifica_registrada', true);
+
+            return false;
+        }
+
         return DB::transaction(function () use ($contexto, $actor, $tag, $activo): bool {
             $anterior = $tag->activo;
             $tag->forceFill(['activo' => $activo])->save();
             $this->auditar($contexto, $actor, $tag, $activo ? 'etiqueta.reactivada' : 'etiqueta.desactivada', ['activo' => $anterior], ['activo' => $activo]);
+
             return true;
         });
     }
@@ -72,7 +92,9 @@ final class AdministrarCatalogoEtiquetasPqrs
 
     private function conflictoNombre(QueryException $e): never
     {
-        if (in_array((string) $e->getCode(), ['23000', '23505'], true)) throw ValidationException::withMessages(['name' => 'Ya existe una etiqueta con este nombre en la Copropiedad. Reactívala si está desactivada.']);
+        if (in_array((string) $e->getCode(), ['23000', '23505'], true)) {
+            throw ValidationException::withMessages(['name' => 'Ya existe una etiqueta con este nombre en la Copropiedad. Reactívala si está desactivada.']);
+        }
         throw $e;
     }
 }

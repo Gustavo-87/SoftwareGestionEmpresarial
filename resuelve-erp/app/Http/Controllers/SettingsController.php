@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Application\Configuracion\ActualizarConfiguracionCopropiedadInicial;
 use App\Application\Autorizacion\AutorizacionContextual;
+use App\Application\Configuracion\ActualizarConfiguracionCopropiedadInicial;
 use App\Application\Contexto\ContextoInstitucionalNoConfigurado;
 use App\Application\Contexto\ContextoOperativo;
 use App\Models\SiteSetting;
@@ -52,7 +52,7 @@ class SettingsController extends Controller
         $data['logo_scale'] = $data['logo_scale'] ?? 1.0;
         $data['logo_offset_x'] = $data['logo_offset_x'] ?? 0;
         $data['logo_offset_y'] = $data['logo_offset_y'] ?? 0;
-        $settings = SiteSetting::first() ?? new SiteSetting();
+        $settings = SiteSetting::first() ?? new SiteSetting;
         unset($data['logo']);
         $newLogoPath = null;
         $previousLogoPath = $settings->logo_path;

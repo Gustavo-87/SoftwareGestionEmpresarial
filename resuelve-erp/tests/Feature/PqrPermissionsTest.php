@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Pqr;
 use App\Models\Copropiedad;
 use App\Models\Organizacion;
+use App\Models\Pqr;
 use App\Models\TipoPqr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

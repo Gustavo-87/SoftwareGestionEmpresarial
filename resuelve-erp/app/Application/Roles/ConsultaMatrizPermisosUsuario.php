@@ -7,7 +7,9 @@ use App\Application\Contexto\ContextoOperativo;
 use App\Models\MembresiaCopropiedad;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 /**
  * Matriz global de permisos "ver como usuario" (HU-USR-06, Sprint 18).
@@ -92,8 +94,8 @@ final class ConsultaMatrizPermisosUsuario
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, \Spatie\Permission\Models\Role>  $rolesAsignados
-     * @param  \Illuminate\Support\Collection<string, \Spatie\Permission\Models\Permission>  $directos
+     * @param  Collection<int, Role>  $rolesAsignados
+     * @param  Collection<string, Permission>  $directos
      * @return list<string>
      */
     private function origenes(Permission $permiso, $rolesAsignados, ?object $rolActivo, $directos): array

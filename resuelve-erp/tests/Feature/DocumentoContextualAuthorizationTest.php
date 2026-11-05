@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Documentos\ConsultaDocumentosContextuales;
-use App\Domain\GestionDocumental\Enums\NivelAccesoDocumentoEnum;
 use App\Models\Copropiedad;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;

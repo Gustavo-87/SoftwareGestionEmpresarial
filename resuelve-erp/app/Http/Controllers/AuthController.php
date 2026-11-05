@@ -6,6 +6,7 @@ use App\Application\Roles\GestionarRolActivo;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -135,8 +136,8 @@ class AuthController extends Controller
         return 'login:'.$alcance.':'.sha1($valor);
     }
 
-    /** @return \Illuminate\Support\Collection<int, MembresiaCopropiedad> */
-    private function membresiasVigentes($usuario): \Illuminate\Support\Collection
+    /** @return Collection<int, MembresiaCopropiedad> */
+    private function membresiasVigentes($usuario): Collection
     {
         return MembresiaCopropiedad::query()
             ->where('usuario_id', $usuario->id)

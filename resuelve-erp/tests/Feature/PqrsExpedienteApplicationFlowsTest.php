@@ -130,12 +130,32 @@ class PqrsExpedienteApplicationFlowsTest extends TestCase
         $manager = $this->manager($organizacion, $copropiedad);
         $pqr = Pqr::factory()->paraContexto($organizacion, $copropiedad)->create(['estado' => 'en_revision']);
         $contexto = app(ContextResolver::class)->resolverExplicito($organizacion->id, $copropiedad->id, $manager->id);
-        $adjuntoFallido = new class {
-            public function getClientOriginalName(): string { return 'fallido.pdf'; }
-            public function getRealPath(): string { return __FILE__; }
-            public function getMimeType(): string { return 'application/pdf'; }
-            public function store(string $path): never { throw new RuntimeException('No se pudo almacenar el adjunto.'); }
-            public function getSize(): int { return 10; }
+        $adjuntoFallido = new class
+        {
+            public function getClientOriginalName(): string
+            {
+                return 'fallido.pdf';
+            }
+
+            public function getRealPath(): string
+            {
+                return __FILE__;
+            }
+
+            public function getMimeType(): string
+            {
+                return 'application/pdf';
+            }
+
+            public function store(string $path): never
+            {
+                throw new RuntimeException('No se pudo almacenar el adjunto.');
+            }
+
+            public function getSize(): int
+            {
+                return 10;
+            }
         };
 
         try {

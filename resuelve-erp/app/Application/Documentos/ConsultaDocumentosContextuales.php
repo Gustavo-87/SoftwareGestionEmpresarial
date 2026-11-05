@@ -28,7 +28,7 @@ final class ConsultaDocumentosContextuales
 
     public function resolver(ContextoOperativo $contexto, int|string $identificador): Documento
     {
-        $modelo = new Documento();
+        $modelo = new Documento;
 
         return $this->para($contexto)
             ->where($modelo->getRouteKeyName(), $identificador)
@@ -38,7 +38,7 @@ final class ConsultaDocumentosContextuales
     public function resolverVersion(ContextoOperativo $contexto, Documento $documento, int|string $identificador): DocumentoVersion
     {
         $documento = $this->resolver($contexto, $documento->getKey());
-        $modelo = new DocumentoVersion();
+        $modelo = new DocumentoVersion;
 
         return DocumentoVersion::query()
             ->where($modelo->getRouteKeyName(), $identificador)

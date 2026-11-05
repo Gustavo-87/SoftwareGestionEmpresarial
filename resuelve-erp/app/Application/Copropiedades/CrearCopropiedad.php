@@ -31,7 +31,6 @@ final class CrearCopropiedad
             $ciudad,
             $telefono,
             $email,
-            $creadaPor,
         ) {
             $organizacion = Organizacion::findOrFail($organizacionId);
 

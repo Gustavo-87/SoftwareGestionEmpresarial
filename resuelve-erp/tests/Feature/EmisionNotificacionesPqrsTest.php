@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextoOperativo;
 use App\Application\Contexto\ContextResolver;
 use App\Application\Notificaciones\EmitirNotificacionPqrs;
 use App\Jobs\EnviarCorreoNotificacionPqrs;
 use App\Mail\PqrEventMail;
+use App\Models\MembresiaCopropiedad;
 use App\Models\Pqr;
 use App\Models\User;
 use App\Notifications\PqrEventNotification;
@@ -150,7 +152,7 @@ class EmisionNotificacionesPqrsTest extends TestCase
         $this->assertSame([app_path('Application/Notificaciones/EmitirNotificacionPqrs.php')], $hallazgos);
     }
 
-    /** @return array{\App\Application\Contexto\ContextoOperativo, Pqr, User, ?\App\Models\MembresiaCopropiedad} */
+    /** @return array{ContextoOperativo, Pqr, User, ?MembresiaCopropiedad} */
     private function escenarioResidente(bool $incluirMembresia = false): array
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();

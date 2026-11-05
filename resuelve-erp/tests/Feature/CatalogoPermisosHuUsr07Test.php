@@ -2,12 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Application\Roles\CrearRol;
+use App\Application\Contexto\ContextResolver;
 use App\Application\Roles\GestionarCatalogoPermisos;
-use App\Application\Roles\GestionarPermisosDirectos;
 use App\Application\Roles\SincronizarPermisosRol;
 use App\Models\AuditLog;
-use App\Models\MembresiaCopropiedad;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -253,7 +251,7 @@ class CatalogoPermisosHuUsr07Test extends TestCase
 
     private function contexto($organizacion, $copropiedad, User $user)
     {
-        return app(\App\Application\Contexto\ContextResolver::class)
+        return app(ContextResolver::class)
             ->resolverExplicito($organizacion->id, $copropiedad->id, $user->id);
     }
 }

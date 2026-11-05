@@ -6,7 +6,6 @@ use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Organizacion;
 use App\Models\Rol;
-use App\Models\Permiso;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

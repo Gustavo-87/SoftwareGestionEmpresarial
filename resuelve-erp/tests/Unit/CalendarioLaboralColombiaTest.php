@@ -15,7 +15,7 @@ class CalendarioLaboralColombiaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->calendario = new CalendarioLaboralColombia();
+        $this->calendario = new CalendarioLaboralColombia;
     }
 
     protected function tearDown(): void

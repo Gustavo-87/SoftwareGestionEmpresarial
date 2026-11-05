@@ -26,7 +26,7 @@ class MantenimientoTest extends TestCase
     public function test_index_muestra_resumen_por_estado_y_fechas_respetando_el_alcance(): void
     {
         [$u, $o, $c] = $this->identidad('admin', ['mantenimiento.ver_todas', 'mantenimiento.crear']);
-        $crear = fn (string $estado, ?string $fecha, string $titulo, $solicitante = null) => \App\Models\Mantenimiento::forceCreate([
+        $crear = fn (string $estado, ?string $fecha, string $titulo, $solicitante = null) => Mantenimiento::forceCreate([
             'organizacion_id' => $o->id, 'copropiedad_id' => $c->id, 'solicitante_id' => $solicitante ?? $u->id,
             'titulo' => $titulo, 'descripcion' => 'x', 'estado' => $estado, 'fecha_programada' => $fecha,
         ]);

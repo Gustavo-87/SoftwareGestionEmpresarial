@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Copropiedad;
 use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -136,7 +137,7 @@ class OrganizacionCrudTest extends TestCase
     public function test_no_puede_desactivar_con_copropiedades_activas(): void
     {
         $org = Organizacion::create(['nombre' => 'Org Con Cop', 'estado' => 'activa']);
-        \App\Models\Copropiedad::create([
+        Copropiedad::create([
             'organizacion_id' => $org->id,
             'nombre' => 'Cop Test',
             'estado' => 'activa',

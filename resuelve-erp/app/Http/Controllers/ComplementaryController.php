@@ -4,15 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
-use App\Application\Pqrs\ConsultaPqrsContextuales;
-use App\Application\Pqrs\ConsultaEtiquetasPqrsContextuales;
 use App\Application\Pqrs\AdministrarCatalogoEtiquetasPqrs;
+use App\Application\Pqrs\ConsultaEtiquetasPqrsContextuales;
+use App\Application\Pqrs\ConsultaPqrsContextuales;
 use App\Application\Pqrs\SincronizarEtiquetasPqrs;
-use App\Models\{AuditLog, AutomationRule, Pqr, PqrTag, ResponseTemplate, SatisfactionSurvey, TipoPqr, User};
+use App\Http\Requests\StoreEtiquetaRequest;
+use App\Http\Requests\UpdateEtiquetaRequest;
+use App\Models\AuditLog;
+use App\Models\AutomationRule;
+use App\Models\Pqr;
+use App\Models\PqrTag;
+use App\Models\ResponseTemplate;
+use App\Models\SatisfactionSurvey;
+use App\Models\TipoPqr;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class ComplementaryController extends Controller
@@ -27,30 +34,42 @@ class ComplementaryController extends Controller
         $this->permitir($contexto, 'gestion.carga_ver');
         $scope = fn ($query) => $consulta->restringir($query, $contexto);
         $users = User::query()->whereHas('membresiasCopropiedad', fn ($query) => $query->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->where('estado', 'activa'))->withCount(['assignedPqrs as active_count' => fn ($query) => $scope($query)->whereIn('estado', ['radicada', 'en_revision']), 'assignedPqrs as overdue_count' => fn ($query) => $scope($query)->whereIn('estado', ['radicada', 'en_revision'])->whereDate('fecha_limite_respuesta', '<', today()), 'assignedPqrs as completed_count' => fn ($query) => $scope($query)->whereIn('estado', ['respondida', 'cerrada'])])->get();
+
         return view('management.workload', compact('users'));
     }
 
     public function tools(Request $request, ContextoOperativo $contexto): View
     {
         $this->permitir($contexto, 'gestion.herramientas_gestionar');
-        return view('management.tools', ['templates' => ResponseTemplate::latest()->get(), 'tags' => PqrTag::query()->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->orderBy('name')->get(), 'rules' => AutomationRule::with(['type', 'assignee'])->latest()->get(), 'types' => TipoPqr::orderBy('nombre')->get(), 'managers' => User::query()->whereHas('membresiasCopropiedad', fn ($query) => $query->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->where('estado', 'activa'))->orderBy('name')->get(), 'puedeExportarInformes' => app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar')]);
+
+        return view('management.tools', ['templates' => ResponseTemplate::latest()->get(), 'tags' => PqrTag::query()->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->orderBy('name')->get(), 'rules' => AutomationRule::with(['type', 'assignee'])->latest()->get(), 'types' => TipoPqr::query()->whereNull('desactivada_at')->orderBy('nombre')->get(), 'managers' => User::query()->whereHas('membresiasCopropiedad', fn ($query) => $query->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->where('estado', 'activa'))->orderBy('name')->get(), 'puedeExportarInformes' => app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar')]);
     }
 
-    public function template(Request $request, ContextoOperativo $contexto): RedirectResponse { $this->permitir($contexto, 'gestion.herramientas_gestionar'); ResponseTemplate::create($request->validate(['name' => 'required|max:100', 'subject' => 'nullable|max:150', 'body' => 'required|max:10000']) + ['created_by' => $request->user()->id]); return back()->with('success', 'Plantilla creada.'); }
-    public function tag(Request $request, ContextoOperativo $contexto, AdministrarCatalogoEtiquetasPqrs $catalogo): RedirectResponse
+    public function template(Request $request, ContextoOperativo $contexto): RedirectResponse
     {
         $this->permitir($contexto, 'gestion.herramientas_gestionar');
-        $catalogo->crear($contexto, $request->user(), $this->validarEtiqueta($request, $contexto));
+        ResponseTemplate::create($request->validate(['name' => 'required|max:100', 'subject' => 'nullable|max:150', 'body' => 'required|max:10000']) + ['created_by' => $request->user()->id]);
+
+        return back()->with('success', 'Plantilla creada.');
+    }
+
+    public function tag(StoreEtiquetaRequest $request, ContextoOperativo $contexto, AdministrarCatalogoEtiquetasPqrs $catalogo): RedirectResponse
+    {
+        $this->permitir($contexto, 'gestion.herramientas_gestionar');
+        $catalogo->crear($contexto, $request->user(), $request->validated());
+
         return back()->with('success', 'Etiqueta creada correctamente.');
     }
-    public function updateTag(Request $request, PqrTag $tag, ContextoOperativo $contexto, ConsultaEtiquetasPqrsContextuales $consulta, AdministrarCatalogoEtiquetasPqrs $catalogo): RedirectResponse
+
+    public function updateTag(UpdateEtiquetaRequest $request, PqrTag $tag, ContextoOperativo $contexto, ConsultaEtiquetasPqrsContextuales $consulta, AdministrarCatalogoEtiquetasPqrs $catalogo): RedirectResponse
     {
         $this->permitir($contexto, 'gestion.herramientas_gestionar');
         $tag = $consulta->resolver($contexto, $tag->getKey());
-        $request->merge(['editing_tag' => (string) $tag->id]);
-        $changed = $catalogo->actualizar($contexto, $request->user(), $tag, $this->validarEtiqueta($request, $contexto, $tag));
+        $changed = $catalogo->actualizar($contexto, $request->user(), $tag, $request->validated());
+
         return back()->with($changed ? 'success' : 'info', $changed ? 'Etiqueta actualizada correctamente.' : 'La etiqueta no tenía cambios.');
     }
+
     public function tagStatus(Request $request, PqrTag $tag, ContextoOperativo $contexto, ConsultaEtiquetasPqrsContextuales $consulta, AdministrarCatalogoEtiquetasPqrs $catalogo): RedirectResponse
     {
         $this->permitir($contexto, 'gestion.herramientas_gestionar');
@@ -58,16 +77,45 @@ class ComplementaryController extends Controller
         $data = $request->validate(['activo' => ['present', 'boolean']]);
         $activo = (bool) $data['activo'];
         $changed = $catalogo->cambiarEstado($contexto, $request->user(), $tag, $activo);
+
         return back()->with($changed ? 'success' : 'info', $changed ? ($activo ? 'Etiqueta reactivada.' : 'Etiqueta desactivada.') : 'La etiqueta ya tenía ese estado.');
     }
-    private function validarEtiqueta(Request $request, ContextoOperativo $contexto, ?PqrTag $tag = null): array
+
+    /** Papelera (HU-CONF-03): etiquetas desactivadas con acción de restauración. */
+    public function papeleraEtiquetas(ContextoOperativo $contexto): View
     {
-        $input = ['name' => AdministrarCatalogoEtiquetasPqrs::normalizarNombre((string) $request->input('name')), 'color' => AdministrarCatalogoEtiquetasPqrs::normalizarColor((string) $request->input('color'))];
-        $unique = Rule::unique('pqr_tags', 'name')->where(fn ($query) => $query->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id));
-        if ($tag) $unique->ignore($tag->id);
-        return Validator::make($input, ['name' => ['required', 'string', 'max:60', $unique], 'color' => ['required', 'regex:/^#[0-9A-F]{6}$/']], ['name.required' => 'El nombre de la etiqueta es obligatorio.', 'name.max' => 'El nombre no puede superar 60 caracteres.', 'name.unique' => 'Ya existe una etiqueta con este nombre en la Copropiedad. Reactívala si está desactivada.', 'color.regex' => 'El color debe usar el formato #RRGGBB.'])->validate();
+        $this->permitir($contexto, 'gestion.herramientas_gestionar');
+
+        $etiquetas = PqrTag::query()
+            ->where('organizacion_id', $contexto->organizacion->id)
+            ->where('copropiedad_id', $contexto->copropiedad->id)
+            ->where('activo', false)
+            ->orderBy('name')
+            ->get();
+
+        return view('management.papelera', [
+            'titulo' => 'Papelera de etiquetas',
+            'descripcion' => 'Etiquetas desactivadas de la Copropiedad activa. Restaurar vuelve a ponerlas a disposición sin crear registros nuevos.',
+            'volver' => route('management.tools'),
+            'volverTexto' => 'Volver a herramientas',
+            'columna' => 'Etiqueta',
+            'registros' => $etiquetas->map(fn (PqrTag $tag): array => [
+                'id' => $tag->id,
+                'resumen' => $tag->name,
+                'fecha' => $tag->updated_at?->format('d/m/Y H:i'),
+                'restaurar' => route('management.tags.status', $tag),
+            ]),
+        ]);
     }
-    public function rule(Request $request, ContextoOperativo $contexto): RedirectResponse { $this->permitir($contexto, 'gestion.herramientas_gestionar'); AutomationRule::create($request->validate(['name' => 'required|max:100', 'tipo_pqr_id' => 'nullable|exists:tipo_pqrs,id', 'assign_to_id' => 'nullable|exists:users,id', 'set_status' => 'required|in:radicada,en_revision'])); return back()->with('success', 'Regla automática creada.'); }
+
+    public function rule(Request $request, ContextoOperativo $contexto): RedirectResponse
+    {
+        $this->permitir($contexto, 'gestion.herramientas_gestionar');
+        AutomationRule::create($request->validate(['name' => 'required|max:100', 'tipo_pqr_id' => 'nullable|exists:tipo_pqrs,id', 'assign_to_id' => 'nullable|exists:users,id', 'set_status' => 'required|in:radicada,en_revision']));
+
+        return back()->with('success', 'Regla automática creada.');
+    }
+
     public function syncTags(Request $request, Pqr $pqr, ContextoOperativo $contexto, ConsultaPqrsContextuales $consultaPqrs, SincronizarEtiquetasPqrs $sincronizarEtiquetas): RedirectResponse
     {
         $pqr = $consultaPqrs->resolver($contexto, $pqr->getKey());
@@ -80,8 +128,36 @@ class ComplementaryController extends Controller
 
         return back()->with('success', 'Etiquetas actualizadas.');
     }
-    public function residents(Request $request, ContextoOperativo $contexto): View { $this->permitir($contexto, 'residentes.gestionar'); return view('management.residents', ['residents' => User::orderBy('name')->paginate(20)]); }
-    public function resident(Request $request, User $user, ContextoOperativo $contexto): RedirectResponse { $this->permitir($contexto, 'residentes.gestionar'); $user->update($request->validate(['tower' => 'nullable|max:50', 'unit' => 'nullable|max:50'])); return back()->with('success', 'Unidad residencial actualizada.'); }
-    public function audit(Request $request, ContextoOperativo $contexto): View { $this->permitir($contexto, 'auditoria.ver'); return view('management.audit', ['logs' => AuditLog::with('user')->latest()->paginate(30)]); }
-    public function survey(Request $request, Pqr $pqr): RedirectResponse { $this->authorize('view', $pqr); abort_unless($pqr->user_id === $request->user()->id && in_array($pqr->estado, ['respondida', 'cerrada']), 403); $data = $request->validate(['rating' => 'required|integer|between:1,5', 'comment' => 'nullable|max:2000']); SatisfactionSurvey::updateOrCreate(['pqr_id' => $pqr->id], $data + ['user_id' => $request->user()->id]); return back()->with('success', 'Gracias por calificar la atención.'); }
+
+    public function residents(Request $request, ContextoOperativo $contexto): View
+    {
+        $this->permitir($contexto, 'residentes.gestionar');
+
+        return view('management.residents', ['residents' => User::orderBy('name')->paginate(20)]);
+    }
+
+    public function resident(Request $request, User $user, ContextoOperativo $contexto): RedirectResponse
+    {
+        $this->permitir($contexto, 'residentes.gestionar');
+        $user->update($request->validate(['tower' => 'nullable|max:50', 'unit' => 'nullable|max:50']));
+
+        return back()->with('success', 'Unidad residencial actualizada.');
+    }
+
+    public function audit(Request $request, ContextoOperativo $contexto): View
+    {
+        $this->permitir($contexto, 'auditoria.ver');
+
+        return view('management.audit', ['logs' => AuditLog::with('user')->latest()->paginate(30)]);
+    }
+
+    public function survey(Request $request, Pqr $pqr): RedirectResponse
+    {
+        $this->authorize('view', $pqr);
+        abort_unless($pqr->user_id === $request->user()->id && in_array($pqr->estado, ['respondida', 'cerrada']), 403);
+        $data = $request->validate(['rating' => 'required|integer|between:1,5', 'comment' => 'nullable|max:2000']);
+        SatisfactionSurvey::updateOrCreate(['pqr_id' => $pqr->id], $data + ['user_id' => $request->user()->id]);
+
+        return back()->with('success', 'Gracias por calificar la atención.');
+    }
 }

@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextResolver;
 use App\Application\Roles\GestionarPermisosDirectos;
 use App\Models\AuditLog;
+use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
+use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -176,10 +179,10 @@ class PermisosDirectosHuUsr05Test extends TestCase
 
     private function contexto(User $user)
     {
-        return app(\App\Application\Contexto\ContextResolver::class)
+        return app(ContextResolver::class)
             ->resolverExplicito(
-                \App\Models\Organizacion::query()->value('id'),
-                \App\Models\Copropiedad::query()->value('id'),
+                Organizacion::query()->value('id'),
+                Copropiedad::query()->value('id'),
                 $user->id,
             );
     }

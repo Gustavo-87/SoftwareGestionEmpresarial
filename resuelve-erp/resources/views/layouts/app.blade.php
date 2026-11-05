@@ -71,6 +71,8 @@
             $personasItems = [];
             if ($navegacion['residentes'] ?? false) {
                 $personasItems[] = ['label' => 'Residentes', 'route' => 'management.residents', 'match' => 'management.residents', 'icon' => 'users'];
+                $personasItems[] = ['label' => 'Unidades privadas', 'route' => 'management.unidades.index', 'match' => 'management.unidades.*', 'icon' => 'users'];
+                $personasItems[] = ['label' => 'Personas', 'route' => 'management.personas.index', 'match' => 'management.personas.*', 'icon' => 'users'];
             }
             $personasItems[] = ['label' => 'Mi perfil', 'route' => 'profile.edit', 'match' => 'profile.*', 'icon' => 'membership'];
             $navItems[] = ['id' => 'personas', 'label' => 'Perfil', 'icon' => 'users', 'items' => $personasItems];

@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use App\Domain\GestionDocumental\Enums\EstadoDocumentoVersionEnum;
 use App\Domain\GestionDocumental\Enums\NivelAccesoDocumentoEnum;
+use App\Models\Copropiedad;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;
 use App\Models\Mantenimiento;
+use App\Models\MantenimientoDocumentoEvidencia;
+use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesInstitutionalContext;
@@ -30,7 +33,7 @@ class EvidenciaMantenimientoTest extends TestCase
             ->post(route('mantenimiento.evidencia.store', $mantenimiento), ['documento_version_id' => $version->id])
             ->assertRedirect();
 
-        $evidencia = \App\Models\MantenimientoDocumentoEvidencia::query()->firstOrFail();
+        $evidencia = MantenimientoDocumentoEvidencia::query()->firstOrFail();
         $this->assertSame($version->id, (int) $evidencia->documento_version_id);
         $this->assertDatabaseHas('audit_logs', ['action' => 'mantenimiento.evidencia.vincular', 'auditable_id' => $evidencia->id]);
 
@@ -53,7 +56,7 @@ class EvidenciaMantenimientoTest extends TestCase
             ->post(route('mantenimiento.evidencia.store', $mantenimiento), ['documento_version_id' => $archivado->id])
             ->assertSessionHasErrors('documento_id');
 
-        $this->assertSame(0, \App\Models\MantenimientoDocumentoEvidencia::query()->count());
+        $this->assertSame(0, MantenimientoDocumentoEvidencia::query()->count());
     }
 
     public function test_vincular_exige_autorizacion_sobre_ambos_recursos_y_pertenencia_al_contexto(): void
@@ -72,7 +75,7 @@ class EvidenciaMantenimientoTest extends TestCase
             ->assertForbidden();
 
         // Documento de otro contexto: prohibido.
-        $otra = \App\Models\Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra', 'estado' => 'activa']);
+        $otra = Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra', 'estado' => 'activa']);
         $ajeno = $this->version($organizacion, $otra, EstadoDocumentoVersionEnum::APROBADA);
         $this->actingAsContextual($gestor)
             ->post(route('mantenimiento.evidencia.store', $mantenimiento), ['documento_version_id' => $ajeno->id])
@@ -95,13 +98,13 @@ class EvidenciaMantenimientoTest extends TestCase
         $payload = ['documento_version_id' => $version->id];
         $this->actingAsContextual($gestor)->post(route('mantenimiento.evidencia.store', $mantenimiento), $payload);
         $this->actingAsContextual($gestor)->post(route('mantenimiento.evidencia.store', $mantenimiento), $payload);
-        $this->assertSame(1, \App\Models\MantenimientoDocumentoEvidencia::query()->count());
+        $this->assertSame(1, MantenimientoDocumentoEvidencia::query()->count());
 
-        $evidencia = \App\Models\MantenimientoDocumentoEvidencia::query()->firstOrFail();
+        $evidencia = MantenimientoDocumentoEvidencia::query()->firstOrFail();
         $this->actingAsContextual($gestor)
             ->delete(route('mantenimiento.evidencia.destroy', [$mantenimiento, $evidencia]))
             ->assertRedirect();
-        $this->assertSame(0, \App\Models\MantenimientoDocumentoEvidencia::query()->count());
+        $this->assertSame(0, MantenimientoDocumentoEvidencia::query()->count());
 
         // Tras finalizar, el conjunto de evidencias es inmutable.
         $mantenimiento->update(['estado' => 'finalizado']);
@@ -110,7 +113,7 @@ class EvidenciaMantenimientoTest extends TestCase
             ->assertSessionHasErrors('evidencia');
     }
 
-    /** @return array{0:\App\Models\Organizacion,1:\App\Models\Copropiedad,2:User,3:Mantenimiento} */
+    /** @return array{0:Organizacion,1:Copropiedad,2:User,3:Mantenimiento} */
     private function escenario(): array
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();

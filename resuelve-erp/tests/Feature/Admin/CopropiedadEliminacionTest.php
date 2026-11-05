@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\ConfiguracionCopropiedad;
+use App\Models\Copropiedad;
 use App\Models\Documento;
 use App\Models\Mantenimiento;
 use App\Models\MembresiaCopropiedad;
@@ -47,7 +48,7 @@ class CopropiedadEliminacionTest extends TestCase
         ]);
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $plataforma->id, 'action' => 'copropiedad.delete',
-            'auditable_type' => \App\Models\Copropiedad::class, 'auditable_id' => $copropiedad->id,
+            'auditable_type' => Copropiedad::class, 'auditable_id' => $copropiedad->id,
         ]);
     }
 

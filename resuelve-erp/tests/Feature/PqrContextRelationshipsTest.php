@@ -12,8 +12,8 @@ use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
-use Tests\TestCase;
 use Tests\Concerns\CreatesInstitutionalContext;
+use Tests\TestCase;
 
 class PqrContextRelationshipsTest extends TestCase
 {

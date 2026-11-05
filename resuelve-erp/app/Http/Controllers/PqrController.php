@@ -8,6 +8,7 @@ use App\Application\Documentos\ConsultaDocumentosContextuales;
 use App\Application\Mantenimiento\ConsultaMantenimientos;
 use App\Application\Notificaciones\ConsultaNotificacionesContextuales;
 use App\Application\Pqrs\ActualizarPqrs;
+use App\Application\Pqrs\ConsultaExpedienteIntegrado;
 use App\Application\Pqrs\ConsultaParticipacionContextual;
 use App\Application\Pqrs\ConsultaPqrsContextuales;
 use App\Application\Pqrs\PresentarPqrs;
@@ -256,8 +257,7 @@ class PqrController extends Controller
         Request $request,
         ContextoOperativo $contexto,
         ConsultaPqrsContextuales $consultaPqrs
-    )
-    {
+    ) {
         $this->authorize('viewAny', Pqr::class);
 
         $autorizacion = app(AutorizacionContextual::class);
@@ -287,11 +287,21 @@ class PqrController extends Controller
         } elseif ($request->filled('estado')) {
             $query->where('estado', $request->estado);
         }
-        if ($request->filled('tipo_pqr_id')) $query->where('tipo_pqr_id', $request->integer('tipo_pqr_id'));
-        if ($request->filled('assigned_to_id')) $query->where('assigned_to_id', $request->integer('assigned_to_id'));
-        if ($puedeGestionar && $request->filled('prioridad')) $query->where('prioridad', $request->input('prioridad'));
-        if ($request->filled('desde')) $query->whereDate('fecha_radicacion', '>=', $request->date('desde'));
-        if ($request->filled('hasta')) $query->whereDate('fecha_radicacion', '<=', $request->date('hasta'));
+        if ($request->filled('tipo_pqr_id')) {
+            $query->where('tipo_pqr_id', $request->integer('tipo_pqr_id'));
+        }
+        if ($request->filled('assigned_to_id')) {
+            $query->where('assigned_to_id', $request->integer('assigned_to_id'));
+        }
+        if ($puedeGestionar && $request->filled('prioridad')) {
+            $query->where('prioridad', $request->input('prioridad'));
+        }
+        if ($request->filled('desde')) {
+            $query->whereDate('fecha_radicacion', '>=', $request->date('desde'));
+        }
+        if ($request->filled('hasta')) {
+            $query->whereDate('fecha_radicacion', '<=', $request->date('hasta'));
+        }
 
         $pqrs = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
@@ -319,15 +329,16 @@ class PqrController extends Controller
                 ->groupBy('estado')->pluck('total', 'estado'),
         ];
 
-        $tipos = TipoPqr::orderBy('nombre')->get();
+        $tipos = TipoPqr::query()->whereNull('desactivada_at')->orderBy('nombre')->get();
         $gestores = User::query()->whereHas('membresiasCopropiedad', fn ($query) => $query->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->where('estado', 'activa'))->orderBy('name')->get();
+
         return view('pqrs.index', compact('pqrs', 'resumen', 'chartData', 'tipos', 'gestores', 'puedeGestionar'));
     }
 
     public function create()
     {
         $this->authorize('create', Pqr::class);
-        $tipos = TipoPqr::orderBy('nombre')->get();
+        $tipos = TipoPqr::query()->whereNull('desactivada_at')->orderBy('nombre')->get();
 
         return view('pqrs.create', compact('tipos'));
     }
@@ -379,7 +390,7 @@ class PqrController extends Controller
         ContextoOperativo $contexto,
         ConsultaParticipacionContextual $consultaParticipacion,
         VisibilidadBorradoresPqrs $visibilidadBorradores,
-        \App\Application\Pqrs\ConsultaExpedienteIntegrado $consultaExpediente,
+        ConsultaExpedienteIntegrado $consultaExpediente,
     ) {
         $this->authorize('view', $pqr);
         $puedeGestionar = app(AutorizacionContextual::class)->puedeGestionarPqr($contexto, $pqr);
@@ -426,7 +437,7 @@ class PqrController extends Controller
         // de mantenimiento desde la PQRS y exportación del expediente.
         $expediente = $consultaExpediente->para($request->user(), $contexto, $pqr);
         $puedeGenerarMantenimiento = $puedeGestionar
-            && $request->user()->can('create', \App\Models\Mantenimiento::class);
+            && $request->user()->can('create', Mantenimiento::class);
         $puedeExportarExpediente = app(AutorizacionContextual::class)->tienePermiso($contexto, 'informes.exportar');
 
         return view('pqrs.show', compact('pqr', 'participacion', 'templates', 'availableTags', 'puedeGestionar', 'proximoPaso', 'replyOperationKeys', 'expediente', 'puedeGenerarMantenimiento', 'puedeExportarExpediente'));
@@ -435,7 +446,7 @@ class PqrController extends Controller
     public function edit(Pqr $pqr, ContextoOperativo $contexto)
     {
         $this->authorize('update', $pqr);
-        $tipos = TipoPqr::orderBy('nombre')->get();
+        $tipos = TipoPqr::query()->whereNull('desactivada_at')->orderBy('nombre')->get();
         $gestores = User::query()->whereHas('membresiasCopropiedad', fn ($query) => $query->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->where('estado', 'activa'))->orderBy('name')->get();
 
         return view('pqrs.edit', compact('pqr', 'tipos', 'gestores'));

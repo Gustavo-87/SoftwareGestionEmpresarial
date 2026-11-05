@@ -26,6 +26,7 @@ final class ResolverDestinatariosNotificacionPqrs
 
         return $candidatos->filter()->filter(function (User $usuario) use ($contexto, $event): bool {
             $destino = $this->contextos->resolverExplicito($contexto->organizacion->id, $contexto->copropiedad->id, $usuario->id);
+
             return $this->autorizacion->tienePermiso($destino, 'notificaciones.consultar')
                 && ($event !== 'pqr_creada' || $this->autorizacion->tienePermiso($destino, 'pqrs.gestionar'));
         })->unique('id')->values();

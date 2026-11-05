@@ -5,8 +5,8 @@ namespace Tests\Unit\Membresias;
 use App\Application\Membresias\SuspenderMembresia;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use InvalidArgumentException;
+use Tests\TestCase;
 
 class SuspenderMembresiaTest extends TestCase
 {
@@ -17,7 +17,7 @@ class SuspenderMembresiaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->suspenderMembresia = new SuspenderMembresia();
+        $this->suspenderMembresia = new SuspenderMembresia;
     }
 
     public function test_suspender_membresia_exitosa(): void

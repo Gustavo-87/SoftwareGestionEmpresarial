@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pqrs', function (Blueprint $table) {
-    $table->id();
-    $table->string('asunto', 150);
-    $table->text('descripcion');
-    $table->date('fecha_radicacion');
-    $table->date('fecha_limite_respuesta')->nullable();
-    $table->enum('estado', ['radicada', 'en_revision', 'respondida', 'cerrada'])->default('radicada');
-    $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->foreignId('tipo_pqr_id')->constrained('tipo_pqrs')->onDelete('cascade');
-    $table->timestamps();
-});
+            $table->id();
+            $table->string('asunto', 150);
+            $table->text('descripcion');
+            $table->date('fecha_radicacion');
+            $table->date('fecha_limite_respuesta')->nullable();
+            $table->enum('estado', ['radicada', 'en_revision', 'respondida', 'cerrada'])->default('radicada');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('tipo_pqr_id')->constrained('tipo_pqrs')->onDelete('cascade');
+            $table->timestamps();
+        });
     }
 
     /**

@@ -32,7 +32,7 @@ final class ConsultaPqrsContextuales
 
     public function resolver(ContextoOperativo $contexto, int|string $identificador): Pqr
     {
-        $modelo = new Pqr();
+        $modelo = new Pqr;
 
         return $this->para($contexto)
             ->where($modelo->getRouteKeyName(), $identificador)

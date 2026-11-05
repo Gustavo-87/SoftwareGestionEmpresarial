@@ -5,6 +5,7 @@ namespace App\Application\Pqrs;
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Notificaciones\EmitirNotificacionPqrs;
+use App\Events\PqrEstadoActualizado;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Pqr;
 use App\Models\User;
@@ -24,7 +25,7 @@ final class ActualizarPqrs
     public function ejecutar(ContextoOperativo $contexto, User $usuario, Pqr $pqr, array $datos, iterable $adjuntos = []): Pqr
     {
         if (! $this->autorizacion->puedeGestionarPqr($contexto, $pqr)) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         $datosPermitidos = array_intersect_key($datos, array_flip([
@@ -80,7 +81,9 @@ final class ActualizarPqrs
 
         [$pqr, $before] = $resultado;
         if ($before['estado'] !== $pqr->estado) {
-            $this->notificaciones->ejecutar($contexto, $pqr, 'pqr_estado_actualizado');
+            // HU-NOT-03: el listener NotificarPqrEstadoActualizado emite la
+            // notificación (misma semántica que la invocación directa).
+            event(new PqrEstadoActualizado($contexto, $pqr));
         }
         if ((int) $before['assigned_to_id'] !== (int) $pqr->assigned_to_id && $pqr->assignee) {
             $this->notificaciones->ejecutar($contexto, $pqr, 'pqr_asignada');

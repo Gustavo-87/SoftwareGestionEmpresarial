@@ -38,10 +38,25 @@ class DocumentoVersion extends Model
         ];
     }
 
-    public function documento(): BelongsTo { return $this->belongsTo(Documento::class); }
-    public function sustituyeVersion(): BelongsTo { return $this->belongsTo(self::class, 'sustituye_version_id'); }
-    public function sucesora(): HasMany { return $this->hasMany(self::class, 'sustituye_version_id'); }
-    public function actuaciones(): HasMany { return $this->hasMany(DocumentoActuacion::class); }
+    public function documento(): BelongsTo
+    {
+        return $this->belongsTo(Documento::class);
+    }
+
+    public function sustituyeVersion(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'sustituye_version_id');
+    }
+
+    public function sucesora(): HasMany
+    {
+        return $this->hasMany(self::class, 'sustituye_version_id');
+    }
+
+    public function actuaciones(): HasMany
+    {
+        return $this->hasMany(DocumentoActuacion::class);
+    }
 
     /** El preview solo es posible para versiones aprobadas, vigentes, con archivo y de tipo visualizable. */
     public function esPrevisualizable(): bool

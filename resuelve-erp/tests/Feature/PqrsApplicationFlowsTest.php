@@ -119,7 +119,8 @@ class PqrsApplicationFlowsTest extends TestCase
         $this->createContextualIdentity($resident, $organizacion, $copropiedad, 'residente', ['pqrs.crear']);
         $contexto = app(ContextResolver::class)->resolverExplicito($organizacion->id, $copropiedad->id, $resident->id);
         $tipo = TipoPqr::factory()->create();
-        $adjuntoFallido = new class {
+        $adjuntoFallido = new class
+        {
             public function store(string $path): never
             {
                 throw new RuntimeException('No se pudo almacenar el adjunto.');

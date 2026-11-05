@@ -17,7 +17,9 @@ final class CrearDocumento
 
     public function ejecutar(ContextoOperativo $contexto, User $actor, array $datos): Documento
     {
-        if (! $this->autorizacion->tienePermiso($contexto, 'documentos.gestionar')) throw new AuthorizationException();
+        if (! $this->autorizacion->tienePermiso($contexto, 'documentos.gestionar')) {
+            throw new AuthorizationException;
+        }
         $this->validarPropietario($contexto, $datos['propietario_documental_user_id']);
 
         return DB::transaction(function () use ($contexto, $actor, $datos): Documento {
@@ -29,6 +31,7 @@ final class CrearDocumento
                 'creado_por_user_id' => $actor->id,
             ])->save();
             $this->actuaciones->registrar($documento, null, $actor, 'documento_creado', 'Creó el Documento.');
+
             return $documento;
         });
     }
@@ -36,6 +39,8 @@ final class CrearDocumento
     private function validarPropietario(ContextoOperativo $contexto, int $userId): void
     {
         $vigente = MembresiaCopropiedad::query()->where('usuario_id', $userId)->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id)->where('estado', 'activa')->where('vigente_desde', '<=', now())->where(fn ($q) => $q->whereNull('vigente_hasta')->orWhere('vigente_hasta', '>', now()))->exists();
-        if (! $vigente) throw ValidationException::withMessages(['propietario_documental_user_id' => ['El propietario documental seleccionado no es válido.']]);
+        if (! $vigente) {
+            throw ValidationException::withMessages(['propietario_documental_user_id' => ['El propietario documental seleccionado no es válido.']]);
+        }
     }
 }

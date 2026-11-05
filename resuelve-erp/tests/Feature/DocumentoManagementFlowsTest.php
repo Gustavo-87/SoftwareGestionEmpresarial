@@ -83,6 +83,7 @@ class DocumentoManagementFlowsTest extends TestCase
     {
         $documento = new Documento(['ambito' => 'copropiedad', 'propietario_documental_user_id' => $ownerId, 'tipo' => 'documento_general', 'categoria' => 'administrativo', 'titulo' => 'Documento', 'nivel_acceso' => 'interno', 'estado' => 'activo']);
         $documento->forceFill(['organizacion_id' => $organizacionId, 'copropiedad_id' => $copropiedadId])->save();
+
         return $documento;
     }
 }

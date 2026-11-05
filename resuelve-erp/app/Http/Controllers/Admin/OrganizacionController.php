@@ -26,8 +26,8 @@ final class OrganizacionController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('identificacion_tributaria', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('identificacion_tributaria', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -97,7 +97,7 @@ final class OrganizacionController extends Controller
 
         $data = $request->validate([
             'nombre' => ['required', 'string', 'max:200'],
-            'identificacion_tributaria' => ['nullable', 'string', 'max:40', 'unique:organizaciones,identificacion_tributaria,' . $organizacion->id],
+            'identificacion_tributaria' => ['nullable', 'string', 'max:40', 'unique:organizaciones,identificacion_tributaria,'.$organizacion->id],
             'email' => ['nullable', 'email', 'max:150'],
             'telefono' => ['nullable', 'string', 'max:40'],
         ]);

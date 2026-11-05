@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Membresias;
 
-use App\Models\User;
+use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Organizacion;
-use App\Models\Copropiedad;
 use App\Models\Rol;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,9 +15,13 @@ class AdminMembresiaRolTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Organizacion $organizacion;
+
     private Copropiedad $copropiedad;
+
     private MembresiaCopropiedad $membresia;
+
     private Rol $rol;
 
     protected function setUp(): void

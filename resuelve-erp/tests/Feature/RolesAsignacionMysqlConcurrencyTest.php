@@ -6,8 +6,10 @@ use App\Application\Roles\CrearRol;
 use App\Application\Roles\RevocarRolUsuario;
 use App\Models\MembresiaCopropiedad;
 use App\Models\User;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Permission;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
@@ -29,8 +31,8 @@ class RolesAsignacionMysqlConcurrencyTest extends TestCase
 
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $plataforma = User::factory()->create(['es_administrador_sistema' => true]);
-        \Spatie\Permission\Models\Permission::findOrCreate('usuarios.gestionar', 'web');
-        $sufijo = \Illuminate\Support\Str::random(6);
+        Permission::findOrCreate('usuarios.gestionar', 'web');
+        $sufijo = Str::random(6);
         $rolUno = app(CrearRol::class)->ejecutar($plataforma, null, ['nombre' => 'Capacidad uno '.$sufijo, 'permisos' => ['usuarios.gestionar']]);
         $rolDos = app(CrearRol::class)->ejecutar($plataforma, null, ['nombre' => 'Capacidad dos '.$sufijo, 'permisos' => ['usuarios.gestionar']]);
 

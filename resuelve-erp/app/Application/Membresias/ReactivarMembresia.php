@@ -4,6 +4,7 @@ namespace App\Application\Membresias;
 
 use App\Application\Usuarios\DesactivarUsuarioGlobal;
 use App\Models\MembresiaCopropiedad;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -26,7 +27,7 @@ final class ReactivarMembresia
 {
     /**
      * @param  string|null  $vigenciaAnterior  `vigente_hasta` previo a la
-     *     suspensión, según la auditoría (`membresia.suspend` → before).
+     *                                         suspensión, según la auditoría (`membresia.suspend` → before).
      */
     public function ejecutar(MembresiaCopropiedad $membresia, ?string $vigenciaAnterior = null): MembresiaCopropiedad
     {
@@ -111,6 +112,6 @@ final class ReactivarMembresia
             return $membresia->vigente_hasta;
         }
 
-        return $vigenciaAnterior === null ? null : \Illuminate\Support\Carbon::parse($vigenciaAnterior);
+        return $vigenciaAnterior === null ? null : Carbon::parse($vigenciaAnterior);
     }
 }

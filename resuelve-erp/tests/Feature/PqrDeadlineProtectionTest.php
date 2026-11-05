@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextResolver;
+use App\Application\Pqrs\PresentarPqrs;
 use App\Models\ConfiguracionCopropiedad;
 use App\Models\Pqr;
 use App\Models\TipoPqr;
@@ -53,8 +55,8 @@ class PqrDeadlineProtectionTest extends TestCase
         foreach ([[$orgA, $copA, 'uno'], [$orgB, $copB, 'predeterminado']] as [$org, $cop, $asunto]) {
             $resident = User::factory()->create(['role' => 'residente']);
             $this->createContextualIdentity($resident, $org, $cop, 'residente', ['pqrs.crear']);
-            $contexto = app(\App\Application\Contexto\ContextResolver::class)->resolverExplicito($org->id, $cop->id, $resident->id);
-            app(\App\Application\Pqrs\PresentarPqrs::class)->ejecutar($contexto, $resident, ['asunto' => $asunto, 'descripcion' => 'Plazo contextual.', 'tipo_pqr_id' => $tipo->id]);
+            $contexto = app(ContextResolver::class)->resolverExplicito($org->id, $cop->id, $resident->id);
+            app(PresentarPqrs::class)->ejecutar($contexto, $resident, ['asunto' => $asunto, 'descripcion' => 'Plazo contextual.', 'tipo_pqr_id' => $tipo->id]);
         }
 
         $this->assertSame('2026-08-13', Pqr::where('asunto', 'uno')->sole()->fecha_limite_respuesta->toDateString());

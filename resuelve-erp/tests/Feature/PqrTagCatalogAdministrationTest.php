@@ -36,7 +36,9 @@ class PqrTagCatalogAdministrationTest extends TestCase
         try {
             $migration->up();
         } finally {
-            if (! Schema::hasColumn('pqr_tags', 'activo')) $migration->up();
+            if (! Schema::hasColumn('pqr_tags', 'activo')) {
+                $migration->up();
+            }
         }
         $this->assertTrue(Schema::hasColumn('pqr_tags', 'activo'));
         $this->assertStringContainsString('pqr_tags_context_activo_index', collect(Schema::getIndexes('pqr_tags'))->pluck('name')->join(','));
@@ -48,7 +50,7 @@ class PqrTagCatalogAdministrationTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $this->createContextualIdentity($admin, $org, $cop, 'admin', ['gestion.herramientas_gestionar']);
 
-        $this->actingAsContextual($admin)->post(route('management.tags.store'), ['name' => "  Atención   común  ", 'color' => '#aabbcc', 'organizacion_id' => 999])->assertRedirect()->assertSessionHas('success');
+        $this->actingAsContextual($admin)->post(route('management.tags.store'), ['name' => '  Atención   común  ', 'color' => '#aabbcc', 'organizacion_id' => 999])->assertRedirect()->assertSessionHas('success');
 
         $tag = PqrTag::query()->sole();
         $this->assertSame('Atención común', $tag->name);
@@ -106,7 +108,8 @@ class PqrTagCatalogAdministrationTest extends TestCase
 
     public function test_autoriza_antes_de_validar_y_resuelve_recurso_contextual_sin_idor(): void
     {
-        [$org, $cop] = $this->createInstitutionalContext(); [$otherOrg, $otherCop] = $this->createInstitutionalContext();
+        [$org, $cop] = $this->createInstitutionalContext();
+        [$otherOrg, $otherCop] = $this->createInstitutionalContext();
         $external = PqrTag::factory()->paraContexto($otherOrg, $otherCop)->create();
         foreach (['apoyo', 'auditor', 'residente'] as $role) {
             $actor = User::factory()->create(['role' => $role]);

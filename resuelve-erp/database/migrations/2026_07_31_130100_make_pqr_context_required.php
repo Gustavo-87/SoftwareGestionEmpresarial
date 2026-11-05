@@ -13,7 +13,7 @@ return new class extends Migration
             ->whereNull('organizacion_id')
             ->orWhereNull('copropiedad_id')
             ->exists()) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'No se puede exigir el contexto: existen PQRS sin Organización o Copropiedad.'
             );
         }
