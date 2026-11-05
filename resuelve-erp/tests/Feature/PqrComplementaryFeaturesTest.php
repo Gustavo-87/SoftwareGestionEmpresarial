@@ -63,7 +63,7 @@ class PqrComplementaryFeaturesTest extends TestCase
         $this->createContextualIdentity($resident, $organizacion, $copropiedad, 'residente_recordatorio', ['notificaciones.consultar']);
         $pqr = Pqr::factory()->paraContexto($organizacion, $copropiedad)->create(['user_id' => $resident->id, 'estado' => 'radicada', 'fecha_limite_respuesta' => today()->addDay()]);
         $this->artisan('pqrs:send-reminders')->assertSuccessful();
-        Notification::assertSentTo($resident,PqrEventNotification::class);
+        Notification::assertSentTo($resident, PqrEventNotification::class);
         $this->assertNotNull($pqr->fresh()->last_reminder_at);
     }
 }

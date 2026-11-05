@@ -17,6 +17,6 @@ class AuditMutations
             AuditLog::create(['user_id' => $r->user()->id, 'action' => $r->method().' '.$r->route()?->getName(), 'auditable_type' => $r->route('pqr') ? 'pqr' : null, 'auditable_id' => $r->route('pqr')?->id, 'ip_address' => $r->ip(), 'metadata' => ['path' => $r->path()]]);
         }
 
-return $response;
+        return $response;
     }
 }

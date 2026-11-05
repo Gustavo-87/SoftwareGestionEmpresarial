@@ -29,6 +29,6 @@ final class DescargarVersionDocumento
             throw (new ModelNotFoundException)->setModel(DocumentoVersion::class, [$v->id]);
         }
 
-return $disk->download($v->ruta_archivo, $v->nombre_original);
+        return $disk->download($v->ruta_archivo, $v->nombre_original);
     }
 }

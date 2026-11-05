@@ -39,7 +39,7 @@ final class AprobarVersionDocumento
             }$v->update(['estado' => 'aprobada', 'vigente_desde' => $desde, 'vigente_hasta' => $hasta, 'aprobada_por_user_id' => $u->id, 'nombre_aprobador' => $u->name, 'aprobada_at' => now()]);
             $this->h->registrar($d, $v, $u, 'version_aprobada', 'Aprobó la Versión.');
             if ($anterior) {
-                $this->h->registrar($d,$anterior,$u,'vigencia_cerrada','Cerró la vigencia de la Versión sustituida.');
+                $this->h->registrar($d, $anterior, $u, 'vigencia_cerrada', 'Cerró la vigencia de la Versión sustituida.');
             }
         });
     }
