@@ -16,6 +16,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ContextResolverTest extends TestCase
@@ -57,8 +59,8 @@ class ContextResolverTest extends TestCase
         // permisos desde el RBAC de Spatie (equipo = Copropiedad). El espejo
         // legado anterior se conserva como compatibilidad y diagnóstico.
         setPermissionsTeamId(null);
-        $rolSpatie = \Spatie\Permission\Models\Role::findOrCreate('gestor', 'web');
-        \Spatie\Permission\Models\Permission::findOrCreate('pqrs.gestionar', 'web');
+        $rolSpatie = Role::findOrCreate('gestor', 'web');
+        Permission::findOrCreate('pqrs.gestionar', 'web');
         $rolSpatie->syncPermissions(['pqrs.gestionar']);
         setPermissionsTeamId($copropiedad->id);
         $usuario->unsetRelation('roles')->unsetRelation('permissions');

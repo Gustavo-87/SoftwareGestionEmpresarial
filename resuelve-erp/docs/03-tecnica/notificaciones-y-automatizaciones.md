@@ -63,6 +63,26 @@ fuera de contexto concluye en `no_recipient`. La respuesta web comunica
 únicamente que la respuesta quedó registrada y distingue si el aviso quedó
 encolado, sin destinatario o pendiente de reintento.
 
+## Eventos y listeners (HU-NOT-03, Sprint 23)
+
+La emisión de los hechos `pqr_creada` y `pqr_estado_actualizado` sigue el
+patrón Laravel Event/Listener, sin cambiar sus efectos:
+
+- `PqrRadicada` (`app/Events/`) se despacha desde `PresentarPqrs` y
+  `PqrEstadoActualizado` desde `AplicarAccionRapidaPqrs` y `ActualizarPqrs`,
+  en el mismo punto posterior al commit donde antes se invocaba la emisión
+  directa (sustitución 1:1, sin doble emisión).
+- Los listeners síncronos `NotificarPqrRadicada` y
+  `NotificarPqrEstadoActualizado` (`app/Listeners/`) invocan
+  `EmitirNotificacionPqrs` con los mismos strings funcionales, por lo que se
+  conservan destinatarios, canales, orden y momento. Se registran por
+  descubrimiento automático (sin `EventServiceProvider`).
+- Un rollback de la transacción no dispara el evento ni sus efectos: el
+  despacho ocurre solo tras el commit.
+- Quedan fuera de este patrón `pqr_asignada`, recordatorios y respuestas
+  (flujo B-3), que conservan su invocación directa actual. No se modifican
+  `PqrEventNotification`, el job de correo ni el scheduler.
+
 ## Seguridad y límites
 
 - `ContextoOperativo`, `AutorizacionContextual`, Membresía vigente y
@@ -81,9 +101,12 @@ encolado, sin destinatario o pendiente de reintento.
 - `app/Console/Commands/ReconciliarNotificacionesRespuestaPqrs.php`
 - `app/Jobs/EnviarCorreoNotificacionPqrs.php`
 - `app/Notifications/PqrEventNotification.php`
+- `app/Events/PqrRadicada.php`, `app/Events/PqrEstadoActualizado.php`
+- `app/Listeners/NotificarPqrRadicada.php`, `app/Listeners/NotificarPqrEstadoActualizado.php`
 - `app/Http/Controllers/NotificationController.php`
 - `app/Console/Commands/EnviarRecordatoriosPqrs.php`
 - `tests/Feature/NotificacionesContextualesTest.php`
 - `tests/Feature/BandejaNotificacionesContextualesTest.php`
 - `tests/Feature/EmisionNotificacionesPqrsTest.php`
+- `tests/Feature/EventosNotificacionTest.php`
 - `tests/Feature/PqrVerifiedNotificationTest.php`

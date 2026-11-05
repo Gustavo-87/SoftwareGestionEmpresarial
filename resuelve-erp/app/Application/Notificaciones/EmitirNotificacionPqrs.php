@@ -10,8 +10,8 @@ use App\Mail\PqrEventMail;
 use App\Models\Pqr;
 use App\Models\User;
 use App\Notifications\PqrEventNotification;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Mail;
 use InvalidArgumentException;
 use RuntimeException;
 

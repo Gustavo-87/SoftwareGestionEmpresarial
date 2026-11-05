@@ -93,7 +93,9 @@ final class GestionarCicloRespuestaPqrs
         $normalize = static fn (?string $value): ?string => $value === null ? null : preg_replace('/\R/u', "\n", trim($value));
         $newAttachments = collect($files)->values()->map(function (object $file, int $position): array {
             $sha256 = hash_file('sha256', $file->getRealPath());
-            if (! is_string($sha256)) throw new \RuntimeException('No fue posible calcular la huella técnica del adjunto.');
+            if (! is_string($sha256)) {
+                throw new \RuntimeException('No fue posible calcular la huella técnica del adjunto.');
+            }
 
             return [
                 'logical_id' => "attachment:{$position}",
@@ -167,7 +169,9 @@ final class GestionarCicloRespuestaPqrs
                         : $file->store("pqrs/{$lockedPqr->id}/communications/{$key}");
                     $createdPaths[] = $path;
                     $sha256 = hash_file('sha256', $file->getRealPath());
-                    if (! is_string($sha256)) throw new \RuntimeException('No fue posible calcular la huella técnica del adjunto.');
+                    if (! is_string($sha256)) {
+                        throw new \RuntimeException('No fue posible calcular la huella técnica del adjunto.');
+                    }
                     $attachments[] = [
                         'name' => $file->getClientOriginalName(), 'path' => $path,
                         'storage_key' => $key, 'position' => $index,
@@ -288,7 +292,7 @@ final class GestionarCicloRespuestaPqrs
     }
 
     /** @param list<array<string,mixed>> $attachments
-     *  @return list<array{storage_key:string,position:int,sha256:string}>
+     * @return list<array{storage_key:string,position:int,sha256:string}>
      */
     private function cleanupManifest(array $attachments): array
     {

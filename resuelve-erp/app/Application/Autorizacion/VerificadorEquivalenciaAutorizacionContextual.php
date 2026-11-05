@@ -25,6 +25,7 @@ use RuntimeException;
 final class VerificadorEquivalenciaAutorizacionContextual
 {
     public const SEVERIDAD_ERROR = 'error';
+
     public const SEVERIDAD_AVISO = 'aviso';
 
     private const PERMISOS_POR_ROL = [
@@ -51,12 +52,14 @@ final class VerificadorEquivalenciaAutorizacionContextual
             $esperados = self::PERMISOS_POR_ROL[$rolHeredado] ?? null;
             if ($esperados === null) {
                 $divergencias[] = $this->divergencia($usuario, 'users.role no es reconocido por el catálogo de compatibilidad.', self::SEVERIDAD_ERROR);
+
                 return;
             }
 
             $contexto = $this->contextResolver->resolverExplicito($siteSetting->organizacion_id, $siteSetting->copropiedad_id, $usuario->id);
             if (! $contexto->tieneMembresiaContextual()) {
                 $divergencias[] = $this->divergencia($usuario, 'no tiene Membresía de Copropiedad vigente.', self::SEVERIDAD_AVISO);
+
                 return;
             }
 
@@ -69,6 +72,7 @@ final class VerificadorEquivalenciaAutorizacionContextual
             );
             if (! in_array($rolHeredado, $rolesAsignados, true)) {
                 $divergencias[] = $this->divergencia($usuario, 'el Rol heredado users.role no está asignado en el contexto.', self::SEVERIDAD_ERROR);
+
                 return;
             }
 

@@ -6,10 +6,10 @@ use App\Application\Contexto\ContextoOperativo;
 use App\Application\Pqrs\ConsultaPqrsContextuales;
 use App\Application\Pqrs\GestionarCicloRespuestaPqrs;
 use App\Application\Pqrs\VisibilidadBorradoresPqrs;
+use App\Enums\PqrCommunicationNotificationStatus;
+use App\Enums\PqrCommunicationOperation;
 use App\Models\Pqr;
 use App\Models\PqrReply;
-use App\Enums\PqrCommunicationOperation;
-use App\Enums\PqrCommunicationNotificationStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -80,7 +80,9 @@ class PqrReplyController extends Controller
         $this->authorize('view', $pqr);
         abort_unless($reply->pqr_id === $pqr->id && isset($reply->attachments[$file]), 404);
         $estado = $visibilidadBorradores->estado($contexto, $pqr, $reply);
-        if ($estado !== 'visible') abort($estado === 'forbidden' ? 403 : 404);
+        if ($estado !== 'visible') {
+            abort($estado === 'forbidden' ? 403 : 404);
+        }
         $attachment = $reply->attachments[$file];
 
         return Storage::disk('local')->download($attachment['path'], $attachment['name']);

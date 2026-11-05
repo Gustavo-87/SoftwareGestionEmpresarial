@@ -24,7 +24,7 @@ final class GestionarPersona
         AutorizacionResidencia::exigirGestion($contexto);
         $validados = $this->validar($contexto, $datos);
 
-        $persona = new Persona();
+        $persona = new Persona;
         $persona->forceFill([
             'organizacion_id' => $contexto->organizacion->id,
             'estado' => 'activa',
@@ -101,15 +101,27 @@ final class GestionarPersona
         ]);
     }
 
-    private function validar(ContextoOperativo $contexto, array $datos): array
+    /**
+     * Reglas de validación del alta y la edición (fuente única para la capa
+     * HTTP mediante Form Requests y para los casos de uso).
+     *
+     * @return array<string, array<int, string>>
+     */
+    public static function reglasValidacion(): array
     {
-        $validados = validator($datos, [
+        return [
             'tipo_persona' => ['required', 'string', 'in:'.implode(',', array_column(TipoPersonaEnum::cases(), 'value'))],
             'nombre_razon_social' => ['required', 'string', 'max:255'],
             'identificacion' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:50'],
-        ], [
+        ];
+    }
+
+    /** @return array<string, string> */
+    public static function mensajesValidacion(): array
+    {
+        return [
             'tipo_persona.required' => 'Selecciona el tipo de persona.',
             'tipo_persona.in' => 'Selecciona un tipo de persona válido.',
             'nombre_razon_social.required' => 'El nombre o razón social es obligatorio.',
@@ -117,13 +129,41 @@ final class GestionarPersona
             'identificacion.max' => 'La identificación no puede exceder 50 caracteres.',
             'email.email' => 'Ingresa un correo electrónico válido.',
             'telefono.max' => 'El teléfono no puede exceder 50 caracteres.',
-        ])->validate();
+        ];
+    }
+
+    public function actualizar(ContextoOperativo $contexto, User $operador, Persona $persona, array $datos): Persona
+    {
+        AutorizacionResidencia::exigirGestion($contexto);
+        $validados = $this->validar($contexto, $datos, $persona->id);
+
+        $persona->forceFill($validados)->save();
+
+        AuditLog::create([
+            'user_id' => $operador->id,
+            'action' => 'residencia.persona.actualizar',
+            'auditable_type' => Persona::class,
+            'auditable_id' => $persona->id,
+            'ip_address' => request()->ip(),
+            'metadata' => [
+                'nombre_razon_social' => $persona->nombre_razon_social,
+                'cambios' => array_keys($persona->getChanges()),
+            ],
+        ]);
+
+        return $persona;
+    }
+
+    private function validar(ContextoOperativo $contexto, array $datos, ?int $exceptoId = null): array
+    {
+        $validados = validator($datos, self::reglasValidacion(), self::mensajesValidacion())->validate();
 
         $identificacion = isset($validados['identificacion']) ? trim((string) $validados['identificacion']) : null;
 
         if ($identificacion !== null && $identificacion !== '') {
             $existe = Persona::query()
                 ->where('organizacion_id', $contexto->organizacion->id)
+                ->when($exceptoId !== null, fn ($query) => $query->where('id', '!=', $exceptoId))
                 ->whereRaw('LOWER(identificacion) = ?', [mb_strtolower($identificacion)])
                 ->exists();
 

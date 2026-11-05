@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Database\Factories\MembresiaCopropiedadFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Role;
 
 class MembresiaCopropiedad extends Model
 {
@@ -61,7 +61,7 @@ class MembresiaCopropiedad extends Model
      */
     public function rolActivo(): BelongsTo
     {
-        return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'rol_activo_id');
+        return $this->belongsTo(Role::class, 'rol_activo_id');
     }
 
     public function roles(): BelongsToMany
@@ -80,6 +80,6 @@ class MembresiaCopropiedad extends Model
             'vigente_hasta',
             'asignado_por',
         ])->using(MembresiaCopropiedadRol::class)
-          ->withTimestamps();
+            ->withTimestamps();
     }
 }

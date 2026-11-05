@@ -113,7 +113,7 @@ class UnidadesPrivadasGestionTest extends TestCase
 
         // El mismo código en otra Copropiedad no choca (unicidad contextual).
         $otra = Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra copropiedad', 'estado' => 'activa']);
-        $otraUnidad = new UnidadPrivada();
+        $otraUnidad = new UnidadPrivada;
         $otraUnidad->forceFill(['organizacion_id' => $organizacion->id, 'copropiedad_id' => $otra->id, 'codigo' => 'A-101'])->save();
         $this->assertSame(2, UnidadPrivada::count());
     }
@@ -123,11 +123,11 @@ class UnidadesPrivadasGestionTest extends TestCase
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $gestor = User::factory()->create();
         $this->createContextualIdentity($gestor, $organizacion, $copropiedad, 'gestor', ['residentes.gestionar']);
-        $propia = new UnidadPrivada();
+        $propia = new UnidadPrivada;
         $propia->forceFill(['organizacion_id' => $organizacion->id, 'copropiedad_id' => $copropiedad->id, 'codigo' => 'A-101'])->save();
 
         $otra = Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra copropiedad', 'estado' => 'activa']);
-        $ajena = new UnidadPrivada();
+        $ajena = new UnidadPrivada;
         $ajena->forceFill(['organizacion_id' => $organizacion->id, 'copropiedad_id' => $otra->id, 'codigo' => 'B-201'])->save();
 
         $respuesta = $this->actingAsContextual($gestor)->get(route('management.unidades.index'))->assertOk();
@@ -143,7 +143,7 @@ class UnidadesPrivadasGestionTest extends TestCase
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $sinPermiso = User::factory()->create();
         $this->createContextualIdentity($sinPermiso, $organizacion, $copropiedad, 'apoyo', ['pqrs.listar']);
-        $unidad = new UnidadPrivada();
+        $unidad = new UnidadPrivada;
         $unidad->forceFill(['organizacion_id' => $organizacion->id, 'copropiedad_id' => $copropiedad->id, 'codigo' => 'A-101'])->save();
 
         $this->actingAsContextual($sinPermiso)->get(route('management.unidades.index'))->assertForbidden();

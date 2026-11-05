@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Application\Copropiedades\CrearCopropiedad;
 use App\Application\Copropiedades\DesactivarCopropiedad;
+use App\Application\Organizaciones\EliminarCopropiedad;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Copropiedad;
@@ -31,8 +32,8 @@ final class CopropiedadController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('nit', 'like', "%{$search}%")
-                  ->orWhere('ciudad', 'like', "%{$search}%");
+                    ->orWhere('nit', 'like', "%{$search}%")
+                    ->orWhere('ciudad', 'like', "%{$search}%");
             });
         }
 
@@ -186,7 +187,7 @@ final class CopropiedadController extends Controller
     public function destroy(Request $request, Copropiedad $copropiedad): RedirectResponse
     {
         // Eliminación segura: solo Copropiedades sin información operativa.
-        app(\App\Application\Organizaciones\EliminarCopropiedad::class)
+        app(EliminarCopropiedad::class)
             ->ejecutar($request->user(), $copropiedad);
         $request->attributes->set('auditoria_especifica_registrada', true);
 

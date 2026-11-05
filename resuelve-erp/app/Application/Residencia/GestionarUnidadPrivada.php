@@ -21,12 +21,15 @@ use Illuminate\Validation\ValidationException;
  */
 final class GestionarUnidadPrivada
 {
+    /** Mensaje canónico del código duplicado (reutilizado por la importación). */
+    public const MENSAJE_CODIGO_DUPLICADO = 'Ya existe una unidad con este código en la Copropiedad activa.';
+
     public function crear(ContextoOperativo $contexto, User $operador, array $datos): UnidadPrivada
     {
         AutorizacionResidencia::exigirGestion($contexto);
         $validados = $this->validar($contexto, $datos);
 
-        $unidad = new UnidadPrivada();
+        $unidad = new UnidadPrivada;
         $unidad->forceFill([
             'organizacion_id' => $contexto->organizacion->id,
             'copropiedad_id' => $contexto->copropiedad->id,
@@ -129,29 +132,53 @@ final class GestionarUnidadPrivada
         ]);
     }
 
-    private function validar(ContextoOperativo $contexto, array $datos, ?int $unidadId = null): array
+    /**
+     * El código ya existe en la Copropiedad activa (comparación insensible a
+     * mayúsculas, unicidad `unidades_copropiedad_codigo_unique`).
+     */
+    public function codigoExistente(ContextoOperativo $contexto, string $codigo, ?int $exceptoId = null): bool
     {
-        $validados = validator($datos, [
+        return UnidadPrivada::query()
+            ->where('copropiedad_id', $contexto->copropiedad->id)
+            ->when($exceptoId !== null, fn ($query) => $query->where('id', '!=', $exceptoId))
+            ->whereRaw('LOWER(codigo) = ?', [mb_strtolower(trim($codigo))])
+            ->exists();
+    }
+
+    /**
+     * Reglas de validación del alta y la edición (fuente única para la capa
+     * HTTP mediante Form Requests y para los casos de uso).
+     *
+     * @return array<string, array<int, string>>
+     */
+    public static function reglasValidacion(): array
+    {
+        return [
             'codigo' => ['required', 'string', 'max:50'],
             'numero_nombre' => ['nullable', 'string', 'max:100'],
             'torre_bloque' => ['nullable', 'string', 'max:50'],
             'tipo' => ['nullable', 'string', 'in:'.implode(',', array_column(TipoUnidadEnum::cases(), 'value'))],
-        ], [
+        ];
+    }
+
+    /** @return array<string, string> */
+    public static function mensajesValidacion(): array
+    {
+        return [
             'codigo.required' => 'El código de la unidad es obligatorio.',
             'codigo.max' => 'El código no puede exceder 50 caracteres.',
             'numero_nombre.max' => 'El nombre o número no puede exceder 100 caracteres.',
             'torre_bloque.max' => 'La torre o bloque no puede exceder 50 caracteres.',
             'tipo.in' => 'Selecciona un tipo de unidad válido.',
-        ])->validate();
+        ];
+    }
+
+    private function validar(ContextoOperativo $contexto, array $datos, ?int $unidadId = null): array
+    {
+        $validados = validator($datos, self::reglasValidacion(), self::mensajesValidacion())->validate();
 
         $codigo = trim((string) $validados['codigo']);
-        $existe = UnidadPrivada::query()
-            ->where('copropiedad_id', $contexto->copropiedad->id)
-            ->when($unidadId !== null, fn ($query) => $query->where('id', '!=', $unidadId))
-            ->whereRaw('LOWER(codigo) = ?', [mb_strtolower($codigo)])
-            ->exists();
-
-        if ($existe) {
+        if ($this->codigoExistente($contexto, $codigo, $unidadId)) {
             throw $this->errorCodigoDuplicado();
         }
 
@@ -166,7 +193,7 @@ final class GestionarUnidadPrivada
     private function errorCodigoDuplicado(): ValidationException
     {
         return ValidationException::withMessages([
-            'codigo' => 'Ya existe una unidad con este código en la Copropiedad activa.',
+            'codigo' => self::MENSAJE_CODIGO_DUPLICADO,
         ]);
     }
 }

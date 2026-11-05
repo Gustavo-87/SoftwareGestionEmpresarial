@@ -17,7 +17,7 @@ class CopropiedadFactory extends Factory
     {
         return [
             'organizacion_id' => Organizacion::factory(),
-            'nombre' => fake()->company() . ' Residencial',
+            'nombre' => fake()->company().' Residencial',
             'estado' => 'activa',
         ];
     }

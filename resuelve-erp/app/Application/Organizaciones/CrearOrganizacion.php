@@ -21,7 +21,6 @@ final class CrearOrganizacion
             $identificacionTributaria,
             $email,
             $telefono,
-            $creadaPor,
         ) {
             if (blank($nombre)) {
                 throw new InvalidArgumentException('El nombre de la organización es obligatorio.');

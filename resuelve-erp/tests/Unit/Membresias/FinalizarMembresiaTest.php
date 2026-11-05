@@ -5,8 +5,8 @@ namespace Tests\Unit\Membresias;
 use App\Application\Membresias\FinalizarMembresia;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use InvalidArgumentException;
+use Tests\TestCase;
 
 class FinalizarMembresiaTest extends TestCase
 {
@@ -17,7 +17,7 @@ class FinalizarMembresiaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->finalizarMembresia = new FinalizarMembresia();
+        $this->finalizarMembresia = new FinalizarMembresia;
     }
 
     public function test_finalizar_membresia_exitosa(): void

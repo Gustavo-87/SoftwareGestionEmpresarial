@@ -159,6 +159,6 @@ class DatabaseSeeder extends Seeder
             OrganizacionSeeder::class,
             CopropiedadSeeder::class,
             PersonaSeeder::class,
-            ]);
+        ]);
     }
 }

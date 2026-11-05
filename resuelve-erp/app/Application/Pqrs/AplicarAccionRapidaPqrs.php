@@ -4,7 +4,7 @@ namespace App\Application\Pqrs;
 
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
-use App\Application\Notificaciones\EmitirNotificacionPqrs;
+use App\Events\PqrEstadoActualizado;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Pqr;
 use App\Models\User;
@@ -17,13 +17,12 @@ final class AplicarAccionRapidaPqrs
     public function __construct(
         private readonly AutorizacionContextual $autorizacion,
         private readonly RegistrarActuacionPqrs $actuaciones,
-        private readonly EmitirNotificacionPqrs $notificaciones,
     ) {}
 
     public function ejecutar(ContextoOperativo $contexto, User $usuario, Pqr $pqr, array $datos): Pqr
     {
         if (! $this->autorizacion->puedeGestionarPqr($contexto, $pqr)) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         $this->validarResponsable($contexto, $datos['assigned_to_id'] ?? null);
@@ -51,7 +50,9 @@ final class AplicarAccionRapidaPqrs
         });
 
         if (($before['estado'] ?? null) !== $pqr->estado) {
-            $this->notificaciones->ejecutar($contexto, $pqr, 'pqr_estado_actualizado');
+            // HU-NOT-03: el listener NotificarPqrEstadoActualizado emite la
+            // notificación (misma semántica que la invocación directa).
+            event(new PqrEstadoActualizado($contexto, $pqr));
         }
 
         return $pqr;

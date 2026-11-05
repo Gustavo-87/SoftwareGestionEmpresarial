@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\AuditLog;
+use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Organizacion;
 use App\Models\Persona;
@@ -189,7 +190,7 @@ class ResidenciaEstadosYFiltrosTest extends TestCase
             ])->assertSessionHasErrors('vigente_hasta');
     }
 
-    /** @return array{0:\App\Models\Organizacion,1:\App\Models\Copropiedad,2:User,3:UnidadPrivada} */
+    /** @return array{0:Organizacion,1:Copropiedad,2:User,3:UnidadPrivada} */
     private function escenario(): array
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
@@ -202,7 +203,7 @@ class ResidenciaEstadosYFiltrosTest extends TestCase
 
     private function persona(int $organizacionId, string $nombre): Persona
     {
-        $persona = new Persona();
+        $persona = new Persona;
         $persona->forceFill(['organizacion_id' => $organizacionId, 'tipo_persona' => 'natural', 'nombre_razon_social' => $nombre])->save();
 
         return $persona;
@@ -210,7 +211,7 @@ class ResidenciaEstadosYFiltrosTest extends TestCase
 
     private function unidad(int $organizacionId, int $copropiedadId, string $codigo): UnidadPrivada
     {
-        $unidad = new UnidadPrivada();
+        $unidad = new UnidadPrivada;
         $unidad->forceFill(['organizacion_id' => $organizacionId, 'copropiedad_id' => $copropiedadId, 'codigo' => $codigo])->save();
 
         return $unidad;

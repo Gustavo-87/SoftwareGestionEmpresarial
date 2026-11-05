@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -137,7 +138,7 @@ class MigrarRbacSpatie extends Command
 
         foreach ($activas->unique(fn (object $fila) => "{$fila->usuario_id}|{$fila->copropiedad_id}|{$fila->clave}") as $asignacion) {
             setPermissionsTeamId((int) $asignacion->copropiedad_id);
-            $usuario = \App\Models\User::query()->find($asignacion->usuario_id);
+            $usuario = User::query()->find($asignacion->usuario_id);
             if ($usuario === null) {
                 continue;
             }

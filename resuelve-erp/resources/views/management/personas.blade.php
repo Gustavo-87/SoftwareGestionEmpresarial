@@ -3,7 +3,7 @@
 @section('titulo_pagina', 'Personas de la Organización')
 @section('contenido')
 <x-page-heading title="Personas" eyebrow="Residentes y unidades">
-    <x-slot name="actions"><a class="button secondary" href="{{ route('management.unidades.index') }}">Volver a unidades</a></x-slot>
+    <x-slot name="actions"><a class="button secondary" href="{{ route('management.personas.papelera') }}">Papelera</a><a class="button secondary" href="{{ route('management.unidades.index') }}">Volver a unidades</a></x-slot>
 </x-page-heading>
 <p>Personas de la Organización activa. Desactivar una persona no elimina sus vínculos: se conservan como historia.</p>
 <section class="panel">
@@ -29,6 +29,7 @@
                 <td>{{ $persona->email ?: '—' }}</td>
                 <td><span class="status {{ $persona->estado === 'activa' ? 'activo' : 'archivado' }}"><i></i>{{ $persona->estado === 'activa' ? 'Activa' : 'Desactivada' }}</span></td>
                 <td class="actions">
+                    <a class="button subtle" href="{{ route('management.personas.edit', $persona) }}">Editar</a>
                     @if($persona->estado === 'activa')
                         <form method="POST" action="{{ route('management.personas.desactivar', $persona) }}">@csrf @method('PATCH')
                             <button class="button subtle danger" data-confirm="Desactivar persona" data-confirm-message="La persona dejará de admitir nuevos vínculos. No se elimina ningún registro y sus vínculos se conservan como historia.">Desactivar</button>

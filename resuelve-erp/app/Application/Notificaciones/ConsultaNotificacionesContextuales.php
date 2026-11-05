@@ -6,9 +6,9 @@ use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 final class ConsultaNotificacionesContextuales
 {
@@ -17,7 +17,7 @@ final class ConsultaNotificacionesContextuales
     public function para(ContextoOperativo $contexto, User $usuario): MorphMany
     {
         if ($contexto->usuario?->id !== $usuario->id || ! $this->autorizacion->tienePermiso($contexto, 'notificaciones.consultar')) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         return $usuario->notifications()

@@ -4,18 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Application\Membresias\CrearMembresia;
 use App\Application\Membresias\EditarMembresia;
+use App\Application\Membresias\FinalizarMembresia;
 use App\Application\Membresias\ReactivarMembresia;
 use App\Application\Membresias\SuspenderMembresia;
-use App\Application\Membresias\FinalizarMembresia;
-use App\Models\MembresiaCopropiedad;
-use App\Models\User;
-use App\Models\Organizacion;
-use App\Models\Copropiedad;
-use App\Models\AuditLog;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
+use App\Models\Copropiedad;
+use App\Models\MembresiaCopropiedad;
+use App\Models\Organizacion;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 final class MembresiaController extends Controller
 {
@@ -44,7 +44,7 @@ final class MembresiaController extends Controller
             $search = $request->input('search');
             $query->whereHas('usuario', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 

@@ -44,5 +44,8 @@ return new class extends Migration
         DB::statement('CREATE INDEX documento_versiones_contexto_estado_index ON documento_versiones (organizacion_id, copropiedad_id, estado)');
     }
 
-    public function down(): void { DB::statement('DROP TABLE documento_versiones'); }
+    public function down(): void
+    {
+        DB::statement('DROP TABLE documento_versiones');
+    }
 };

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Copropiedad;
+use App\Models\MembresiaCopropiedad;
 use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,6 +14,7 @@ class CopropiedadCrudTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Organizacion $organizacion;
 
     protected function setUp(): void
@@ -169,7 +171,7 @@ class CopropiedadCrudTest extends TestCase
             'estado' => 'activa',
         ]);
 
-        \App\Models\MembresiaCopropiedad::create([
+        MembresiaCopropiedad::create([
             'usuario_id' => User::factory()->create()->id,
             'organizacion_id' => $this->organizacion->id,
             'copropiedad_id' => $cop->id,

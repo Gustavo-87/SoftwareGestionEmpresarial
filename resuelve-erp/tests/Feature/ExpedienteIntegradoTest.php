@@ -2,13 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Application\Contexto\ContextoOperativo;
+use App\Application\Contexto\ContextResolver;
 use App\Application\Pqrs\ConsultaExpedienteIntegrado;
 use App\Domain\GestionDocumental\Enums\EstadoDocumentoVersionEnum;
 use App\Domain\GestionDocumental\Enums\NivelAccesoDocumentoEnum;
+use App\Models\Copropiedad;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;
 use App\Models\Mantenimiento;
 use App\Models\MantenimientoDocumentoEvidencia;
+use App\Models\Organizacion;
 use App\Models\Pqr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -112,7 +116,7 @@ class ExpedienteIntegradoTest extends TestCase
         $this->assertStringContainsString('modulo-integracion', $respuesta->content());
     }
 
-    /** @return array{0:\App\Models\Organizacion,1:\App\Models\Copropiedad,2:User,3:User,4:Pqr,5:Mantenimiento} */
+    /** @return array{0:Organizacion,1:Copropiedad,2:User,3:User,4:Pqr,5:Mantenimiento} */
     private function escenario(): array
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
@@ -145,14 +149,14 @@ class ExpedienteIntegradoTest extends TestCase
 
     private function contexto(User $user)
     {
-        $contexto = app(\App\Application\Contexto\ContextResolver::class)->resolverExplicito(
-            \App\Models\Organizacion::query()->value('id'),
-            \App\Models\Copropiedad::query()->value('id'),
+        $contexto = app(ContextResolver::class)->resolverExplicito(
+            Organizacion::query()->value('id'),
+            Copropiedad::query()->value('id'),
             $user->id,
         );
         // Las policies resuelven el contexto desde el contenedor: se fija el
         // mismo contexto que manejaría una petición HTTP del usuario.
-        app()->instance(\App\Application\Contexto\ContextoOperativo::class, $contexto);
+        app()->instance(ContextoOperativo::class, $contexto);
 
         return $contexto;
     }

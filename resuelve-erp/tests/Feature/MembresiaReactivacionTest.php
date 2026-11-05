@@ -9,6 +9,7 @@ use App\Application\Usuarios\DesactivarUsuarioGlobal;
 use App\Models\MembresiaCopropiedad;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
@@ -237,13 +238,13 @@ class MembresiaReactivacionTest extends TestCase
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         $user = User::factory()->create();
         [$membresia] = $this->createContextualIdentity($user, $organizacion, $copropiedad, 'gestor', ['pqrs.listar']);
-        $asignacionesAntes = \Illuminate\Support\Facades\DB::table('model_has_roles')->count();
+        $asignacionesAntes = DB::table('model_has_roles')->count();
 
         app(SuspenderMembresia::class)->ejecutar($membresia, 'Motivo de prueba');
         app(ReactivarMembresia::class)->ejecutar($membresia->fresh());
 
         $this->assertSame('activa', $membresia->fresh()->estado);
-        $this->assertSame($asignacionesAntes, \Illuminate\Support\Facades\DB::table('model_has_roles')->count());
+        $this->assertSame($asignacionesAntes, DB::table('model_has_roles')->count());
     }
 
     public function test_la_reactivacion_es_solo_para_autoridad_de_plataforma_y_muestra_la_accion(): void

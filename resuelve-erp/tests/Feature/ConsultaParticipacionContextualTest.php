@@ -130,7 +130,7 @@ class ConsultaParticipacionContextualTest extends TestCase
 
     private function persona(Organizacion $organizacion, User $usuario): Persona
     {
-        $persona = new Persona();
+        $persona = new Persona;
         $persona->forceFill([
             'organizacion_id' => $organizacion->id,
             'usuario_id' => $usuario->id,
@@ -143,7 +143,7 @@ class ConsultaParticipacionContextualTest extends TestCase
 
     private function unidad(Organizacion $organizacion, Copropiedad $copropiedad, string $codigo): UnidadPrivada
     {
-        $unidad = new UnidadPrivada();
+        $unidad = new UnidadPrivada;
         $unidad->forceFill([
             'organizacion_id' => $organizacion->id,
             'copropiedad_id' => $copropiedad->id,
@@ -155,7 +155,7 @@ class ConsultaParticipacionContextualTest extends TestCase
 
     private function vinculo(Persona $persona, UnidadPrivada $unidad, array $atributos = []): VinculoUnidad
     {
-        $vinculo = new VinculoUnidad();
+        $vinculo = new VinculoUnidad;
         $vinculo->asociarPartesContextuales($persona, $unidad);
         $vinculo->forceFill($atributos + [
             'tipo_vinculo' => 'residente',

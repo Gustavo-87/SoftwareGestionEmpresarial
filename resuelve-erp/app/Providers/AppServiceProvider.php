@@ -2,21 +2,29 @@
 
 namespace App\Providers;
 
+use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
 use App\Application\Contexto\ContextResolver;
-use App\Application\Autorizacion\AutorizacionContextual;
-use App\Models\MembresiaCopropiedad;
 use App\Application\Documentos\ConsultaDocumentosContextuales;
-use App\Application\Pqrs\ConsultaPqrsContextuales;
+use App\Application\Mantenimiento\ConsultaMantenimientos;
 use App\Application\Notificaciones\ConsultaNotificacionesContextuales;
-use App\Application\Notificaciones\ResolverDestinatariosNotificacionPqrs;
 use App\Application\Notificaciones\EmitirNotificacionPqrs;
+use App\Application\Notificaciones\ResolverDestinatariosNotificacionPqrs;
+use App\Application\Pqrs\ConsultaPqrsContextuales;
+use App\Application\Residencia\ConsultaPersonasContextuales;
+use App\Application\Residencia\ConsultaUnidadesPrivadasContextuales;
+use App\Application\Roles\GestionarRolActivo;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;
+use App\Models\Mantenimiento;
+use App\Models\MembresiaCopropiedad;
+use App\Models\Pqr;
 use App\Models\PqrAttachment;
 use App\Models\SiteSetting;
 use App\Policies\DocumentoPolicy;
+use App\Policies\MantenimientoPolicy;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -30,10 +38,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->scoped(ContextResolver::class, fn () => new ContextResolver());
-        $this->app->scoped(AutorizacionContextual::class, fn () => new AutorizacionContextual());
-        $this->app->scoped(ConsultaDocumentosContextuales::class, fn () => new ConsultaDocumentosContextuales());
-        $this->app->scoped(ConsultaPqrsContextuales::class, fn () => new ConsultaPqrsContextuales());
+        $this->app->scoped(ContextResolver::class, fn () => new ContextResolver);
+        $this->app->scoped(AutorizacionContextual::class, fn () => new AutorizacionContextual);
+        $this->app->scoped(ConsultaDocumentosContextuales::class, fn () => new ConsultaDocumentosContextuales);
+        $this->app->scoped(ConsultaPqrsContextuales::class, fn () => new ConsultaPqrsContextuales);
         $this->app->scoped(ConsultaNotificacionesContextuales::class, fn ($app) => new ConsultaNotificacionesContextuales($app->make(AutorizacionContextual::class)));
         $this->app->scoped(ResolverDestinatariosNotificacionPqrs::class, fn ($app) => new ResolverDestinatariosNotificacionPqrs($app->make(ContextResolver::class), $app->make(AutorizacionContextual::class)));
         $this->app->scoped(EmitirNotificacionPqrs::class, fn ($app) => new EmitirNotificacionPqrs(
@@ -53,12 +61,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Pagination\AbstractPaginator::defaultView('vendor.pagination.default');
+        AbstractPaginator::defaultView('vendor.pagination.default');
         Gate::policy(Documento::class, DocumentoPolicy::class);
-        Gate::policy(\App\Models\Mantenimiento::class, \App\Policies\MantenimientoPolicy::class);
-        Route::bind('mantenimiento', fn (string $value) => app(\App\Application\Mantenimiento\ConsultaMantenimientos::class)->resolver(app(ContextoOperativo::class), $value));
-        Route::bind('unidad', fn (string $value) => app(\App\Application\Residencia\ConsultaUnidadesPrivadasContextuales::class)->resolver(app(ContextoOperativo::class), $value));
-        Route::bind('persona', fn (string $value) => app(\App\Application\Residencia\ConsultaPersonasContextuales::class)->resolver(app(ContextoOperativo::class), $value));
+        Gate::policy(Mantenimiento::class, MantenimientoPolicy::class);
+        Route::bind('mantenimiento', fn (string $value) => app(ConsultaMantenimientos::class)->resolver(app(ContextoOperativo::class), $value));
+        Route::bind('unidad', fn (string $value) => app(ConsultaUnidadesPrivadasContextuales::class)->resolver(app(ContextoOperativo::class), $value));
+        Route::bind('persona', fn (string $value) => app(ConsultaPersonasContextuales::class)->resolver(app(ContextoOperativo::class), $value));
         Gate::define('administrar-sistema', fn ($user) => $user->esAdministradorSistema());
         Route::bind('pqr', fn (string $value) => app(ConsultaPqrsContextuales::class)
             ->resolver(app(ContextoOperativo::class), $value));
@@ -91,13 +99,13 @@ class AppServiceProvider extends ServiceProvider
                     $contexto = app(ContextoOperativo::class);
                     $autorizacion = app(AutorizacionContextual::class);
                     $navegacion = [
-                        'pqrs' => Auth::user()->can('viewAny', \App\Models\Pqr::class),
+                        'pqrs' => Auth::user()->can('viewAny', Pqr::class),
                         'verTodasPqrs' => $autorizacion->tienePermiso($contexto, 'pqrs.ver_todas'),
-                        'crearPqrs' => Auth::user()->can('create', \App\Models\Pqr::class),
+                        'crearPqrs' => Auth::user()->can('create', Pqr::class),
                         'gestionarPqrs' => $autorizacion->tienePermiso($contexto, 'pqrs.gestionar'),
                         'exportarInformes' => $autorizacion->tienePermiso($contexto, 'informes.exportar'),
                         'documentos' => Auth::user()->can('viewAny', Documento::class),
-                        'mantenimiento' => Auth::user()->can('viewAny', \App\Models\Mantenimiento::class),
+                        'mantenimiento' => Auth::user()->can('viewAny', Mantenimiento::class),
                         'notificaciones' => $autorizacion->tienePermiso($contexto, 'notificaciones.consultar'),
                         'configuracion' => $autorizacion->tienePermiso($contexto, 'configuracion.gestionar'),
                         'usuarios' => $autorizacion->tienePermiso($contexto, 'usuarios.gestionar'),
@@ -114,7 +122,7 @@ class AppServiceProvider extends ServiceProvider
                         'rolesAsignados' => $contexto->clavesRolesAsignados(),
                         'rolActivoOpciones' => $contexto->membresiaCopropiedad === null
                             ? []
-                            : collect(app(\App\Application\Roles\GestionarRolActivo::class)->rolesAsignados(Auth::user(), $contexto->membresiaCopropiedad))
+                            : collect(app(GestionarRolActivo::class)->rolesAsignados(Auth::user(), $contexto->membresiaCopropiedad))
                                 ->map(fn ($rol) => ['id' => (int) $rol->id, 'nombre' => $rol->name])
                                 ->values()
                                 ->all(),

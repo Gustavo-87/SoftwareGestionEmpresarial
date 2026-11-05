@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Application\Autorizacion\VerificadorEquivalenciaAutorizacionContextual;
 use App\Application\Autorizacion\VerificadorEquivalenciaRbacSpatie;
+use App\Models\Copropiedad;
+use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -121,7 +123,7 @@ class VerificadorEquivalenciaContratoTest extends TestCase
     /**
      * Catálogo legado auténtico, asignación legada y espejo Spatie equivalente.
      *
-     * @return array{0: \App\Models\Organizacion, 1: \App\Models\Copropiedad, 2: User}
+     * @return array{0: Organizacion, 1: Copropiedad, 2: User}
      */
     private function conEquivalenciaCompleta(string $rol): array
     {

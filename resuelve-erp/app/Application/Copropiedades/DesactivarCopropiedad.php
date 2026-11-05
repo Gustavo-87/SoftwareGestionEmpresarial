@@ -3,7 +3,6 @@
 namespace App\Application\Copropiedades;
 
 use App\Models\Copropiedad;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 final class DesactivarCopropiedad
@@ -20,7 +19,7 @@ final class DesactivarCopropiedad
 
         if ($copropiedad->organizacion->estado !== 'activa') {
             throw new InvalidArgumentException(
-                "No se puede desactivar la copropiedad porque la organización padre está desactivada."
+                'No se puede desactivar la copropiedad porque la organización padre está desactivada.'
             );
         }
 

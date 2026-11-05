@@ -3,13 +3,13 @@
 namespace Tests\Unit\Membresias;
 
 use App\Application\Membresias\CrearMembresia;
-use App\Models\User;
-use App\Models\Organizacion;
 use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
+use App\Models\Organizacion;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use InvalidArgumentException;
+use Tests\TestCase;
 
 class CrearMembresiaTest extends TestCase
 {
@@ -20,7 +20,7 @@ class CrearMembresiaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->crearMembresia = new CrearMembresia();
+        $this->crearMembresia = new CrearMembresia;
     }
 
     public function test_crear_membresia_exitosa(): void

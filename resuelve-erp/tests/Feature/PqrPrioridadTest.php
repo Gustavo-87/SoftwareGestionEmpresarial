@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Pqr;
 use App\Models\PqrActivity;
+use App\Models\TipoPqr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
@@ -21,7 +21,7 @@ class PqrPrioridadTest extends TestCase
         [$org, $cop] = $this->createInstitutionalContext();
         $user = User::factory()->create(['role' => 'residente']);
         $this->createContextualIdentity($user, $org, $cop, 'residente', ['pqrs.crear', 'pqrs.ver_propias']);
-        $tipo = \App\Models\TipoPqr::factory()->create();
+        $tipo = TipoPqr::factory()->create();
 
         $this->actingAsContextual($user)->post(route('pqrs.store'), [
             'asunto' => 'Solicitud de prueba',
@@ -64,7 +64,7 @@ class PqrPrioridadTest extends TestCase
     {
         [$org, $cop] = $this->createInstitutionalContext();
         $user = User::factory()->create();
-        $tipo = \App\Models\TipoPqr::factory()->create();
+        $tipo = TipoPqr::factory()->create();
 
         // Valor válido no lanza excepción.
         $pqr = Pqr::factory()->paraContexto($org, $cop)->create(['prioridad' => 'alta']);

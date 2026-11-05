@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     private const REPLIES_BACKUP = 'pqr_replies_c351b2_previous';
+
     private const LEDGER_BACKUP = 'pqr_communication_operations_c351b2_previous';
 
     public ?string $sqliteFailurePoint = null;
@@ -15,6 +16,7 @@ return new class extends Migration
     {
         if (DB::getDriverName() === 'sqlite') {
             $this->rebuildSqlite(true);
+
             return;
         }
         $this->preflightMysql(true);
@@ -28,6 +30,7 @@ return new class extends Migration
         $this->assertRollbackSafe();
         if (DB::getDriverName() === 'sqlite') {
             $this->rebuildSqlite(false);
+
             return;
         }
         $this->preflightMysql(false);
@@ -52,14 +55,23 @@ return new class extends Migration
     {
         $main = Schema::hasTable('pqr_replies');
         $backup = Schema::hasTable(self::REPLIES_BACKUP);
-        if (! $main && ! $backup) throw new RuntimeException('Recuperación B-2 imposible: no existe pqr_replies ni su respaldo específico.');
-        if ($main && $this->sqliteRepliesState('pqr_replies') === 'ambiguous') throw new RuntimeException('Recuperación B-2 ambigua: el esquema principal de respuestas es parcial.');
-        if ($backup && $this->sqliteRepliesState(self::REPLIES_BACKUP) === 'ambiguous') throw new RuntimeException('Recuperación B-2 ambigua: el respaldo de respuestas es parcial.');
-        if ($main && ! $backup && $this->sqliteRepliesState('pqr_replies') === ($b2 ? 'b2' : 'legacy')) return;
+        if (! $main && ! $backup) {
+            throw new RuntimeException('Recuperación B-2 imposible: no existe pqr_replies ni su respaldo específico.');
+        }
+        if ($main && $this->sqliteRepliesState('pqr_replies') === 'ambiguous') {
+            throw new RuntimeException('Recuperación B-2 ambigua: el esquema principal de respuestas es parcial.');
+        }
+        if ($backup && $this->sqliteRepliesState(self::REPLIES_BACKUP) === 'ambiguous') {
+            throw new RuntimeException('Recuperación B-2 ambigua: el respaldo de respuestas es parcial.');
+        }
+        if ($main && ! $backup && $this->sqliteRepliesState('pqr_replies') === ($b2 ? 'b2' : 'legacy')) {
+            return;
+        }
         if ($main && ! $backup) {
             DB::statement('ALTER TABLE pqr_replies RENAME TO '.self::REPLIES_BACKUP);
             $this->fail('replies_after_rename');
-            $main = false; $backup = true;
+            $main = false;
+            $backup = true;
         }
         if (! $main && $backup) {
             $this->createSqliteReplies($b2);
@@ -67,13 +79,15 @@ return new class extends Migration
         } elseif ($main && $backup && $this->sqliteRepliesState('pqr_replies') !== ($b2 ? 'b2' : 'legacy')) {
             throw new RuntimeException('Recuperación B-2 ambigua: principal y respaldo de respuestas tienen esquemas incompatibles.');
         }
-        $comparisonColumns = ['pqr_id','user_id','body','is_draft','attachments','sent_at','created_at','updated_at'];
+        $comparisonColumns = ['pqr_id', 'user_id', 'body', 'is_draft', 'attachments', 'sent_at', 'created_at', 'updated_at'];
         if (Schema::hasColumn('pqr_replies', 'deleted_at') && Schema::hasColumn(self::REPLIES_BACKUP, 'deleted_at')) {
             $comparisonColumns[] = 'deleted_at';
         }
         $this->assertSubset('pqr_replies', self::REPLIES_BACKUP, $comparisonColumns);
         $columns = 'id,pqr_id,user_id,body,is_draft,attachments,sent_at,created_at,updated_at';
-        if ($b2 && Schema::hasColumn(self::REPLIES_BACKUP, 'deleted_at')) $columns .= ',deleted_at';
+        if ($b2 && Schema::hasColumn(self::REPLIES_BACKUP, 'deleted_at')) {
+            $columns .= ',deleted_at';
+        }
         if ($this->sqliteFailurePoint === 'replies_during_copy') {
             DB::statement("INSERT INTO pqr_replies ({$columns}) SELECT {$columns} FROM ".self::REPLIES_BACKUP.' b WHERE NOT EXISTS (SELECT 1 FROM pqr_replies n WHERE n.id=b.id) LIMIT 1');
             $this->fail('replies_during_copy');
@@ -90,23 +104,34 @@ return new class extends Migration
         DB::statement('DROP TABLE '.self::REPLIES_BACKUP);
         DB::statement('CREATE UNIQUE INDEX IF NOT EXISTS pqr_replies_official_unique ON pqr_replies(pqr_id,official_response_slot)');
         DB::statement('CREATE UNIQUE INDEX IF NOT EXISTS pqr_replies_pqr_id_id_unique ON pqr_replies(pqr_id,id)');
-        if ($b2) DB::statement('CREATE INDEX IF NOT EXISTS pqr_replies_draft_deleted_index ON pqr_replies(pqr_id,is_draft,deleted_at)');
+        if ($b2) {
+            DB::statement('CREATE INDEX IF NOT EXISTS pqr_replies_draft_deleted_index ON pqr_replies(pqr_id,is_draft,deleted_at)');
+        }
     }
 
     private function rebuildLedger(bool $b2): void
     {
         $main = Schema::hasTable('pqr_communication_operations');
         $backup = Schema::hasTable(self::LEDGER_BACKUP);
-        if (! $main && ! $backup) throw new RuntimeException('Recuperación B-2 imposible: no existe ledger ni su respaldo específico.');
-        if ($main && $this->sqliteLedgerState('pqr_communication_operations') === 'ambiguous') throw new RuntimeException('Recuperación B-2 ambigua: el esquema principal del ledger es parcial.');
-        if ($backup && $this->sqliteLedgerState(self::LEDGER_BACKUP) === 'ambiguous') throw new RuntimeException('Recuperación B-2 ambigua: el respaldo del ledger es parcial.');
+        if (! $main && ! $backup) {
+            throw new RuntimeException('Recuperación B-2 imposible: no existe ledger ni su respaldo específico.');
+        }
+        if ($main && $this->sqliteLedgerState('pqr_communication_operations') === 'ambiguous') {
+            throw new RuntimeException('Recuperación B-2 ambigua: el esquema principal del ledger es parcial.');
+        }
+        if ($backup && $this->sqliteLedgerState(self::LEDGER_BACKUP) === 'ambiguous') {
+            throw new RuntimeException('Recuperación B-2 ambigua: el respaldo del ledger es parcial.');
+        }
         if ($main && ! $backup
             && $this->sqliteLedgerState('pqr_communication_operations') === ($b2 ? 'b2' : 'legacy')
-            && $this->sqliteLedgerReferencesCanonicalReplies('pqr_communication_operations')) return;
+            && $this->sqliteLedgerReferencesCanonicalReplies('pqr_communication_operations')) {
+            return;
+        }
         if ($main && ! $backup) {
             DB::statement('ALTER TABLE pqr_communication_operations RENAME TO '.self::LEDGER_BACKUP);
             $this->fail('ledger_after_rename');
-            $main = false; $backup = true;
+            $main = false;
+            $backup = true;
         }
         if (! $main && $backup) {
             $this->createSqliteLedger($b2);
@@ -116,7 +141,9 @@ return new class extends Migration
         }
         $commonColumns = 'id,pqr_id,actor_id,actor_uuid,operation,idempotency_key,payload_sha256,result_code,status,cleanup_status,notification_status,pqr_reply_id,pqr_internal_comment_id,completed_at,created_at,updated_at';
         $columns = $commonColumns;
-        if ($b2 && Schema::hasColumn(self::LEDGER_BACKUP, 'cleanup_manifest')) $columns .= ',cleanup_manifest';
+        if ($b2 && Schema::hasColumn(self::LEDGER_BACKUP, 'cleanup_manifest')) {
+            $columns .= ',cleanup_manifest';
+        }
         DB::statement("INSERT INTO pqr_communication_operations ({$columns}) SELECT {$columns} FROM ".self::LEDGER_BACKUP.' b WHERE NOT EXISTS (SELECT 1 FROM pqr_communication_operations n WHERE n.id=b.id)');
         $comparisonColumns = explode(',', $commonColumns);
         if (Schema::hasColumn('pqr_communication_operations', 'cleanup_manifest') && Schema::hasColumn(self::LEDGER_BACKUP, 'cleanup_manifest')) {
@@ -179,9 +206,15 @@ return new class extends Migration
         if ($index && $this->mysqlIndexColumns('pqr_replies', 'pqr_replies_draft_deleted_index') !== ['pqr_id', 'is_draft', 'deleted_at']) {
             throw new RuntimeException('Estado MySQL B-2 ambiguo: el índice de borradores tiene columnas inesperadas.');
         }
-        if (! $column) DB::statement('ALTER TABLE pqr_replies ADD deleted_at TIMESTAMP NULL AFTER sent_at');
-        if (! $index) DB::statement('ALTER TABLE pqr_replies ADD INDEX pqr_replies_draft_deleted_index (pqr_id, is_draft, deleted_at)');
-        if (! $check) DB::statement('ALTER TABLE pqr_replies ADD CONSTRAINT pqr_replies_deleted_draft_check CHECK ('.$this->mysqlReplyCheck().')');
+        if (! $column) {
+            DB::statement('ALTER TABLE pqr_replies ADD deleted_at TIMESTAMP NULL AFTER sent_at');
+        }
+        if (! $index) {
+            DB::statement('ALTER TABLE pqr_replies ADD INDEX pqr_replies_draft_deleted_index (pqr_id, is_draft, deleted_at)');
+        }
+        if (! $check) {
+            DB::statement('ALTER TABLE pqr_replies ADD CONSTRAINT pqr_replies_deleted_draft_check CHECK ('.$this->mysqlReplyCheck().')');
+        }
     }
 
     private function removeMysqlReplySchema(): void
@@ -192,9 +225,15 @@ return new class extends Migration
         if (! $column && ($index || $check)) {
             throw new RuntimeException('Estado MySQL B-2 ambiguo durante rollback: protecciones sin deleted_at.');
         }
-        if ($check) DB::statement('ALTER TABLE pqr_replies DROP CHECK pqr_replies_deleted_draft_check');
-        if ($index) DB::statement('ALTER TABLE pqr_replies DROP INDEX pqr_replies_draft_deleted_index');
-        if ($column) DB::statement('ALTER TABLE pqr_replies DROP COLUMN deleted_at');
+        if ($check) {
+            DB::statement('ALTER TABLE pqr_replies DROP CHECK pqr_replies_deleted_draft_check');
+        }
+        if ($index) {
+            DB::statement('ALTER TABLE pqr_replies DROP INDEX pqr_replies_draft_deleted_index');
+        }
+        if ($column) {
+            DB::statement('ALTER TABLE pqr_replies DROP COLUMN deleted_at');
+        }
     }
 
     private function applyMysqlCleanupManifest(): void
@@ -283,7 +322,9 @@ return new class extends Migration
             }
         }
         foreach (['pqr_communication_operations', self::LEDGER_BACKUP] as $table) {
-            if (! Schema::hasTable($table)) continue;
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
             if (DB::table($table)->whereIn('operation', $this->b2Operations())->exists()
                 || (Schema::hasColumn($table, 'cleanup_manifest') && DB::table($table)->whereNotNull('cleanup_manifest')->exists())) {
                 throw new RuntimeException('Rollback B-2 rechazado: existen operaciones o limpiezas reales cuya trazabilidad debe conservarse.');
@@ -403,6 +444,7 @@ return new class extends Migration
             }
             if ($character === '_' && preg_match('/\A_utf8mb4(?=(?:\\\\)?\')/i', substr($expression, $index), $match) === 1) {
                 $index += strlen($match[0]) - 1;
+
                 continue;
             }
             if ($character === "'" || ($character === '\\' && ($expression[$index + 1] ?? null) === "'")) {
@@ -411,6 +453,7 @@ return new class extends Migration
                     return null;
                 }
                 $tokens[] = ['literal', bin2hex($literal)];
+
                 continue;
             }
             if ($character === '`') {
@@ -424,6 +467,7 @@ return new class extends Migration
                 }
                 $tokens[] = ['word', $identifier];
                 $index = $closing;
+
                 continue;
             }
             if (ctype_alpha($character) || $character === '_') {
@@ -432,6 +476,7 @@ return new class extends Migration
                     $index++;
                 }
                 $tokens[] = ['word', strtolower(substr($expression, $start, $index - $start + 1))];
+
                 continue;
             }
             if (ctype_digit($character)) {
@@ -440,10 +485,12 @@ return new class extends Migration
                     $index++;
                 }
                 $tokens[] = ['number', substr($expression, $start, $index - $start + 1)];
+
                 continue;
             }
             if (str_contains('=(),', $character)) {
                 $tokens[] = ['symbol', $character];
+
                 continue;
             }
 
@@ -509,6 +556,7 @@ return new class extends Migration
                 if ($expression[$cursor] === '\\' && ($expression[$cursor + 1] ?? null) === "'") {
                     $literal .= "\\'";
                     $cursor++;
+
                     continue;
                 }
                 $literal .= $expression[$cursor];
@@ -518,6 +566,7 @@ return new class extends Migration
                 if (($expression[$cursor + 1] ?? null) === "'") {
                     $literal .= "'";
                     $cursor++;
+
                     continue;
                 }
                 $index = $cursor;
@@ -535,6 +584,7 @@ return new class extends Migration
                     return null;
                 }
                 $literal .= $expression[$cursor++];
+
                 continue;
             }
             $runStart = $cursor;
@@ -544,6 +594,7 @@ return new class extends Migration
             $slashes = $cursor - $runStart;
             if (($expression[$cursor] ?? null) !== "'") {
                 $literal .= str_repeat('\\', $slashes);
+
                 continue;
             }
             if ($slashes === 1) {
@@ -570,15 +621,27 @@ return new class extends Migration
         $depth = 0;
         $quoted = false;
         for ($index = 0, $length = strlen($expression); $index < $length; $index++) {
-            if ($expression[$index] === "'" && ($index === 0 || $expression[$index - 1] !== '\\')) $quoted = ! $quoted;
-            if ($quoted) continue;
-            if ($expression[$index] === '(') $depth++;
-            if ($expression[$index] === ')') $depth--;
-            if ($depth !== 0 || strcasecmp(substr($expression, $index, strlen($operator)), $operator) !== 0) continue;
+            if ($expression[$index] === "'" && ($index === 0 || $expression[$index - 1] !== '\\')) {
+                $quoted = ! $quoted;
+            }
+            if ($quoted) {
+                continue;
+            }
+            if ($expression[$index] === '(') {
+                $depth++;
+            }
+            if ($expression[$index] === ')') {
+                $depth--;
+            }
+            if ($depth !== 0 || strcasecmp(substr($expression, $index, strlen($operator)), $operator) !== 0) {
+                continue;
+            }
             $before = $index === 0 ? ' ' : $expression[$index - 1];
             $afterIndex = $index + strlen($operator);
             $after = $afterIndex >= $length ? ' ' : $expression[$afterIndex];
-            if (preg_match('/[a-z0-9_]/i', $before) || preg_match('/[a-z0-9_]/i', $after)) continue;
+            if (preg_match('/[a-z0-9_]/i', $before) || preg_match('/[a-z0-9_]/i', $after)) {
+                continue;
+            }
             $parts[] = substr($expression, $start, $index - $start);
             $start = $afterIndex;
             $index = $afterIndex - 1;
@@ -595,13 +658,26 @@ return new class extends Migration
             $quoted = false;
             $wraps = true;
             for ($index = 0, $length = strlen($expression); $index < $length; $index++) {
-                if ($expression[$index] === "'" && ($index === 0 || $expression[$index - 1] !== '\\')) $quoted = ! $quoted;
-                if ($quoted) continue;
-                if ($expression[$index] === '(') $depth++;
-                if ($expression[$index] === ')') $depth--;
-                if ($depth === 0 && $index < $length - 1) { $wraps = false; break; }
+                if ($expression[$index] === "'" && ($index === 0 || $expression[$index - 1] !== '\\')) {
+                    $quoted = ! $quoted;
+                }
+                if ($quoted) {
+                    continue;
+                }
+                if ($expression[$index] === '(') {
+                    $depth++;
+                }
+                if ($expression[$index] === ')') {
+                    $depth--;
+                }
+                if ($depth === 0 && $index < $length - 1) {
+                    $wraps = false;
+                    break;
+                }
             }
-            if (! $wraps) break;
+            if (! $wraps) {
+                break;
+            }
             $expression = trim(substr($expression, 1, -1));
         }
 
@@ -647,8 +723,12 @@ return new class extends Migration
         $sql = strtolower((string) DB::scalar("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", [$table]));
         $column = Schema::hasColumn($table, 'deleted_at');
         $check = str_contains($sql, 'pqr_replies_deleted_draft_check');
-        if (! $column && ! $check) return 'legacy';
-        if ($column && $check) return 'b2';
+        if (! $column && ! $check) {
+            return 'legacy';
+        }
+        if ($column && $check) {
+            return 'b2';
+        }
 
         return 'ambiguous';
     }
@@ -659,8 +739,12 @@ return new class extends Migration
         $b2Tokens = collect($this->b2Operations())->filter(fn (string $token) => str_contains($sql, $token))->count();
         $manifest = Schema::hasColumn($table, 'cleanup_manifest');
         $manifestCheck = str_contains($sql, 'pqr_comm_cleanup_manifest_check');
-        if ($b2Tokens === 0 && ! $manifest && ! $manifestCheck) return 'legacy';
-        if ($b2Tokens === count($this->b2Operations()) && $manifest && $manifestCheck) return 'b2';
+        if ($b2Tokens === 0 && ! $manifest && ! $manifestCheck) {
+            return 'legacy';
+        }
+        if ($b2Tokens === count($this->b2Operations()) && $manifest && $manifestCheck) {
+            return 'b2';
+        }
 
         return 'ambiguous';
     }
@@ -672,8 +756,32 @@ return new class extends Migration
 
         return $replyTargets === ['pqr_replies'];
     }
-    private function b2Operations(): array { return ['create_draft','update_draft','send_draft','delete_draft','send_reply']; }
-    private function assertEqualCounts(string $main, string $backup): void { if (DB::table($main)->count() !== DB::table($backup)->count()) throw new RuntimeException('Recuperación B-2 incompleta: el número de filas no coincide.'); }
-    private function assertSubset(string $main, string $backup, array $columns): void { $diff = collect($columns)->map(fn($c) => "NOT (n.{$c} IS b.{$c})")->implode(' OR '); if (DB::table("{$main} as n")->leftJoin("{$backup} as b",'b.id','=','n.id')->whereNull('b.id')->orWhereRaw("({$diff})")->exists()) throw new RuntimeException('Recuperación B-2 ambigua: las filas de la tabla principal divergen del respaldo.'); }
-    private function fail(string $point): void { if ($this->sqliteFailurePoint === $point) { $this->sqliteFailurePoint = null; throw new RuntimeException("Fallo SQLite B-2 inyectado en {$point}."); } }
+
+    private function b2Operations(): array
+    {
+        return ['create_draft', 'update_draft', 'send_draft', 'delete_draft', 'send_reply'];
+    }
+
+    private function assertEqualCounts(string $main, string $backup): void
+    {
+        if (DB::table($main)->count() !== DB::table($backup)->count()) {
+            throw new RuntimeException('Recuperación B-2 incompleta: el número de filas no coincide.');
+        }
+    }
+
+    private function assertSubset(string $main, string $backup, array $columns): void
+    {
+        $diff = collect($columns)->map(fn ($c) => "NOT (n.{$c} IS b.{$c})")->implode(' OR ');
+        if (DB::table("{$main} as n")->leftJoin("{$backup} as b", 'b.id', '=', 'n.id')->whereNull('b.id')->orWhereRaw("({$diff})")->exists()) {
+            throw new RuntimeException('Recuperación B-2 ambigua: las filas de la tabla principal divergen del respaldo.');
+        }
+    }
+
+    private function fail(string $point): void
+    {
+        if ($this->sqliteFailurePoint === $point) {
+            $this->sqliteFailurePoint = null;
+            throw new RuntimeException("Fallo SQLite B-2 inyectado en {$point}.");
+        }
+    }
 };

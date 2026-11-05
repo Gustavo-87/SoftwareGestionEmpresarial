@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -14,7 +14,9 @@ class PqrSafeDraftMysqlPartialDdlTest extends TestCase
 
     public function test_up_and_down_resume_each_unambiguous_partial_mysql_state(): void
     {
-        if (DB::getDriverName() !== 'mysql') $this->markTestSkipped('Requiere MySQL.');
+        if (DB::getDriverName() !== 'mysql') {
+            $this->markTestSkipped('Requiere MySQL.');
+        }
         $migration = require database_path('migrations/2026_08_13_180000_add_safe_draft_lifecycle.php');
         $migration->down();
 

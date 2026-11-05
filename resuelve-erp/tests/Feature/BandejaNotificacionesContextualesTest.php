@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Copropiedad, MembresiaCopropiedad, Organizacion, Pqr, User};
+use App\Models\Copropiedad;
+use App\Models\Organizacion;
+use App\Models\Pqr;
+use App\Models\User;
 use App\Notifications\PqrEventNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;

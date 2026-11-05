@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\AuditLog;
+use App\Domain\GestionDocumental\Enums\EstadoDocumentoVersionEnum;
+use App\Models\Copropiedad;
+use App\Models\Documento;
+use App\Models\DocumentoVersion;
 use App\Models\Mantenimiento;
+use App\Models\MantenimientoDocumentoEvidencia;
+use App\Models\Organizacion;
 use App\Models\Pqr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -159,7 +164,7 @@ class IntegracionModulosTest extends TestCase
 
         // Cruce de contexto: la PQRS de otra Copropiedad es invisible (el
         // binding de ruta es contextual y oculta el recurso con 404).
-        $otra = \App\Models\Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra', 'estado' => 'activa']);
+        $otra = Copropiedad::create(['organizacion_id' => $organizacion->id, 'nombre' => 'Otra', 'estado' => 'activa']);
         $pqrAjena = Pqr::factory()->paraContexto($organizacion, $otra)->create();
         $this->actingAsContextual($gestor)
             ->post(route('pqrs.mantenimientos.store', $pqrAjena), ['titulo' => 'X', 'descripcion' => 'Y', 'idempotency_key' => 'clave-403-3'])
@@ -266,7 +271,7 @@ class IntegracionModulosTest extends TestCase
         $this->assertSame('finalizado', $mantenimiento->fresh()->estado);
     }
 
-    /** @return array{0:\App\Models\Organizacion,1:\App\Models\Copropiedad,2:User,3:Pqr} */
+    /** @return array{0:Organizacion,1:Copropiedad,2:User,3:Pqr} */
     private function flujoBase(): array
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
@@ -296,12 +301,12 @@ class IntegracionModulosTest extends TestCase
 
     private function prepararFinalizacion(User $gestor, $organizacion, $copropiedad, Mantenimiento $mantenimiento): void
     {
-        $documento = \App\Models\Documento::factory()->paraContexto($organizacion, $copropiedad)->create();
-        $version = \App\Models\DocumentoVersion::factory()->create([
+        $documento = Documento::factory()->paraContexto($organizacion, $copropiedad)->create();
+        $version = DocumentoVersion::factory()->create([
             'documento_id' => $documento->id,
-            'estado' => \App\Domain\GestionDocumental\Enums\EstadoDocumentoVersionEnum::APROBADA,
+            'estado' => EstadoDocumentoVersionEnum::APROBADA,
         ]);
-        \App\Models\MantenimientoDocumentoEvidencia::create([
+        MantenimientoDocumentoEvidencia::create([
             'mantenimiento_id' => $mantenimiento->id,
             'documento_id' => $documento->id,
             'documento_version_id' => $version->id,

@@ -5,6 +5,7 @@ namespace App\Application\Roles;
 use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -33,6 +34,7 @@ use Spatie\Permission\PermissionRegistrar;
 final class GestionarCatalogoPermisos
 {
     public const ESTADO_ACTIVO = 'activo';
+
     public const ESTADO_INACTIVO = 'inactivo';
 
     public const FORMATO_CLAVE = '/^[a-z0-9_]+\.[a-z0-9_]+$/';
@@ -188,7 +190,7 @@ final class GestionarCatalogoPermisos
      * (Copropiedad). La consulta no depende del equipo activo para no ocultar
      * uso en otros contextos.
      *
-     * @return \Illuminate\Support\Collection<int, User>
+     * @return Collection<int, User>
      */
     private function usuariosConPermiso(Permission $permiso)
     {

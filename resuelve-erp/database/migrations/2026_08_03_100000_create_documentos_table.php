@@ -73,5 +73,8 @@ return new class extends Migration
         DB::statement('CREATE INDEX documentos_contexto_estado_index ON documentos (organizacion_id, copropiedad_id, estado)');
     }
 
-    public function down(): void { DB::statement('DROP TABLE documentos'); }
+    public function down(): void
+    {
+        DB::statement('DROP TABLE documentos');
+    }
 };

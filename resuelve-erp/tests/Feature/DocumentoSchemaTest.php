@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Domain\GestionDocumental\Enums\AmbitoDocumentoEnum;
-use App\Domain\GestionDocumental\Enums\EstadoDocumentoVersionEnum;
 use App\Models\Copropiedad;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;

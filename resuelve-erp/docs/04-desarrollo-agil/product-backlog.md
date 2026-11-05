@@ -2,10 +2,10 @@
 
 ## Control documental
 
-- **Versión:** v1.3
+- **Versión:** v1.11
 - **Estado:** En construcción
 - **Fecha de creación:** 31 de julio de 2026
-- **Última actualización:** 17 de octubre de 2026
+- **Última actualización:** 5 de noviembre de 2026
 - **Responsable:** Product Owner de Resuelve
 
 ## Propósito y alcance
@@ -242,6 +242,39 @@ Como Residente o Propietario
 Quiero utilizar las capacidades que tenga autorizadas en mi Copropiedad  
 Para participar en los servicios ofrecidos por Resuelve.
 
+## Historia incorporada — Importación masiva de Unidades Privadas
+
+El Product Owner aprobó el 5 de noviembre de 2026 incorporar HU-RYP-03 para el
+requisito de importación masiva de la guía final. Alcance aprobado:
+
+- importar el catálogo de Unidades Privadas desde un archivo XLSX;
+- validar cada fila y permitir que las filas válidas continúen aunque otras
+  fallen;
+- omitir y reportar los duplicados (código repetido en el archivo o ya
+  existente en la Copropiedad);
+- fijar la Organización y la Copropiedad desde el contexto activo, nunca desde
+  el archivo;
+- mostrar y permitir descargar un reporte XLSX con los errores por fila;
+- auditar la operación.
+
+### HU-RYP-03 — Importación masiva de Unidades Privadas
+
+Como Administrador  
+Quiero importar el catálogo de Unidades Privadas desde un archivo Excel  
+Para cargar de una vez los inmuebles de mi Copropiedad sin registrarlos uno a
+uno.
+
+La importación solo crea Unidades Privadas: no modifica ni elimina registros
+existentes. Reutiliza las reglas y los permisos existentes
+(`residentes.gestionar`, unicidad contextual del código) y no incorpora
+Personas, vínculos, compras, inventario ni entidades nuevas.
+
+**Estado (Sprint 22, completado):** HU-RYP-03 quedó implementada de principio a
+fin y cerrada el 5 de noviembre de 2026, con verificación local (13 pruebas de
+importación, suite completa de 761: 752 aprobadas y 9 omitidas por MySQL, Pint
+aprobado) y ejecución real de GitHub Actions pendiente (ver
+[Sprint 22 — Importación masiva de Unidades Privadas](sprint-22-importacion-unidades-privadas.md)).
+
 # 5. Épica: PQRS
 
 - **Objetivo:** centralizar la gestión de peticiones, quejas, reclamos y
@@ -310,6 +343,40 @@ Para mantenerme informado dentro del contexto de la Copropiedad.
 Como Administrador  
 Quiero que los hechos relevantes se comuniquen a los destinatarios autorizados  
 Para facilitar el seguimiento de la gestión.
+
+## Historia incorporada — Eventos de dominio con listeners
+
+El Product Owner aprobó el 5 de noviembre de 2026 incorporar HU-NOT-03 para el
+requisito de automatización de la guía final. Alcance aprobado:
+
+- crear al menos dos eventos de dominio con sus listeners (radicación de
+  PQRS y cambio de estado de PQRS);
+- sustituir las invocaciones directas de emisión por los listeners, en el
+  mismo punto posterior al commit, conservando destinatarios, canales, orden y
+  efectos (la emisión de campana y correo existente se reutiliza sin
+  duplicarse);
+- mantener los listeners síncronos y el descubrimiento automático de Laravel;
+- excluir de este alcance `pqr_asignada`, recordatorios y respuestas (flujo
+  B-3), que conservan su implementación actual.
+
+### HU-NOT-03 — Eventos de dominio con listeners para la emisión de Notificaciones
+
+Como Administrador  
+Quiero que los hechos relevantes de la gestión se comuniquen mediante eventos
+del sistema con sus listeners  
+Para mantener la emisión de Notificaciones extensible y verificable sin
+duplicar lógica.
+
+La implementación reutiliza `EmitirNotificacionPqrs` sin duplicar reglas ni
+cambiar efectos: no modifica `PqrEventNotification`, el job de correo, el
+scheduler ni el flujo de respuestas.
+
+**Estado (Sprint 23, completado):** HU-NOT-03 quedó implementada de principio a
+fin y cerrada el 5 de noviembre de 2026, con verificación local (3 pruebas de
+eventos más las 8 de emisión existentes sin modificaciones, suite completa de
+764: 755 aprobadas y 9 omitidas por MySQL, Pint aprobado) y ejecución real de
+GitHub Actions pendiente (ver
+[Sprint 23 — Eventos de dominio con listeners](sprint-23-eventos-listeners.md)).
 
 # 8. Épica: Inteligencia Artificial
 
@@ -380,6 +447,46 @@ Como Administrador
 Quiero definir los parámetros autorizados de una Copropiedad  
 Para adecuar su gestión dentro de Resuelve.
 
+## Historia incorporada — Catálogos maestros con ciclo de vida completo
+
+El Product Owner aprobó el 5 de noviembre de 2026 incorporar HU-CONF-03 para el
+requisito de entidades maestras de la guía final. Alcance aprobado:
+
+- crear Form Requests para el alta y la edición de Tipos de PQRS, Etiquetas,
+  Unidades Privadas y Personas, moviendo la validación HTTP sin duplicar
+  reglas y conservando las reglas de dominio en los casos de uso;
+- completar para cada entidad el ciclo de alta, consulta, edición, baja
+  lógica, papelera y restauración, reutilizando los campos existentes
+  (`estado`/`desactivada_at`/`activo`), sin eliminación física ni cambios de
+  esquema;
+- proteger todas las acciones en backend con los permisos actuales y conservar
+  el aislamiento de Organización/Copropiedad.
+
+### HU-CONF-03 — Catálogos maestros con ciclo de vida completo
+
+Como Administrador  
+Quiero gestionar los catálogos maestros con validación formal, eliminación
+lógica, papelera y restauración  
+Para mantener los datos de referencia controlados y recuperables.
+
+La implementación reutiliza los casos de uso, permisos y aislamiento
+contextuales existentes; no incorpora entidades nuevas ni elimina registros
+físicamente.
+
+**Estado (Sprint 24, completado):** HU-CONF-03 quedó implementada de principio a
+fin y cerrada el 5 de noviembre de 2026, con verificación local (15 pruebas de
+ciclo de vida, suite completa de 779: 770 aprobadas y 9 omitidas por MySQL,
+Pint aprobado), bloqueo documentado para la baja lógica de Tipos de PQRS (sin
+columnas de estado) y ejecución real de GitHub Actions pendiente (ver
+[Sprint 24 — Catálogos maestros con ciclo de vida completo](sprint-24-catalogos-ciclo-vida.md)).
+
+**Extensión aprobada (5 de noviembre de 2026):** el Product Owner autorizó una
+migración con la columna nullable `desactivada_at` en `tipo_pqrs`, que completó
+la baja lógica, papelera y restauración de Tipos de PQRS (las cuatro entidades
+del alcance). Verificación local de la extensión: 5 pruebas del catálogo de
+tipos (incluida la de baja lógica con papelera y restauración), suite completa
+de 780 (771 aprobadas y 9 omitidas por MySQL) y Pint aprobado.
+
 # 11. Épica: Integraciones
 
 - **Objetivo:** permitir intercambios autorizados con servicios o productos
@@ -403,7 +510,43 @@ Como Administrador
 Quiero utilizar intercambios de información previamente autorizados  
 Para apoyar la gestión sin perder el contexto ni el control de los datos.
 
-Las integraciones específicas permanecen pendientes de definición y
+## Historia incorporada — API REST v1 (entrega final académica)
+
+El Product Owner aprobó el 5 de noviembre de 2026 incorporar HU-API-01 para el
+requisito de API de la guía final, sobre el modelo residencial autorizado
+(PQRS, mantenimiento y gestión documental; sin ventas, compras ni inventario).
+Alcance aprobado:
+
+- API REST v1 autenticada con Laravel Sanctum;
+- inicio de sesión con rol activo y cierre de sesión que revoca el token;
+- consulta contextual del listado de PQRS y del detalle de una PQRS;
+- radicación de PQRS como operación de escritura;
+- colección de pruebas automatizadas;
+- mínimo cuatro endpoints, al menos uno de escritura.
+
+### HU-API-01 — API REST v1 con Sanctum
+
+Como consumidor externo autorizado  
+Quiero una API REST v1 autenticada con Laravel Sanctum que exponga la operación
+residencial  
+Para consultar y radicar PQRS por un canal distinto de la web, reutilizando los
+casos de uso y la autorización contextual existentes.
+
+La implementación reutilizará los casos de uso, las policies y la autorización
+contextual existentes (ADR-008), sin duplicar reglas de negocio ni omitir la
+autorización del backend. La consulta y el detalle conservarán el aislamiento
+de Organización/Copropiedad y las reglas de visibilidad de la web. Esta
+aprobación no incorpora ventas, compras ni inventario y no modifica la
+arquitectura.
+
+**Estado (Sprint 21, completado):** HU-API-01 quedó implementada en dos
+bloques —autenticación con Sanctum y consulta, detalle y radicación de PQRS— y
+cerrada el 5 de noviembre de 2026, con verificación local (15 pruebas API,
+suite completa de 748: 739 aprobadas y 9 omitidas por MySQL, Pint aprobado) y
+ejecución real de GitHub Actions pendiente (ver
+[Sprint 21 — API REST v1](sprint-21-api-rest-v1.md)).
+
+Las integraciones específicas adicionales permanecen pendientes de definición y
 aprobación.
 
 # 12. Épica: Auditoría y Trazabilidad

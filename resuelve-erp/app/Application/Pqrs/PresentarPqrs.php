@@ -5,8 +5,8 @@ namespace App\Application\Pqrs;
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Configuracion\ResolverDiasRespuestaContextual;
 use App\Application\Contexto\ContextoOperativo;
-use App\Application\Notificaciones\EmitirNotificacionPqrs;
 use App\Domain\Pqrs\CalendarioLaboralColombia;
+use App\Events\PqrRadicada;
 use App\Models\AutomationRule;
 use App\Models\Pqr;
 use App\Models\User;
@@ -19,7 +19,6 @@ final class PresentarPqrs
     public function __construct(
         private readonly AutorizacionContextual $autorizacion,
         private readonly RegistrarActuacionPqrs $actuaciones,
-        private readonly EmitirNotificacionPqrs $notificaciones,
         private readonly CalendarioLaboralColombia $calendario,
         private readonly ResolverDiasRespuestaContextual $diasRespuesta,
     ) {}
@@ -28,7 +27,7 @@ final class PresentarPqrs
     public function ejecutar(ContextoOperativo $contexto, User $usuario, array $datos, iterable $adjuntos = []): Pqr
     {
         if (! $this->autorizacion->tienePermiso($contexto, 'pqrs.crear')) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         $fechaRadicacion = $this->calendario->hoy();
@@ -62,7 +61,9 @@ final class PresentarPqrs
             return $pqr;
         });
 
-        $this->notificaciones->ejecutar($contexto, $pqr, 'pqr_creada');
+        // HU-NOT-03: el listener NotificarPqrRadicada emite la notificación
+        // (misma semántica que la invocación directa anterior).
+        event(new PqrRadicada($contexto, $pqr));
 
         return $pqr;
     }
@@ -80,5 +81,4 @@ final class PresentarPqrs
             ]);
         }
     }
-
 }

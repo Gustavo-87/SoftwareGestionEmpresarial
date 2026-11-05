@@ -1,6 +1,23 @@
 <?php
-namespace App\Models; use Illuminate\Database\Eloquent\Model; use Illuminate\Support\Str;
-class AuditLog extends Model { protected $fillable=['user_id','action','auditable_type','auditable_id','ip_address','metadata']; protected function casts():array{return ['metadata'=>'array'];} public function user(){return $this->belongsTo(User::class);}
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
+class AuditLog extends Model
+{
+    protected $fillable = ['user_id', 'action', 'auditable_type', 'auditable_id', 'ip_address', 'metadata'];
+
+    protected function casts(): array
+    {
+        return ['metadata' => 'array'];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function getHumanActionAttribute(): string
     {
@@ -91,20 +108,43 @@ class AuditLog extends Model { protected $fillable=['user_id','action','auditabl
         $routeName = $parts[1] ?? $action;
 
         // Mapeo de prefijos de ruta a módulos legibles.
-        if (Str::startsWith($routeName, ['pqrs.', 'pqrs.replies.', 'pqrs.comments.', 'pqrs.tags.', 'pqrs.survey.'])) return 'Gestión PQRS';
-        if (Str::startsWith($routeName, ['admin.organizaciones.', 'organizacion.'])) return 'Organizaciones';
-        if (Str::startsWith($routeName, ['admin.copropiedades.', 'copropiedad.'])) return 'Copropiedades';
-        if (Str::startsWith($routeName, ['admin.membresias.', 'membresia.'])) return 'Membresías';
-        if (Str::startsWith($routeName, ['admin.usuarios-globales.', 'usuario.', 'users.'])) return 'Usuarios';
-        if (Str::startsWith($routeName, ['settings.'])) return 'Configuración';
-        if (Str::startsWith($routeName, ['management.residents.'])) return 'Residentes';
-        if (Str::startsWith($routeName, ['documentos.'])) return 'Documentos';
-        if (Str::startsWith($routeName, ['login.', 'password.'])) return 'Autenticación';
-        if (Str::startsWith($routeName, ['tag.'])) return 'Etiquetas';
-        if (Str::startsWith($routeName, ['system_admin.'])) return 'Administración';
+        if (Str::startsWith($routeName, ['pqrs.', 'pqrs.replies.', 'pqrs.comments.', 'pqrs.tags.', 'pqrs.survey.'])) {
+            return 'Gestión PQRS';
+        }
+        if (Str::startsWith($routeName, ['admin.organizaciones.', 'organizacion.'])) {
+            return 'Organizaciones';
+        }
+        if (Str::startsWith($routeName, ['admin.copropiedades.', 'copropiedad.'])) {
+            return 'Copropiedades';
+        }
+        if (Str::startsWith($routeName, ['admin.membresias.', 'membresia.'])) {
+            return 'Membresías';
+        }
+        if (Str::startsWith($routeName, ['admin.usuarios-globales.', 'usuario.', 'users.'])) {
+            return 'Usuarios';
+        }
+        if (Str::startsWith($routeName, ['settings.'])) {
+            return 'Configuración';
+        }
+        if (Str::startsWith($routeName, ['management.residents.'])) {
+            return 'Residentes';
+        }
+        if (Str::startsWith($routeName, ['documentos.'])) {
+            return 'Documentos';
+        }
+        if (Str::startsWith($routeName, ['login.', 'password.'])) {
+            return 'Autenticación';
+        }
+        if (Str::startsWith($routeName, ['tag.'])) {
+            return 'Etiquetas';
+        }
+        if (Str::startsWith($routeName, ['system_admin.'])) {
+            return 'Administración';
+        }
 
         // Fallback: extraer primer segmento.
         $segment = Str::before($routeName, '.');
+
         return Str::title(str_replace(['_', '-'], ' ', $segment)) ?: 'Sistema';
     }
 

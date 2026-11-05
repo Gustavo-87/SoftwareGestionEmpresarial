@@ -8,11 +8,13 @@ use App\Application\Roles\CrearRol;
 use App\Application\Roles\EditarRol;
 use App\Application\Roles\EliminarRol;
 use App\Application\Roles\SincronizarPermisosRol;
+use App\Models\AuditLog;
 use App\Models\Copropiedad;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Permission;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
@@ -183,7 +185,7 @@ class RolesCatalogoTest extends TestCase
     {
         [$organizacion, $copropiedad] = $this->createInstitutionalContext();
         [$operador, $contexto] = $this->operador($organizacion, $copropiedad, ['roles.gestionar', 'pqrs.listar']);
-        \Spatie\Permission\Models\Permission::findOrCreate('pqrs.eliminar', 'web');
+        Permission::findOrCreate('pqrs.eliminar', 'web');
         $plataforma = User::factory()->create(['es_administrador_sistema' => true]);
         $poderoso = app(CrearRol::class)->ejecutar($plataforma, null, [
             'nombre' => 'Rol con permisos elevados',
@@ -249,7 +251,7 @@ class RolesCatalogoTest extends TestCase
         app(SincronizarPermisosRol::class)->ejecutar($operador, $contexto, $rol->id, []);
         app(EliminarRol::class)->ejecutar($operador, $contexto, $rol->id);
 
-        $acciones = \App\Models\AuditLog::query()
+        $acciones = AuditLog::query()
             ->where('user_id', $operador->id)
             ->whereIn('action', ['rol.store', 'rol.update', 'rol.permissions.sync', 'rol.delete'])
             ->pluck('action')

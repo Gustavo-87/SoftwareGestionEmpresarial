@@ -22,6 +22,7 @@ class VerificarEquivalenciaAutorizacionContextual extends Command
             $divergencias = $verificador->divergencias();
         } catch (Throwable $exception) {
             $this->error($exception->getMessage());
+
             return self::FAILURE;
         }
 
@@ -42,6 +43,7 @@ class VerificarEquivalenciaAutorizacionContextual extends Command
             $divergenciasSpatie = $verificadorSpatie->divergenciasClasificadas();
         } catch (Throwable $exception) {
             $this->error($exception->getMessage());
+
             return self::FAILURE;
         }
 
@@ -63,12 +65,14 @@ class VerificarEquivalenciaAutorizacionContextual extends Command
 
         if ($errores > 0) {
             $this->error('Se detectaron divergencias de severidad error. El gate no exige 0 divergencias: los avisos corresponden a deriva explicada.');
+
             return self::FAILURE;
         }
 
         $this->info('Fuente efectiva de autorización: RBAC de Spatie por Copropiedad (equipo = Copropiedad activa).');
         $this->info('Espejo temporal conservado: RBAC contextual legado (roles_contextuales, permisos_contextuales, rol_permiso_contextual, membresia_copropiedad_rol) para rollback y diagnóstico.');
         $this->info('Equivalencia verificada con el contrato aprobado: normalización canónica, tolerancia multi-rol y severidad.');
+
         return self::SUCCESS;
     }
 }

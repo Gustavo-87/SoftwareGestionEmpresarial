@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
+use App\Application\Documentos\ConsultaDocumentosContextuales;
 use App\Application\Documentos\VincularEvidenciaMantenimiento;
 use App\Application\Mantenimiento\ConsultaMantenimientos;
 use App\Application\Mantenimiento\FinalizarMantenimiento;
@@ -11,6 +13,7 @@ use App\Application\Mantenimiento\GestionarMantenimiento;
 use App\Application\Mantenimiento\RegistrarMantenimiento;
 use App\Application\Mantenimiento\RegistrarResultadoMantenimiento;
 use App\Application\Mantenimiento\VincularMantenimientoPqr;
+use App\Application\Pqrs\ConsultaPqrsContextuales;
 use App\Models\Documento;
 use App\Models\DocumentoVersion;
 use App\Models\Mantenimiento;
@@ -51,20 +54,20 @@ class MantenimientoController extends Controller
         $usuario = request()->user();
         $gestiona = $usuario->can('update', $mantenimiento);
         $puedeVerInterno = $gestiona
-            || app(\App\Application\Autorizacion\AutorizacionContextual::class)->tienePermiso($contexto, 'mantenimiento.ver_todas');
+            || app(AutorizacionContextual::class)->tienePermiso($contexto, 'mantenimiento.ver_todas');
         $responsables = $gestiona ? $consulta->responsables($contexto)->orderBy('name')->get() : collect();
         $evidencias = $mantenimiento->evidencias()->with(['documento', 'version'])->orderBy('id')->get();
         $pqrsVinculables = collect();
         $evidenciasDisponibles = collect();
         if ($gestiona && $mantenimiento->estado !== 'finalizado') {
-            $pqrsVinculables = app(\App\Application\Pqrs\ConsultaPqrsContextuales::class)
+            $pqrsVinculables = app(ConsultaPqrsContextuales::class)
                 ->para($contexto)
                 ->orderByDesc('created_at')
                 ->limit(200)
                 ->get()
                 ->filter(fn (Pqr $pqr) => $usuario->can('update', $pqr))
                 ->values();
-            $evidenciasDisponibles = app(\App\Application\Documentos\ConsultaDocumentosContextuales::class)
+            $evidenciasDisponibles = app(ConsultaDocumentosContextuales::class)
                 ->para($contexto)
                 ->where('estado', 'activo')
                 ->with('versiones')

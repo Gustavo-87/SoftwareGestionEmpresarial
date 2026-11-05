@@ -24,7 +24,7 @@ final class SincronizarEtiquetasPqrs
     {
         $pqr = $this->consultaPqrs->resolver($contexto, $pqr->getKey());
         if (! $this->autorizacion->puedeGestionarPqr($contexto, $pqr)) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         $etiquetas = array_values(array_unique(array_map('intval', $etiquetas)));

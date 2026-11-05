@@ -8,12 +8,22 @@ use App\Application\Residencia\ConsultaPersonasContextuales;
 use App\Application\Residencia\ConsultaUnidadesPrivadasContextuales;
 use App\Application\Residencia\GestionarUnidadPrivada;
 use App\Application\Residencia\GestionarVinculoUnidad;
+use App\Application\Residencia\ImportarUnidadesPrivadas;
 use App\Domain\Residencia\Enums\TipoUnidadEnum;
+use App\Http\Requests\StoreUnidadPrivadaRequest;
+use App\Http\Requests\UpdateUnidadPrivadaRequest;
+use App\Models\SiteSetting;
 use App\Models\UnidadPrivada;
 use App\Models\VinculoUnidad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Gestión visible de Unidades Privadas (HU-RYP-01, Sprint 20).
@@ -51,9 +61,9 @@ class UnidadPrivadaController extends Controller
         return view('management.unidades-form', ['unidad' => null, 'tipos' => TipoUnidadEnum::cases()]);
     }
 
-    public function store(Request $request, ContextoOperativo $contexto, GestionarUnidadPrivada $gestionar): RedirectResponse
+    public function store(StoreUnidadPrivadaRequest $request, ContextoOperativo $contexto, GestionarUnidadPrivada $gestionar): RedirectResponse
     {
-        $gestionar->crear($contexto, $request->user(), $request->all());
+        $gestionar->crear($contexto, $request->user(), $request->validated());
 
         return redirect()->route('management.unidades.index')->with('success', 'Unidad privada creada correctamente.');
     }
@@ -65,9 +75,9 @@ class UnidadPrivadaController extends Controller
         return view('management.unidades-form', ['unidad' => $unidad, 'tipos' => TipoUnidadEnum::cases()]);
     }
 
-    public function update(Request $request, ContextoOperativo $contexto, UnidadPrivada $unidad, GestionarUnidadPrivada $gestionar): RedirectResponse
+    public function update(UpdateUnidadPrivadaRequest $request, ContextoOperativo $contexto, UnidadPrivada $unidad, GestionarUnidadPrivada $gestionar): RedirectResponse
     {
-        $gestionar->actualizar($contexto, $request->user(), $unidad, $request->all());
+        $gestionar->actualizar($contexto, $request->user(), $unidad, $request->validated());
 
         return redirect()->route('management.unidades.index')->with('success', 'Unidad privada actualizada correctamente.');
     }
@@ -146,6 +156,119 @@ class UnidadPrivadaController extends Controller
         $gestionar->corregirVigencia($contexto, $request->user(), $vinculo, $request->all());
 
         return redirect()->route('management.unidades.show', $unidad)->with('success', 'Vigencia corregida; los valores anteriores y el motivo quedaron en la auditoría.');
+    }
+
+    /**
+     * Importación masiva desde XLSX (HU-RYP-03, Sprint 22). Solo altas.
+     */
+    public function importar(ContextoOperativo $contexto): View
+    {
+        $this->permitir($contexto);
+
+        return view('management.unidades-importar', [
+            'resultado' => session('importacion_unidades_resultado'),
+            'tieneReporte' => (bool) session('importacion_unidades_reporte'),
+        ]);
+    }
+
+    public function importarStore(Request $request, ContextoOperativo $contexto, ImportarUnidadesPrivadas $importar): RedirectResponse
+    {
+        $this->permitir($contexto);
+
+        $request->validate([
+            'archivo' => ['required', 'file', 'mimes:xlsx', 'max:2048'],
+        ], [
+            'archivo.required' => 'Selecciona un archivo XLSX para importar.',
+            'archivo.file' => 'El archivo no pudo ser leído.',
+            'archivo.mimes' => 'El archivo debe tener formato XLSX.',
+            'archivo.max' => 'El archivo no debe superar 2 MB.',
+        ]);
+
+        try {
+            $resultado = $importar->ejecutar($contexto, $request->user(), $request->file('archivo'));
+        } catch (ValidationException $exception) {
+            // Límites del archivo (filas, encabezados o lectura): se rechaza el
+            // archivo completo, sin crear registros.
+            return redirect()->route('management.unidades.importar')->withErrors($exception->errors());
+        }
+
+        // La operación la audita el caso de uso con sus totales.
+        $request->attributes->set('auditoria_especifica_registrada', true);
+        $request->session()->put('importacion_unidades_reporte', $resultado['errores']);
+
+        return redirect()
+            ->route('management.unidades.importar')
+            ->with('importacion_unidades_resultado', $resultado + ['archivo' => $request->file('archivo')->getClientOriginalName()]);
+    }
+
+    public function reporteErrores(Request $request, ContextoOperativo $contexto): StreamedResponse|RedirectResponse
+    {
+        $this->permitir($contexto);
+
+        /** @var list<array{fila: int, campo: ?string, motivo: string}> $errores */
+        $errores = $request->session()->get('importacion_unidades_reporte', []);
+        if ($errores === []) {
+            return redirect()->route('management.unidades.importar');
+        }
+
+        $settings = SiteSetting::current();
+        $color = ltrim(SiteSetting::COLOR_INSTITUCIONAL, '#');
+
+        $book = new Spreadsheet;
+        $sheet = $book->getActiveSheet();
+        $sheet->setTitle('Errores');
+        $sheet->setShowGridlines(false);
+        $sheet->mergeCells('A1:C2')->setCellValue('A1', $settings->nombre_conjunto);
+        $sheet->mergeCells('A3:C3')->setCellValue('A3', 'REPORTE DE ERRORES DE IMPORTACIÓN DE UNIDADES PRIVADAS');
+        $sheet->getStyle('A1:C3')->getFont()->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A1:C3')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF'.$color);
+        $sheet->getStyle('A1:C3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1')->getFont()->setSize(16);
+        $sheet->fromArray(['Fila', 'Campo', 'Motivo'], null, 'A5');
+        $sheet->getStyle('A5:C5')->getFont()->setBold(true);
+
+        $fila = 6;
+        foreach ($errores as $error) {
+            $sheet->setCellValue('A'.$fila, $error['fila']);
+            $sheet->setCellValue('B'.$fila, (string) ($error['campo'] ?? ''));
+            $sheet->setCellValue('C'.$fila, $error['motivo']);
+            $fila++;
+        }
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+
+        return response()->streamDownload(function () use ($book): void {
+            (new Xlsx($book))->save('php://output');
+        }, 'reporte-errores-importacion-unidades-'.now()->format('Ymd').'.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /** Papelera (HU-CONF-03): unidades desactivadas con acción de restauración. */
+    public function papelera(ContextoOperativo $contexto, ConsultaUnidadesPrivadasContextuales $consulta): View
+    {
+        $this->permitir($contexto);
+
+        $unidades = $consulta->para($contexto)
+            ->where('estado', 'desactivada')
+            ->orderBy('codigo')
+            ->get();
+
+        return view('management.papelera', [
+            'titulo' => 'Papelera de unidades privadas',
+            'descripcion' => 'Unidades desactivadas de la Copropiedad activa. Restaurar vuelve a ponerlas en servicio sin crear registros nuevos.',
+            'volver' => route('management.unidades.index'),
+            'volverTexto' => 'Volver a unidades',
+            'columna' => 'Unidad',
+            'registros' => $unidades->map(fn (UnidadPrivada $unidad): array => [
+                'id' => $unidad->id,
+                'resumen' => $unidad->codigo.($unidad->numero_nombre ? ' — '.$unidad->numero_nombre : ''),
+                'fecha' => $unidad->desactivada_at?->format('d/m/Y H:i'),
+                'restaurar' => route('management.unidades.reactivar', $unidad),
+            ]),
+        ]);
     }
 
     private function permitir(ContextoOperativo $contexto): void

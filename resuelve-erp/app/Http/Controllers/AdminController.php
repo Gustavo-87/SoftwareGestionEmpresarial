@@ -6,7 +6,6 @@ use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Organizacion;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {

@@ -3,7 +3,7 @@
 @section('titulo_pagina', 'Unidades privadas')
 @section('contenido')
 <x-page-heading title="Unidades privadas" eyebrow="Residentes y unidades">
-    <x-slot name="actions"><a class="button primary" href="{{ route('management.unidades.create') }}">Nueva unidad</a></x-slot>
+    <x-slot name="actions"><a class="button subtle" href="{{ route('management.unidades.papelera') }}">Papelera</a><a class="button subtle" href="{{ route('management.unidades.importar') }}">Importar</a><a class="button primary" href="{{ route('management.unidades.create') }}">Nueva unidad</a></x-slot>
 </x-page-heading>
 <p>Unidades Privadas de la Copropiedad activa. Los vínculos de propietarios y residentes se administran por separado.</p>
 <section class="panel">

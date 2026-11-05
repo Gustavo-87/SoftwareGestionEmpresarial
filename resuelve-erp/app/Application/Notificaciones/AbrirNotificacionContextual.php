@@ -23,12 +23,12 @@ final class AbrirNotificacionContextual
         $datos = $notificacion->data;
 
         if (($datos['resource_type'] ?? null) !== 'pqr' || ! is_numeric($datos['resource_id'] ?? null)) {
-            throw (new ModelNotFoundException())->setModel(Pqr::class);
+            throw (new ModelNotFoundException)->setModel(Pqr::class);
         }
 
         $pqr = $this->pqrs->resolver($contexto, (int) $datos['resource_id']);
         if (! $this->autorizacion->puedeVerPqr($contexto, $pqr)) {
-            throw (new ModelNotFoundException())->setModel(Pqr::class, [$datos['resource_id']]);
+            throw (new ModelNotFoundException)->setModel(Pqr::class, [$datos['resource_id']]);
         }
 
         $notificacion->markAsRead();

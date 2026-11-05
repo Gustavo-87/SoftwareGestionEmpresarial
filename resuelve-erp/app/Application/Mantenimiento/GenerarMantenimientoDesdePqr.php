@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Mantenimiento;
 use App\Models\Pqr;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -52,13 +53,14 @@ final class GenerarMantenimientoDesdePqr
                 $existente = Mantenimiento::query()->where('idempotency_key', $clave)->first();
                 if ($existente !== null) {
                     $this->verificarReutilizacionDeClave($existente, $pqr, $titulo, $descripcion, $fecha);
+
                     return $existente;
                 }
 
                 $this->autorizar($operador, $contexto, $pqr);
 
                 if (! $contexto->tieneMembresiaContextual()) {
-                    throw new \Illuminate\Auth\Access\AuthorizationException('Se requiere una Membresía vigente para generar mantenimientos.');
+                    throw new AuthorizationException('Se requiere una Membresía vigente para generar mantenimientos.');
                 }
 
                 $duplicado = Mantenimiento::query()
@@ -150,11 +152,11 @@ final class GenerarMantenimientoDesdePqr
         // Autorización efectiva sobre ambos recursos: gestionar la PQRS y poder
         // crear mantenimiento. `pqrs.listar` no es suficiente (ajuste aprobado).
         if (! $operador->can('update', $pqr)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException('No tienes autorización para gestionar esta PQRS.');
+            throw new AuthorizationException('No tienes autorización para gestionar esta PQRS.');
         }
 
         if (! $operador->can('create', Mantenimiento::class)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException('No tienes permiso para generar mantenimientos.');
+            throw new AuthorizationException('No tienes permiso para generar mantenimientos.');
         }
     }
 

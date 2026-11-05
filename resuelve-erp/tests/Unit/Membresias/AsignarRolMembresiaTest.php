@@ -7,8 +7,8 @@ use App\Models\MembresiaCopropiedad;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use InvalidArgumentException;
+use Tests\TestCase;
 
 class AsignarRolMembresiaTest extends TestCase
 {
@@ -19,7 +19,7 @@ class AsignarRolMembresiaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->asignarRol = new AsignarRolMembresia();
+        $this->asignarRol = new AsignarRolMembresia;
     }
 
     public function test_asignar_rol_exitoso(): void

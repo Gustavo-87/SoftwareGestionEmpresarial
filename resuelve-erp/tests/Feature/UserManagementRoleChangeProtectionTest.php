@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Application\Roles\CapacidadAdministrativa;
 use App\Models\Copropiedad;
 use App\Models\MembresiaCopropiedad;
+use App\Models\Organizacion;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -48,7 +49,7 @@ class UserManagementRoleChangeProtectionTest extends TestCase
      * Spatie 'admin' no otorga usuarios.gestionar: sin la protección, la
      * Copropiedad quedaría sin capacidad administrativa efectiva.
      *
-     * @return array{0: User, 1: \App\Models\Organizacion, 2: \App\Models\Copropiedad}
+     * @return array{0: User, 1: Organizacion, 2: Copropiedad}
      */
     private function escenarioUltimoTitular(): array
     {

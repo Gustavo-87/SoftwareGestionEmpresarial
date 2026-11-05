@@ -6,6 +6,7 @@
             <h1>Herramientas del equipo</h1>
             <p>Plantillas, etiquetas y reportes para la gestión de la Copropiedad activa.</p>
         </div>
+        <div class="heading-actions"><a class="button subtle" href="{{ route('management.tags.papelera') }}">Papelera de etiquetas</a></div>
     </section>
     <div class="tools-grid">
         @if($puedeExportarInformes)

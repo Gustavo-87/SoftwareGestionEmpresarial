@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Copropiedad;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
 
@@ -31,7 +32,7 @@ class RolesCatalogoWebTest extends TestCase
 
         $this->post(route('roles.store'), ['nombre' => 'Coordinador web', 'permisos' => ['pqrs.listar']])
             ->assertRedirect(route('roles.index'))->assertSessionHas('success');
-        $rol = \Spatie\Permission\Models\Role::query()->where('name', 'Coordinador web')->firstOrFail();
+        $rol = Role::query()->where('name', 'Coordinador web')->firstOrFail();
         $this->assertSame($copropiedad->id, (int) $rol->copropiedad_id);
 
         $this->get(route('roles.edit', $rol->id))->assertOk()->assertSee('Coordinador web');
@@ -60,7 +61,7 @@ class RolesCatalogoWebTest extends TestCase
         [$operador] = $this->operador($organizacion, $copropiedad);
         $this->actingAsContextual($operador);
         $this->post(route('roles.store'), ['nombre' => 'Rol propio', 'permisos' => ['pqrs.listar']]);
-        $rol = \Spatie\Permission\Models\Role::query()->where('name', 'Rol propio')->firstOrFail();
+        $rol = Role::query()->where('name', 'Rol propio')->firstOrFail();
 
         [$sinPermiso] = $this->operador($organizacion, $copropiedad, ['pqrs.listar'], 'lector');
         $this->actingAsContextual($sinPermiso);
@@ -82,7 +83,7 @@ class RolesCatalogoWebTest extends TestCase
         [$operadorB] = $this->operador($organizacion, $copropiedadB, ['roles.gestionar', 'pqrs.listar', 'pqrs.crear'], 'gestor');
 
         $this->actingAsContextual($operadorA)->post(route('roles.store'), ['nombre' => 'Rol de A', 'permisos' => ['pqrs.listar']]);
-        $rolA = \Spatie\Permission\Models\Role::query()->where('name', 'Rol de A')->firstOrFail();
+        $rolA = Role::query()->where('name', 'Rol de A')->firstOrFail();
 
         $this->actingAsContextual($operadorB);
         $this->get(route('roles.index'))->assertOk()->assertDontSee('Rol de A');
@@ -103,7 +104,7 @@ class RolesCatalogoWebTest extends TestCase
             ->assertSessionHasErrors('permisos');
 
         $this->post(route('roles.store'), ['nombre' => 'Rol en uso', 'permisos' => ['pqrs.listar']]);
-        $rol = \Spatie\Permission\Models\Role::query()->where('name', 'Rol en uso')->firstOrFail();
+        $rol = Role::query()->where('name', 'Rol en uso')->firstOrFail();
         $asignado = User::factory()->create();
         setPermissionsTeamId($copropiedad->id);
         $asignado->assignRole($rol);
@@ -133,7 +134,7 @@ class RolesCatalogoWebTest extends TestCase
         $this->post(route('roles.store'), ['nombre' => 'Rol base nuevo'])
             ->assertRedirect(route('roles.index'))->assertSessionHas('success');
 
-        $rol = \Spatie\Permission\Models\Role::query()->where('name', 'Rol base nuevo')->firstOrFail();
+        $rol = Role::query()->where('name', 'Rol base nuevo')->firstOrFail();
         $this->assertNull($rol->copropiedad_id);
         $this->get(route('roles.index'))->assertSee('Global');
     }

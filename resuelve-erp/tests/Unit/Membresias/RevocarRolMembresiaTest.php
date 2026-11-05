@@ -6,8 +6,8 @@ use App\Application\Membresias\RevocarRolMembresia;
 use App\Models\MembresiaCopropiedad;
 use App\Models\Rol;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use InvalidArgumentException;
+use Tests\TestCase;
 
 class RevocarRolMembresiaTest extends TestCase
 {
@@ -18,7 +18,7 @@ class RevocarRolMembresiaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->revocarRol = new RevocarRolMembresia();
+        $this->revocarRol = new RevocarRolMembresia;
     }
 
     public function test_revocar_rol_exitoso(): void

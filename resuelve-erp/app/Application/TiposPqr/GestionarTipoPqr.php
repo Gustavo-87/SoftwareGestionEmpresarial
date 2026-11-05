@@ -53,9 +53,18 @@ final class GestionarTipoPqr
         return $tipo->refresh();
     }
 
-    public function eliminar(User $operador, TipoPqr $tipo): void
+    /**
+     * Baja lógica (HU-CONF-03): desactiva el tipo conservando la fila. Las
+     * guardas por uso y sus respuestas se conservan: un tipo asociado a PQRS o
+     * a reglas automáticas no se desactiva. Es idempotente.
+     */
+    public function desactivar(User $operador, TipoPqr $tipo): TipoPqr
     {
         $this->autorizar($operador);
+
+        if ($tipo->estaDesactivado()) {
+            return $tipo; // idempotente
+        }
 
         $enPqrs = Pqr::query()->where('tipo_pqr_id', $tipo->id)->count();
         $enReglas = DB::table('automation_rules')->where('tipo_pqr_id', $tipo->id)->count();
@@ -73,19 +82,53 @@ final class GestionarTipoPqr
             ]);
         }
 
-        $this->auditar($operador, 'tipo_pqr.delete', $tipo, ['nombre' => $tipo->nombre]);
-        $tipo->delete();
+        $tipo->forceFill(['desactivada_at' => now()])->save();
+        $this->auditar($operador, 'tipo_pqr.deactivate', $tipo, ['nombre' => $tipo->nombre]);
+
+        return $tipo;
+    }
+
+    /** Restauración desde la papelera (HU-CONF-03): limpia la desactivación. */
+    public function reactivar(User $operador, TipoPqr $tipo): TipoPqr
+    {
+        $this->autorizar($operador);
+
+        if (! $tipo->estaDesactivado()) {
+            return $tipo; // idempotente
+        }
+
+        $tipo->forceFill(['desactivada_at' => null])->save();
+        $this->auditar($operador, 'tipo_pqr.reactivate', $tipo, ['nombre' => $tipo->nombre]);
+
+        return $tipo;
+    }
+
+    /**
+     * Reglas de validación del alta y la edición (fuente única para la capa
+     * HTTP mediante Form Requests y para el caso de uso).
+     *
+     * @return array<string, array<int, mixed>>
+     */
+    public static function reglasValidacion(?int $exceptoId = null): array
+    {
+        return [
+            'nombre' => ['required', 'string', 'max:100', Rule::unique('tipo_pqrs', 'nombre')->ignore($exceptoId)],
+            'descripcion' => ['nullable', 'string', 'max:1000'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public static function mensajesValidacion(): array
+    {
+        return [
+            'nombre.required' => 'El nombre del tipo es obligatorio.',
+            'nombre.unique' => 'Ya existe un tipo de PQRS con ese nombre.',
+        ];
     }
 
     private function validar(array $datos, ?TipoPqr $actual = null): array
     {
-        return Validator::make($datos, [
-            'nombre' => ['required', 'string', 'max:100', Rule::unique('tipo_pqrs', 'nombre')->ignore($actual?->id)],
-            'descripcion' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'nombre.required' => 'El nombre del tipo es obligatorio.',
-            'nombre.unique' => 'Ya existe un tipo de PQRS con ese nombre.',
-        ])->validate();
+        return Validator::make($datos, self::reglasValidacion($actual?->id), self::mensajesValidacion())->validate();
     }
 
     private function autorizar(User $operador): void

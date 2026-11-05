@@ -27,6 +27,7 @@ use Spatie\Permission\Models\Role;
 final class VerificadorEquivalenciaRbacSpatie
 {
     public const SEVERIDAD_ERROR = 'error';
+
     public const SEVERIDAD_AVISO = 'aviso';
 
     public const PERMISOS_NUEVOS = ['pqrs.gestionar_asignadas', 'pqrs.ver_borradores', 'roles.gestionar'];

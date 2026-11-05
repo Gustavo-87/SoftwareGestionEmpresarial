@@ -40,7 +40,7 @@ class ConsultasResidenciaContextualesTest extends TestCase
 
     private function persona(int $organizacionId, string $nombre): Persona
     {
-        $persona = new Persona();
+        $persona = new Persona;
         $persona->forceFill(['organizacion_id' => $organizacionId, 'tipo_persona' => 'natural', 'nombre_razon_social' => $nombre])->save();
 
         return $persona;
@@ -48,7 +48,7 @@ class ConsultasResidenciaContextualesTest extends TestCase
 
     private function unidad(int $organizacionId, int $copropiedadId, string $codigo): UnidadPrivada
     {
-        $unidad = new UnidadPrivada();
+        $unidad = new UnidadPrivada;
         $unidad->forceFill(['organizacion_id' => $organizacionId, 'copropiedad_id' => $copropiedadId, 'codigo' => $codigo])->save();
 
         return $unidad;
@@ -56,7 +56,7 @@ class ConsultasResidenciaContextualesTest extends TestCase
 
     private function vinculo(Persona $persona, UnidadPrivada $unidad): VinculoUnidad
     {
-        $vinculo = new VinculoUnidad();
+        $vinculo = new VinculoUnidad;
         $vinculo->asociarPartesContextuales($persona, $unidad);
         $vinculo->forceFill(['tipo_vinculo' => 'residente', 'estado' => 'activo', 'vigente_desde' => now()->toDateString()])->save();
 

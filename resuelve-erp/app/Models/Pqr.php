@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use App\Domain\Pqrs\CalendarioLaboralColombia;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 
 class Pqr extends Model
 {
@@ -19,10 +18,11 @@ class Pqr extends Model
     {
         static::saving(function (Pqr $pqr) {
             if ($pqr->prioridad !== null && ! in_array($pqr->prioridad, self::PRIORIDADES, true)) {
-                throw new \InvalidArgumentException("Prioridad inválida: {$pqr->prioridad}. Valores permitidos: " . implode(', ', self::PRIORIDADES));
+                throw new \InvalidArgumentException("Prioridad inválida: {$pqr->prioridad}. Valores permitidos: ".implode(', ', self::PRIORIDADES));
             }
         });
     }
+
     protected $fillable = [
         'asunto',
         'descripcion',
@@ -64,18 +64,46 @@ class Pqr extends Model
         return $this->belongsTo(TipoPqr::class);
     }
 
-    public function assignee() { return $this->belongsTo(User::class, 'assigned_to_id'); }
-    public function activities() { return $this->hasMany(PqrActivity::class)->latest(); }
-    public function replies() { return $this->hasMany(PqrReply::class)->latest(); }
-    public function mantenimientos() { return $this->hasMany(\App\Models\Mantenimiento::class)->orderBy('created_at'); }
-    public function internalComments() { return $this->hasMany(PqrInternalComment::class)->latest(); }
-    public function communicationOperations() { return $this->hasMany(PqrCommunicationOperation::class); }
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to_id');
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(PqrActivity::class)->latest();
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(PqrReply::class)->latest();
+    }
+
+    public function mantenimientos()
+    {
+        return $this->hasMany(Mantenimiento::class)->orderBy('created_at');
+    }
+
+    public function internalComments()
+    {
+        return $this->hasMany(PqrInternalComment::class)->latest();
+    }
+
+    public function communicationOperations()
+    {
+        return $this->hasMany(PqrCommunicationOperation::class);
+    }
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(PqrTag::class)
             ->withPivot(['organizacion_id', 'copropiedad_id']);
     }
-    public function satisfactionSurvey() { return $this->hasOne(SatisfactionSurvey::class); }
+
+    public function satisfactionSurvey()
+    {
+        return $this->hasOne(SatisfactionSurvey::class);
+    }
 
     public function attachments()
     {
@@ -135,6 +163,7 @@ class Pqr extends Model
 
         return $this->fecha_limite_respuesta->toDateString() < app(CalendarioLaboralColombia::class)->hoy()->toDateString();
     }
+
     public function getElapsedDaysAttribute(): int
     {
         return max(0, app(CalendarioLaboralColombia::class)->diferenciaDiasHabiles(

@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class MantenimientoDocumentoEvidencia extends Model
 {
-
     protected $table = 'mantenimiento_documento_evidencia';
 
     protected $fillable = [

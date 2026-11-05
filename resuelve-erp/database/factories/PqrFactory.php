@@ -6,8 +6,8 @@ use App\Models\Copropiedad;
 use App\Models\Organizacion;
 use App\Models\Pqr;
 use App\Models\SiteSetting;
-use App\Models\User;
 use App\Models\TipoPqr;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use InvalidArgumentException;
 

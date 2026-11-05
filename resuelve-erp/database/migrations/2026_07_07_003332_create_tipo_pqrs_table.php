@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tipo_pqrs', function (Blueprint $table) {
-    $table->id();
-    $table->string('nombre', 100);
-    $table->text('descripcion')->nullable();
-    $table->timestamps();
-});
-    
+            $table->id();
+            $table->string('nombre', 100);
+            $table->text('descripcion')->nullable();
+            $table->timestamps();
+        });
+
     }
 
     /**

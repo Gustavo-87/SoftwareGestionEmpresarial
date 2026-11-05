@@ -51,7 +51,7 @@ final class GestionarVinculoUnidad
 
         $this->verificarSolapamiento($unidad, $persona, $validados['tipo_vinculo'], $validados['vigente_desde'], $validados['vigente_hasta']);
 
-        $vinculo = new VinculoUnidad();
+        $vinculo = new VinculoUnidad;
         $vinculo->asociarPartesContextuales($persona, $unidad);
         $vinculo->forceFill([
             'tipo_vinculo' => $validados['tipo_vinculo'],
