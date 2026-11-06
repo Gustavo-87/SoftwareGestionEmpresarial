@@ -11,12 +11,24 @@ use App\Models\Documento;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-class DocumentoController extends Controller
+class DocumentoController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            'auth',
+            new Middleware('can:viewAny,'.Documento::class, only: ['index']),
+            new Middleware('can:create,'.Documento::class, only: ['create', 'store']),
+            new Middleware('can:view,documento', only: ['show']),
+        ];
+    }
+
     public function index(ContextoOperativo $contexto, ConsultaDocumentosContextuales $consulta): View
     {
         $this->authorize('viewAny', Documento::class);

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Domain\Residencia\Enums\TipoUnidadEnum;
+use App\Models\Concerns\AuditaCambiosDeModelo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UnidadPrivada extends Model
 {
+    use AuditaCambiosDeModelo;
+
     protected $table = 'unidades_privadas';
 
     /**

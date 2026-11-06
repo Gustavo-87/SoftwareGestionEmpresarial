@@ -25,12 +25,26 @@ use App\Models\TipoPqr;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class PqrController extends Controller
+class PqrController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            'auth',
+            new Middleware('can:viewAny,'.Pqr::class, only: ['index']),
+            new Middleware('can:create,'.Pqr::class, only: ['create', 'store']),
+            new Middleware('can:view,pqr', only: ['show']),
+            new Middleware('can:update,pqr', only: ['edit', 'update']),
+            new Middleware('can:delete,pqr', only: ['destroy']),
+        ];
+    }
+
     public function panel(
         Request $request,
         ContextoOperativo $contexto,

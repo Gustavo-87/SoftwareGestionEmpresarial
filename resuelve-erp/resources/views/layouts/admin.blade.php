@@ -28,7 +28,7 @@
                     ['label' => 'Catálogo de permisos', 'route' => 'admin.permisos.index', 'match' => 'admin.permisos.*', 'icon' => 'shield'],
                 ]],
                 ['id' => 'administration', 'label' => 'Administración', 'icon' => 'settings', 'items' => [
-                    ['label' => 'Auditoría', 'route' => 'management.audit', 'match' => 'management.audit', 'icon' => 'audit'],
+                    ['label' => 'Auditoría', 'route' => 'admin.audit', 'match' => 'admin.audit', 'icon' => 'audit'],
                     ['label' => 'Configuración', 'route' => 'settings.edit', 'match' => 'settings.*', 'icon' => 'settings'],
                     ['label' => 'Configuración PQRS', 'route' => 'admin.tipos-pqr.index', 'match' => 'admin.tipos-pqr.*', 'icon' => 'shield'],
                 ]],

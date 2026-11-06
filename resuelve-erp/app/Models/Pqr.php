@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Domain\Pqrs\CalendarioLaboralColombia;
+use App\Models\Concerns\AuditaCambiosDeModelo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Pqr extends Model
 {
+    use AuditaCambiosDeModelo;
     use HasFactory;
 
     public const PRIORIDADES = ['alta', 'media', 'baja'];

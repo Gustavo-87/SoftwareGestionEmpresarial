@@ -1,4 +1,14 @@
-# Túnel temporal de demostración
+# Herramientas de demostración
+
+## Notificaciones con SMTP local
+
+`php scripts/probar-notificaciones-mailpit.php` demuestra radicación, cambio de
+estado y recordatorio sobre SQLite en memoria, con tres campanas y correo SMTP
+capturado localmente. Requiere Mailpit activo en los puertos locales estándar.
+No procesa datos ni la cola de desarrollo. Procedimiento y límites en
+[Correo y automatización](../docs/08-despliegue/correo-y-automatizacion.md).
+
+## Túnel temporal de demostración
 
 Esta herramienta expone temporalmente la aplicación local de Resuelve mediante
 un túnel rápido de Cloudflare. Solo funciona en macOS y requiere `zsh`,

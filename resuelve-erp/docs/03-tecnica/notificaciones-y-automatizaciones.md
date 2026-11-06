@@ -97,6 +97,16 @@ patrón Laravel Event/Listener, sin cambiar sus efectos:
 - Se reutilizan notificaciones, colas y correo de Laravel conforme a ADR-001,
   ADR-002, ADR-003, ADR-005, ADR-006 y ADR-008.
 
+## Verificación SMTP del Sprint 26
+
+El remitente preparado es `gestionpqrs7@gmail.com`; sin contraseña de aplicación
+el entorno conserva `MAIL_MAILER=log`. Se comprobó el flujo real de radicación,
+cambio de estado y recordatorio con SMTP a Mailpit, base aislada y cola
+síncrona: tres correos capturados, tres campanas y cero recordatorios nuevos
+al repetir el comando el mismo día. Esto verifica el flujo local y no acredita
+recepción externa en Gmail. Procedimiento, comando de diagnóstico y requisitos
+de operación en [Correo y automatización](../08-despliegue/correo-y-automatizacion.md).
+
 ## Evidencia
 
 - `app/Application/Notificaciones/`

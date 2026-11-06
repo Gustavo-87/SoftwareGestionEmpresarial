@@ -1362,3 +1362,15 @@ td small {
 /* Integración de módulos (Sprint 19): microindicadores del panel compacto. */
 .modulo-integracion{margin:0;padding:2px 14px 0;font-size:12px;line-height:1.4;color:var(--muted)}
 [data-theme="dark"] .modulo-integracion{color:var(--muted)}
+
+
+/* Auditoría: filtros y columnas adaptables, sin porcentajes más separadores. */
+.audit-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+.audit-filters .field,.audit-filters input,.audit-filters select{min-width:0}
+.audit-filters .heading-actions{align-self:end;flex-wrap:wrap}
+[data-theme="dark"] .audit-filters input[type="date"]{color-scheme:dark}
+@media(min-width:761px){
+    .audit-panel .audit-header,.audit-panel .audit-row{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr)) minmax(0,.8fr)}
+    .audit-panel .audit-row>div{min-width:0;overflow-wrap:anywhere}
+}
+@media(max-width:760px){.audit-filters{grid-template-columns:minmax(0,1fr)}}

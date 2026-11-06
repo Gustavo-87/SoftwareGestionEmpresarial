@@ -278,6 +278,7 @@ es enum.
 | `action` | Texto obligatorio, máximo 80. |
 | `auditable_type` | Texto opcional. |
 | `auditable_id` | Bigint unsigned opcional. |
+| `organizacion_id`, `copropiedad_id` | Bigint unsigned, nullable; ámbito de las operaciones nuevas. Historia sin ámbito reservada a plataforma. |
 | `ip_address` | Texto opcional, máximo 45. |
 | `metadata` | JSON opcional. |
 | `created_at`, `updated_at` | Timestamps. |
@@ -341,6 +342,21 @@ documental del documento.
 
 Restricción única `(mantenimiento_id, documento_version_id)`: impide vínculos
 duplicados por doble clic, reenvío o concurrencia.
+
+### 3.20 activity_log
+
+Registro técnico de `spatie/laravel-activitylog`, representado por
+`App\Models\Activity`. Contiene `id`, `log_name`, `description`, referencias
+polimórficas `subject_type`/`subject_id` y `causer_type`/`causer_id`, `event`,
+`batch_uuid`, `properties` JSON y timestamps. Añade Organización y Copropiedad
+nullable y un índice compuesto por ambos ámbitos y fecha. No usa cascadas que
+eliminen el registro al borrar un recurso. `audit_logs` incorpora el mismo
+índice contextual mediante `2026_11_05_230000`.
+
+`properties` conserva únicamente los campos permitidos antes/después de los
+cinco modelos auditados. Es infraestructura técnica y no sustituye actuaciones,
+versiones ni el ledger de comunicaciones del dominio. Ver
+[Auditoría y trazabilidad](auditoria-y-trazabilidad.md).
 
 ## 4. Tablas de infraestructura
 

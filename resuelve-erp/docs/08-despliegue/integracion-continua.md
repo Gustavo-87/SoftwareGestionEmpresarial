@@ -35,7 +35,9 @@ repositorio.
 
 1. Checkout del repositorio (historia completa para el control del diff).
 2. Configuración de PHP 8.3 con las extensiones requeridas.
-3. Generación y validación de un `APP_KEY` temporal.
+3. Preparación de `.env` temporal desde `.env.example`, seguida de generación
+   y validación de un `APP_KEY` efímero. Las variables aisladas del workflow
+   prevalecen sobre el ejemplo; no se usa el `.env` del equipo.
 4. Restauración de la caché de Composer acotada a `resuelve-erp/composer.lock`
    e instalación de dependencias PHP.
 5. **Comprobación de estilo de código:** `vendor/bin/pint --test` (sin
@@ -106,7 +108,18 @@ históricas; no se sustituyen por este resultado posterior. La ejecución usa
 SQLite en memoria y correo de pruebas: no acredita entrega real de correo
 ni una ejecución de concurrencia sobre MySQL.
 
-## 7. Evidencia
+## 7. Verificación local del Sprint 26
+
+El 5 de noviembre de 2026 se verificaron **802 pruebas: 793 aprobadas y 9
+omitidas por MySQL, 3.860 aserciones**, sin advertencias de pruebas. Pint,
+compilación Vite, validación Composer y auditoría de dependencias PHP
+satisfactorios. `composer audit` no reportó avisos de vulnerabilidades conocidas.
+
+La preparación de `.env` temporal en el workflow corrige la configuración que
+faltaba durante las pruebas históricas. El resultado de la siguiente ejecución
+de Actions debe verificarse por separado; no modifica las cifras del PR #3.
+
+## 8. Evidencia
 
 - Workflow activo: `.github/workflows/ci.yml` (raíz del repositorio).
 - Workflow anterior conservado: `resuelve-erp/.github/workflows/ci.yml`.
@@ -116,6 +129,6 @@ ni una ejecución de concurrencia sobre MySQL.
 
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.3
 - **Fecha de creación:** 5 de noviembre de 2026
-- **Fecha de última actualización:** 5 de noviembre de 2026
+- **Fecha de última actualización:** 6 de noviembre de 2026

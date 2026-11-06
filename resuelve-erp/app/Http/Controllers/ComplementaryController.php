@@ -10,7 +10,6 @@ use App\Application\Pqrs\ConsultaPqrsContextuales;
 use App\Application\Pqrs\SincronizarEtiquetasPqrs;
 use App\Http\Requests\StoreEtiquetaRequest;
 use App\Http\Requests\UpdateEtiquetaRequest;
-use App\Models\AuditLog;
 use App\Models\AutomationRule;
 use App\Models\Pqr;
 use App\Models\PqrTag;
@@ -144,11 +143,11 @@ class ComplementaryController extends Controller
         return back()->with('success', 'Unidad residencial actualizada.');
     }
 
-    public function audit(Request $request, ContextoOperativo $contexto): View
+    public function audit(Request $request, ContextoOperativo $contexto): RedirectResponse
     {
         $this->permitir($contexto, 'auditoria.ver');
 
-        return view('management.audit', ['logs' => AuditLog::with('user')->latest()->paginate(30)]);
+        return redirect()->route('management.audit', $request->query());
     }
 
     public function survey(Request $request, Pqr $pqr): RedirectResponse
