@@ -94,7 +94,26 @@ resumen de la PQR radicada. Validación incompleta o inválida: `422` con
 errores por campo; sin permiso `pqrs.crear`: `403`. La radicación por API no
 acepta adjuntos todavía.
 
-## 3. Pendiente (no implementado)
+## 3. Colección de pruebas importable
+
+Importar [coleccion-postman.json](coleccion-postman.json) en Postman. Incluye
+login, listado, radicación, detalle, rechazo sin token y logout, con
+comprobaciones de estado y captura de token/PQRS. Ejecutar en ese orden sobre
+una base de demostración: la radicación crea una PQRS sintética.
+
+Configurar las variables locales `base_url` (por defecto
+`http://localhost:8083/api/v1`), `email`, `password` y `tipo_pqr_id` de un tipo
+existente. La contraseña está vacía en el archivo versionado. `membresia_id` y
+`rol_id` son opcionales; indicarlos cuando el usuario deba seleccionar contexto
+o rol. Las peticiones autenticadas usan la cabecera de membresía cuando se
+configura. `token` y `pqr_id` se rellenan al ejecutar; no exportarlos con datos
+reales. La colección no concede permisos nuevos al usuario.
+
+Los accesos correctos, fallidos, bloqueados, de cuenta inactiva y cierres
+alimentan la [bitácora de seguridad](../03-tecnica/auditoria-y-trazabilidad.md)
+sin registrar contraseñas ni tokens.
+
+## 4. Pendiente (no implementado)
 
 Los siguientes componentes **no** están implementados y no deben tomarse como
 parte del sistema actual:
@@ -104,7 +123,7 @@ parte del sistema actual:
 - otros módulos en API (mantenimiento, documentos, notificaciones) fuera del
   alcance de HU-API-01.
 
-## 4. Evidencia
+## 5. Evidencia
 
 - Rutas: `routes/api.php`, registro en `bootstrap/app.php`.
 - Controladores de transporte: `app/Http/Controllers/Api/AuthController.php`,
@@ -130,6 +149,6 @@ parte del sistema actual:
 
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.3
 - **Fecha de creación:** 5 de noviembre de 2026
-- **Fecha de última actualización:** 5 de noviembre de 2026
+- **Fecha de última actualización:** 6 de noviembre de 2026

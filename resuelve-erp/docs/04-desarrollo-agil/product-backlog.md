@@ -608,6 +608,14 @@ Como representante de una Organización
 Quiero que las acciones importantes conserven su responsable y contexto  
 Para contar con trazabilidad sobre la operación de las Copropiedades.
 
+**Estado (Sprint 26):** completada técnicamente con Activitylog en cinco
+modelos, bitácora de seguridad web/API y consulta visible por contexto o
+autoridad de plataforma, sin exponer registros de otras Copropiedades.
+La autorización del Product Owner para implementar y versionar hasta el punto
+14 de la guía se registra en [Sprint 26](sprint-26-cierre-guia-hasta14.md).
+Se preserva la arquitectura existente; Activitylog se justifica por el
+requisito 10 y reutiliza los actores y el contexto del dominio.
+
 # Evolución del Product Backlog
 
 La comprobación posterior del CI del PR #3 fue satisfactoria el 5 de

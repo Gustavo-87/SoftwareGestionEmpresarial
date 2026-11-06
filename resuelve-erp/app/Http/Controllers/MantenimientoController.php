@@ -21,10 +21,22 @@ use App\Models\MantenimientoDocumentoEvidencia;
 use App\Models\Pqr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\View\View;
 
-class MantenimientoController extends Controller
+class MantenimientoController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            'auth',
+            new Middleware('can:viewAny,'.Mantenimiento::class, only: ['index']),
+            new Middleware('can:create,'.Mantenimiento::class, only: ['create', 'store']),
+            new Middleware('can:view,mantenimiento', only: ['show']),
+        ];
+    }
+
     public function index(ContextoOperativo $contexto, ConsultaMantenimientos $consulta): View
     {
         $mantenimientos = $consulta->para($contexto)->with(['solicitante', 'responsable'])->latest()->paginate(15);

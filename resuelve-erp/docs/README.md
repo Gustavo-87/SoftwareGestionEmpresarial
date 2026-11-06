@@ -27,7 +27,8 @@ PQRS, Mantenimiento y Gestión Documental con autorización por Organización y
 Copropiedad, y dispone de una [API REST v1 con Sanctum](07-api/estado-actual-api.md)
 para autenticación, consulta y radicación de PQRS. La implementación de IA
 continúa pausada. La [integración continua](08-despliegue/integracion-continua.md)
-registra el CI satisfactorio del PR #3 y las advertencias de su ejecución.
+registra las ejecuciones verificadas de los PR, incluida la corrección de
+configuración de las pruebas y el cierre técnico del PR #5.
 
 ## Cómo consultar esta documentación
 
@@ -84,7 +85,7 @@ Los estados utilizados en este índice son:
 | [Rutas web](03-tecnica/rutas-web.md) | Pendiente | Inventariar métodos HTTP, URI, controladores y autorización. |
 | [Notificaciones y automatizaciones](03-tecnica/notificaciones-y-automatizaciones.md) | Completado | Describir eventos, destinatarios, canales, aislamiento contextual y tareas programadas. |
 | [Archivos y almacenamiento](03-tecnica/archivos-y-almacenamiento.md) | Pendiente | Registrar discos, adjuntos, límites, acceso y eliminación. |
-| [Auditoría y trazabilidad](03-tecnica/auditoria-y-trazabilidad.md) | Pendiente | Documentar actividades de PQR y auditoría de mutaciones HTTP. |
+| [Auditoría y trazabilidad](03-tecnica/auditoria-y-trazabilidad.md) | Completado | Registrar cinco modelos con Activitylog, bitácora de seguridad web/API y consulta aislada por Copropiedad o autoridad de plataforma. |
 | [Interfaz web](03-tecnica/interfaz-web.md) | Completado | Registrar la línea base y los correctivos visibles aprobados del Sprint 10. |
 | [Diseño técnico — Invitaciones por correo](03-tecnica/diseno-tecnico-invitaciones.md) | Aprobado e implementado (pendiente integración a main) | Formalizar el diseño técnico del sistema de invitaciones por correo (S11-2, Sprint 11). |
 | [IA — Asistencia documental con revisión humana](03-tecnica/ia-asistencia-documental.md) | Aprobado | Formalizar el Diseño Técnico Definitivo de HU-IA-01, sus contratos, procesamiento, trazabilidad, seguridad y separación académica. |
@@ -123,6 +124,7 @@ Los estados utilizados en este índice son:
 | [Sprint 24 — Catálogos maestros con ciclo de vida completo](04-desarrollo-agil/sprint-24-catalogos-ciclo-vida.md) | Completado | HU-CONF-03 (Épica 10): Form Requests para alta y edición de Tipos de PQRS, Etiquetas, Unidades Privadas y Personas (reglas reutilizadas sin duplicar; autorización antes de la validación) y ciclo de alta, consulta, edición, baja lógica, papelera y restauración con los campos existentes, incluida la extensión aprobada de Tipos de PQRS (columna `desactivada_at` por migración autorizada). Cierre técnico el 5 de noviembre de 2026 con verificación local: 20 pruebas del ciclo (15 de catálogos y 5 del catálogo de tipos), suite completa de 780 (771 aprobadas, 9 omitidas por MySQL) y Pint aprobado; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md). |
 | [Sprint 25 — Anulación trazable de respuestas oficiales](04-desarrollo-agil/sprint-25-anulacion-respuestas.md) | Completado | HU-PQRS-04 (Épica 5): anulación comunicada y trazable de respuestas oficiales (motivo obligatorio, contenido inmutable, ledger `annul_reply`, actuación pública, auditoría y notificación al radicador), con retiro de borrador como acción distinta y decisión del Product Owner registrada (adaptación de «anulación» aprobada por el Product Owner; no requiere aprobación docente para continuar). Cierre técnico el 5 de noviembre de 2026 con verificación local: 6 pruebas de anulación, suite completa de 786 (777 aprobadas, 9 omitidas por MySQL), Pint aprobado y migración aplicada en la base local; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md). |
 | [Pruebas automatizadas](04-desarrollo-agil/pruebas-automatizadas.md) | Pendiente | Inventariar la cobertura existente y sus límites. |
+| [Sprint 26 — Auditoría y cierre técnico hasta el requisito 14](04-desarrollo-agil/sprint-26-cierre-guia-hasta14.md) | Completado técnicamente con límites documentados | HU-AUD-02, middleware, pruebas del panel, colección API y SMTP local; Gmail externo pendiente de credencial y autenticación propia conservada sin Breeze. |
 
 ### 05. Arquitectura
 
@@ -151,6 +153,7 @@ Los estados utilizados en este índice son:
 | [Entorno local](08-despliegue/entorno-local.md) | Pendiente | Documentar requisitos y mecanismos de ejecución local declarados. |
 | [Túnel de demostración](08-despliegue/tunel-demostracion.md) | Pendiente | Describir el servicio de demostración y sus limitaciones. |
 | [Integración continua](08-despliegue/integracion-continua.md) | Completado | Describir el flujo de CI en GitHub Actions, su entorno aislado y la verificación local equivalente. |
+| [Correo y automatización](08-despliegue/correo-y-automatizacion.md) | Completado | Preparar el remitente, repetir la prueba SMTP aislada con Mailpit y operar colas/planificador; recepción real en Gmail pendiente. |
 
 ### 09. Historial
 
@@ -251,17 +254,16 @@ antes de avanzar a capacidades nuevas:
 6. Configuración de la copropiedad
 7. Herramientas operativas
 8. Archivos y almacenamiento
-9. Auditoría y trazabilidad
-10. Dependencias
-11. Configuración técnica
-12. Entorno local
-13. Túnel de demostración
-14. Pruebas automatizadas
-15. Hallazgos de la línea base
-16. Estado actual de IA
+9. Dependencias
+10. Configuración técnica
+11. Entorno local
+12. Túnel de demostración
+13. Pruebas automatizadas
+14. Hallazgos de la línea base
+15. Estado actual de IA
 
 ## Control documental
 
-- **Versión:** v1.52
+- **Versión:** v1.53
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 5 de noviembre de 2026
+- **Fecha de última actualización:** 6 de noviembre de 2026

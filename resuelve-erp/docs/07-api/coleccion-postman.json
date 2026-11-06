@@ -1,0 +1,292 @@
+{
+  "info": {
+    "name": "Resuelve ERP — API v1",
+    "_postman_id": "bcb7bfcc-ea20-4834-afcb-d6489c9b8df6",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Pruebas sobre una base de demostración aislada. Completar password y tipo_pqr_id localmente; no guardar credenciales en Git."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8083/api/v1"
+    },
+    {
+      "key": "email",
+      "value": "gestionpqrs7@gmail.com"
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "tipo_pqr_id",
+      "value": ""
+    },
+    {
+      "key": "pqr_id",
+      "value": ""
+    },
+    {
+      "key": "membresia_id",
+      "value": ""
+    },
+    {
+      "key": "rol_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Iniciar sesión con rol activo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{{login_payload}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d = {email: pm.variables.get('email'), password: pm.variables.get('password')};",
+              "['membresia_id', 'rol_id'].forEach(k => { const v = pm.variables.get(k); if (v) { if (!/^\\d+$/.test(String(v))) throw new Error(k + ' debe ser numérico'); d[k] = Number(v); } });",
+              "pm.variables.set('login_payload', JSON.stringify(d));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Estado HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) { pm.collectionVariables.set('token', pm.response.json().token); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Listar PQRS autorizadas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Membresia-Id",
+            "value": "{{membresia_id}}"
+          }
+        ],
+        "url": "{{base_url}}/pqrs",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Estado HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Listado de PQRS', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Radicar PQRS de demostración",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Membresia-Id",
+            "value": "{{membresia_id}}"
+          }
+        ],
+        "url": "{{base_url}}/pqrs",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"asunto\":\"Prueba API de Resuelve ERP\",\"descripcion\":\"Caso sintético para validar la API en la base aislada.\",\"tipo_pqr_id\":{{tipo_pqr_id}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Estado HTTP 201', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) { pm.collectionVariables.set('pqr_id', pm.response.json().data.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Consultar expediente autorizado",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Membresia-Id",
+            "value": "{{membresia_id}}"
+          }
+        ],
+        "url": "{{base_url}}/pqrs/{{pqr_id}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Estado HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Identificador solicitado', () => pm.expect(String(pm.response.json().data.id)).to.eql(String(pm.collectionVariables.get('pqr_id'))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Rechazar consulta sin token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/pqrs",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Estado HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Cerrar sesión y revocar token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Membresia-Id",
+            "value": "{{membresia_id}}"
+          }
+        ],
+        "url": "{{base_url}}/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Estado HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) { pm.collectionVariables.set('token', ''); }"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

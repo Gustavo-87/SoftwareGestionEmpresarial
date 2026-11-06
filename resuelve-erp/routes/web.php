@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PermisoCatalogoController;
 use App\Http\Controllers\Admin\TipoPqrController;
 use App\Http\Controllers\Admin\UsuarioGlobalController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuditController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplementaryController;
 use App\Http\Controllers\ContextoSelectorController;
@@ -151,10 +152,11 @@ Route::middleware(['auth', 'acceso.pendiente'])->group(function () {
     Route::patch('/residentes/unidades/{unidad}/desactivar', [UnidadPrivadaController::class, 'desactivar'])->name('management.unidades.desactivar');
     Route::patch('/residentes/unidades/{unidad}/reactivar', [UnidadPrivadaController::class, 'reactivar'])->name('management.unidades.reactivar');
     Route::patch('/residentes/unidades/{unidad}/vinculos/{vinculo}', [UnidadPrivadaController::class, 'corregirVinculo'])->name('management.unidades.vinculos.corregir');
-    Route::get('/auditoria', [ComplementaryController::class, 'audit'])->name('management.audit');
+    Route::get('/auditoria', [AuditController::class, 'index'])->name('management.audit');
 
     Route::middleware('admin.sistema')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::get('/auditoria', [AuditController::class, 'plataforma'])->name('audit');
         Route::resource('membresias', MembresiaController::class);
         Route::post('membresias/{membresia}/suspender', [MembresiaController::class, 'suspender'])->name('membresias.suspend');
         Route::patch('membresias/{membresia}/suspender', [MembresiaController::class, 'suspender'])->name('membresias.suspend');

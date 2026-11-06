@@ -35,7 +35,9 @@ repositorio.
 
 1. Checkout del repositorio (historia completa para el control del diff).
 2. Configuración de PHP 8.3 con las extensiones requeridas.
-3. Generación y validación de un `APP_KEY` temporal.
+3. Preparación de `.env` temporal desde `.env.example`, seguida de generación
+   y validación de un `APP_KEY` efímero. Las variables aisladas del workflow
+   prevalecen sobre el ejemplo; no se usa el `.env` del equipo.
 4. Restauración de la caché de Composer acotada a `resuelve-erp/composer.lock`
    e instalación de dependencias PHP.
 5. **Comprobación de estilo de código:** `vendor/bin/pint --test` (sin
@@ -97,7 +99,8 @@ posterior en GitHub Actions se registra por separado a continuación.
 - **Pruebas:** el resumen del registro distingue **24 aprobadas y 762 con
   advertencias**, con **3.763 aserciones** y duración de 28,73 segundos.
   El resultado satisfactorio del CI no acredita una suite libre de
-  advertencias; su diagnóstico y corrección quedan pendientes.
+  advertencias; en esa ejecución su diagnóstico y corrección seguían pendientes. La
+  corrección posterior se registra en el Sprint 26 (§7–8).
 - **Otros pasos:** instalación de dependencias, compilación de Vite,
   comprobación del diff y compilación/limpieza de vistas Blade satisfactorias.
 
@@ -106,7 +109,47 @@ históricas; no se sustituyen por este resultado posterior. La ejecución usa
 SQLite en memoria y correo de pruebas: no acredita entrega real de correo
 ni una ejecución de concurrencia sobre MySQL.
 
-## 7. Evidencia
+## 7. Verificación local del Sprint 26
+
+El 5 de noviembre de 2026 se verificaron **802 pruebas: 793 aprobadas y 9
+omitidas por MySQL, 3.860 aserciones**, sin advertencias de configuración de las pruebas. Pint,
+compilación Vite, validación Composer y auditoría de dependencias PHP
+satisfactorios. `composer audit` no reportó avisos de vulnerabilidades conocidas.
+
+La preparación de `.env` temporal en el workflow corrige la configuración que
+faltaba durante las pruebas históricas. El resultado de Actions se registra por separado a continuación; no modifica
+las cifras históricas del PR #3.
+
+## 8. Ejecución verificada del PR #5
+
+- **Fecha:** 6 de noviembre de 2026, 08:35–08:36 (America/Bogota).
+- **Solicitud:** [PR #5 — Auditoría y evidencias hasta el requisito 14](https://github.com/Gustavo-87/SoftwareGestionEmpresarial/pull/5).
+- **Revisión de origen:** `4b410c7d65f0481106241767878a9a3f7f47264d`.
+- **Ejecución:** [CI #7, 42226657327](https://github.com/Gustavo-87/SoftwareGestionEmpresarial/actions/runs/42226657327),
+  tarea `test` con resultado `success`.
+- **Pruebas:** **793 aprobadas y 9 omitidas**, 3.860 aserciones, 41,89 segundos
+  sobre PHP 8.3/SQLite. No se repiten las advertencias por falta de `.env`;
+  las nueve omisiones corresponden a pruebas específicas de MySQL.
+- **Otros pasos:** instalación PHP, Pint, instalación de frontend, compilación
+  Vite, diff y compilación/limpieza de Blade satisfactorios.
+
+El registro conserva advertencias de obsolescencia del entorno JavaScript de
+las acciones de GitHub (Node 20 forzado a 24, `punycode` y `url.parse`). No son
+fallos de la aplicación y no se declara un registro completamente sin avisos.
+
+La instalación de frontend de esa ejecución también reportó cuatro alertas de
+seguridad de dependencias. Antes de integrar se corrigieron de forma
+compatible: Vite **8.3.6**, concurrently **9.2.5**, shell-quote **1.12.0**,
+source-map-js **1.2.2** y PostCSS **8.5.32** en el archivo de bloqueo. La
+comprobación local posterior `npm audit` reporta **0 vulnerabilidades** y
+`npm run build` pasa. Referencias de los avisos corregidos:
+[shell-quote](https://github.com/advisories/GHSA-pqg4-j6r4-53mv),
+[source-map-js](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) y
+[Vite](https://github.com/advisories/GHSA-rq7h-c2jc-7f22).
+La comprobación del siguiente commit se verifica antes de fusionar y se
+enlaza en la descripción del PR; no se atribuye a este resultado histórico.
+
+## 9. Evidencia
 
 - Workflow activo: `.github/workflows/ci.yml` (raíz del repositorio).
 - Workflow anterior conservado: `resuelve-erp/.github/workflows/ci.yml`.
@@ -116,6 +159,6 @@ ni una ejecución de concurrencia sobre MySQL.
 
 ## Control documental
 
-- **Versión:** v1.2
+- **Versión:** v1.4
 - **Fecha de creación:** 5 de noviembre de 2026
-- **Fecha de última actualización:** 5 de noviembre de 2026
+- **Fecha de última actualización:** 6 de noviembre de 2026

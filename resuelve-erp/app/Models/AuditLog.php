@@ -7,7 +7,40 @@ use Illuminate\Support\Str;
 
 class AuditLog extends Model
 {
-    protected $fillable = ['user_id', 'action', 'auditable_type', 'auditable_id', 'ip_address', 'metadata'];
+    protected $fillable = ['user_id', 'action', 'auditable_type', 'auditable_id', 'ip_address', 'metadata', 'organizacion_id', 'copropiedad_id'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $log): void {
+            if (str_starts_with($log->action, 'auth.')) {
+                return;
+            }
+            $metadata = $log->metadata ?? [];
+            $log->organizacion_id ??= $metadata['organizacion_id'] ?? null;
+            $log->copropiedad_id ??= $metadata['copropiedad_id'] ?? null;
+            $tipos = ['pqr' => Pqr::class, Pqr::class => Pqr::class,
+                Mantenimiento::class => Mantenimiento::class, UnidadPrivada::class => UnidadPrivada::class,
+                PqrTag::class => PqrTag::class, Copropiedad::class => Copropiedad::class,
+                Documento::class => Documento::class];
+            if (! $log->copropiedad_id && isset($tipos[$log->auditable_type ?? '']) && $log->auditable_id) {
+                $recurso = $tipos[$log->auditable_type]::find($log->auditable_id);
+                if ($recurso) {
+                    $log->organizacion_id ??= $recurso->organizacion_id;
+                    $log->copropiedad_id = $recurso instanceof Copropiedad ? $recurso->id : $recurso->copropiedad_id;
+                }
+            }
+            if (! $log->copropiedad_id && $log->user_id) {
+                $membresias = MembresiaCopropiedad::query()->where('usuario_id', $log->user_id)
+                    ->where('estado', 'activa')->where('vigente_desde', '<=', now())
+                    ->where(fn ($q) => $q->whereNull('vigente_hasta')->orWhere('vigente_hasta', '>', now()))
+                    ->limit(2)->get();
+                if ($membresias->count() === 1 && (! $log->organizacion_id || $log->organizacion_id === $membresias->first()->organizacion_id)) {
+                    $log->organizacion_id = $membresias->first()->organizacion_id;
+                    $log->copropiedad_id = $membresias->first()->copropiedad_id;
+                }
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -80,6 +113,11 @@ class AuditLog extends Model
             'Etiqueta reactivada' => 'Etiqueta reactivada',
             'Etiqueta desactivada' => 'Etiqueta desactivada',
             'login.store' => 'Inicio de sesión',
+            'auth.login.exitoso' => 'Inicio de sesión correcto',
+            'auth.login.fallido' => 'Intento de acceso fallido',
+            'auth.login.bloqueado' => 'Acceso bloqueado temporalmente',
+            'auth.cuenta.inactiva' => 'Acceso rechazado por cuenta inactiva',
+            'auth.logout' => 'Cierre de sesión',
         ];
 
         // Extraer nombre de ruta después del método HTTP.
@@ -132,7 +170,7 @@ class AuditLog extends Model
         if (Str::startsWith($routeName, ['documentos.'])) {
             return 'Documentos';
         }
-        if (Str::startsWith($routeName, ['login.', 'password.'])) {
+        if (Str::startsWith($routeName, ['login.', 'password.', 'auth.'])) {
             return 'Autenticación';
         }
         if (Str::startsWith($routeName, ['tag.'])) {

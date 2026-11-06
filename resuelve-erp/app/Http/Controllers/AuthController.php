@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\Auditoria\RegistrarEventoSeguridad;
 use App\Application\Roles\GestionarRolActivo;
 use App\Models\MembresiaCopropiedad;
 use Illuminate\Http\RedirectResponse;
@@ -59,6 +60,7 @@ class AuthController extends Controller
             || RateLimiter::tooManyAttempts($claveIp, self::INTENTOS_IP)) {
             $espera = max(RateLimiter::availableIn($claveCuenta), RateLimiter::availableIn($claveIp));
             $minutos = max(1, (int) ceil($espera / 60));
+            app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.login.bloqueado');
 
             // Mensaje idéntico exista o no la cuenta: no revela su existencia.
             return back()
@@ -72,6 +74,7 @@ class AuthController extends Controller
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::hit($claveCuenta, self::BLOQUEO_LOGIN_SEGUNDOS);
             RateLimiter::hit($claveIp, self::BLOQUEO_LOGIN_SEGUNDOS);
+            app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.login.fallido');
 
             return back()
                 ->withErrors(['email' => 'El correo o la contraseña no son correctos.'])
@@ -82,6 +85,7 @@ class AuthController extends Controller
         // Auth::logout() rota el remember_token, por lo que un intento con
         // "recordarme" de una cuenta desactivada tampoco deja acceso persistente.
         if (Auth::user()->estado !== 'activo') {
+            app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.cuenta.inactiva', Auth::user());
             Auth::logout();
 
             return back()
@@ -95,6 +99,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         $usuario = Auth::user();
+        app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.login.exitoso', $usuario);
 
         // Flujo específico del administrador de plataforma.
         if ($usuario->esAdministradorSistema()) {
@@ -155,6 +160,7 @@ class AuthController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.logout', $request->user());
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

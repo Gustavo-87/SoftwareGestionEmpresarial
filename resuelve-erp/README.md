@@ -56,6 +56,10 @@ Autenticación con Laravel Sanctum, selección de rol activo, cierre de sesión,
 - [Análisis del negocio y entrega académica](docs/integracion-academica.md)
 - [Documentación funcional y técnica](docs/README.md)
 - [Integración continua y resultados verificados](docs/08-despliegue/integracion-continua.md)
+- [Auditoría y bitácora de seguridad](docs/03-tecnica/auditoria-y-trazabilidad.md)
+- [Colección de pruebas API para Postman](docs/07-api/coleccion-postman.json)
+- [Correo, Mailpit y automatización](docs/08-despliegue/correo-y-automatizacion.md)
+- [Matriz de requisitos 1–14 y límites de cumplimiento](docs/04-desarrollo-agil/sprint-26-cierre-guia-hasta14.md)
 - [Evidencias de la Clase 4](../Clase4/docs.md)
 
 ## Requisitos
@@ -118,7 +122,15 @@ Ejecutar las pruebas automatizadas:
 ./vendor/bin/sail artisan test
 ```
 
-La ejecución verificada del CI del PR #3 y sus advertencias están registradas en [Integración continua](docs/08-despliegue/integracion-continua.md). Los resultados locales de cada sprint se conservan en sus respectivas fichas.
+Las ejecuciones verificadas del CI, sus resultados y advertencias están registradas en [Integración continua](docs/08-despliegue/integracion-continua.md). Los resultados locales de cada sprint se conservan en sus respectivas fichas.
+
+## Correo de demostración
+
+Remitente preparado: `gestionpqrs7@gmail.com`. Se mantiene `MAIL_MAILER=log`
+hasta disponer de credenciales SMTP. El flujo de eventos, campana y correo se
+verificó mediante Mailpit local; la recepción externa en Gmail queda pendiente.
+La [guía de correo](docs/08-despliegue/correo-y-automatizacion.md) permite
+repetir la prueba sobre una base aislada y habilitar después el proveedor.
 
 ## Seguridad
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Application\Auditoria\RegistrarEventoSeguridad;
 use App\Application\Membresias\ConsultaMembresiasVigentes;
 use App\Application\Roles\GestionarRolActivo;
 use App\Http\Controllers\Controller;
@@ -60,6 +61,7 @@ final class AuthController extends Controller
             || RateLimiter::tooManyAttempts($claveIp, self::INTENTOS_IP)) {
             $espera = max(RateLimiter::availableIn($claveCuenta), RateLimiter::availableIn($claveIp));
             $minutos = max(1, (int) ceil($espera / 60));
+            app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.login.bloqueado');
 
             return response()->json([
                 'message' => 'Demasiados intentos fallidos de inicio de sesión. '
@@ -71,12 +73,15 @@ final class AuthController extends Controller
         if ($usuario === null || ! Hash::check($datos['password'], $usuario->password)) {
             RateLimiter::hit($claveCuenta, self::BLOQUEO_SEGUNDOS);
             RateLimiter::hit($claveIp, self::BLOQUEO_SEGUNDOS);
+            app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.login.fallido');
 
             return response()->json(['message' => 'El correo o la contraseña no son correctos.'], 401);
         }
 
         // HU-USR-08: los usuarios con users.estado ≠ 'activo' no inician sesión.
         if ($usuario->estado !== 'activo') {
+            app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.cuenta.inactiva', $usuario);
+
             return response()->json([
                 'message' => 'Tu cuenta está desactivada. Contacta con el administrador del sistema.',
             ], 403);
@@ -109,6 +114,7 @@ final class AuthController extends Controller
         // Membresía recupera la unión de Roles.
 
         $token = $usuario->createToken('api-v1')->plainTextToken;
+        app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.login.exitoso', $usuario, $membresia);
 
         return response()->json([
             'token' => $token,
@@ -136,6 +142,7 @@ final class AuthController extends Controller
 
     public function destroy(Request $request): JsonResponse
     {
+        app(RegistrarEventoSeguridad::class)->ejecutar($request, 'auth.logout', $request->user());
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'La sesión de la API se cerró correctamente.']);

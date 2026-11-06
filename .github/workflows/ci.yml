@@ -46,6 +46,9 @@ jobs:
           extensions: mbstring, dom, fileinfo, pdo_sqlite, sqlite3, gd, zip, intl
           coverage: none
 
+      - name: Preparar configuración temporal
+        run: cp .env.example .env
+
       - name: Generar APP_KEY temporal
         shell: bash
         run: |
