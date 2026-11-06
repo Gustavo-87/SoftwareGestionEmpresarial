@@ -3,8 +3,8 @@
 ## Estado y control documental
 
 - **Estado:** Completado. HU-API-01 implementada en dos bloques y verificada
-  localmente el 5 de noviembre de 2026. La ejecución real de GitHub Actions
-  queda **pendiente** y fuera de esta verificación, con constancia explícita.
+  localmente el 5 de noviembre de 2026. La comprobación posterior
+  en GitHub Actions se registra en §3, con sus advertencias.
 - **Fecha de cierre técnico:** 5 de noviembre de 2026.
 - **Origen:** HU-API-01 (Product Backlog, Épica 11 — Integraciones), incorporada
   y aprobada por el Product Owner el 5 de noviembre de 2026 para el requisito
@@ -59,10 +59,14 @@ residencial autorizado: **sin ventas, compras ni inventario**.
 | Suite completa (configuración aislada, SQLite en memoria) | **748 pruebas: 739 aprobadas y 9 omitidas (MySQL)**, 3552 aserciones, sin regresiones |
 | `vendor/bin/pint --test` | **Aprobado** |
 
-**Ámbito de estas verificaciones:** ejecución **local** sobre el árbol de
-trabajo. La **ejecución real de GitHub Actions no está verificada**: el
-workflow activo (raíz del repositorio) se ejecuta con un `pull_request` hacia
-`main`, y su resultado, fecha y revisión siguen pendientes.
+**Ámbito de estas verificaciones:** ejecución **local** histórica.
+
+**Verificación posterior en GitHub Actions:** el CI del PR #3 terminó con
+resultado satisfactorio el 5 de noviembre de 2026, con advertencias en
+las pruebas. Evidencia, revisión y resultados en
+[Integración continua](../08-despliegue/integracion-continua.md).
+Las cifras locales anteriores se conservan como registro histórico
+de la verificación de este sprint.
 
 ## 4. Decisiones
 
@@ -86,15 +90,12 @@ workflow activo (raíz del repositorio) se ejecuta con un `pull_request` hacia
 - **Adjuntos fuera del alcance aprobado:** la radicación por API no acepta
   adjuntos; el caso de uso los soporta pero HU-API-01 no los contempla.
   Registrado como pendiente en [Estado actual de la API](../07-api/estado-actual-api.md).
-- **Conflicto conocido de `git diff --check`:** los saltos de línea Markdown de
-  las Historias de Usuario del Product Backlog usan dos espacios finales
-  (estilo del archivo, con líneas preexistentes que lo conservan); esa
-  comprobación los reporta como *trailing whitespace* y el paso «Comprobar
-  formato del diff» del CI podría fallar si el diff las incluye. Se conserva el
-  espaciado intencional del backlog; la decisión sobre estilo documental frente
-  a la comprobación del CI queda pendiente.
+- **Formato del Product Backlog:** se conservan sus dos espacios finales
+  intencionales de Markdown. El flujo CI activo excluye ese archivo de
+  `git diff --check` y comprueba el resto del diff; la decisión está
+  registrada en [Integración continua](../08-despliegue/integracion-continua.md), §4.
 - Sin ventas, compras ni inventario (adaptación residencial autorizada).
-- Ejecución real de GitHub Actions pendiente (ver §3).
+- Advertencias de las pruebas en GitHub Actions pendientes de diagnóstico (ver §3).
 
 ## 6. Evidencia
 
@@ -110,6 +111,6 @@ workflow activo (raíz del repositorio) se ejecuta con un `pull_request` hacia
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Fecha de creación:** 5 de noviembre de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026

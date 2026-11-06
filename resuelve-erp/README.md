@@ -10,8 +10,7 @@ Sistema de gestión empresarial orientado a la administración de propiedad hori
 
 ## Alcance actual
 
-El proyecto cuenta con funcionalidades de gestión de PQRS y gestión documental, apoyadas en una estructura de organizaciones, copropiedades y usuarios. El módulo de mantenimiento está previsto para una etapa posterior.
-
+El proyecto integra PQRS, gestión documental y mantenimiento, con aislamiento por organización y copropiedad y acceso según roles y permisos. Incluye API REST v1 con Laravel Sanctum, informes PDF y Excel e importación de Unidades Privadas desde XLSX.
 
 ## Módulos y funcionalidades
 
@@ -39,14 +38,24 @@ El proyecto cuenta con funcionalidades de gestión de PQRS y gestión documental
 - Configuración de la información institucional.
 - Inicio de sesión y recuperación de contraseña.
 
-### Gestión de mantenimiento — En construcción
+### Gestión de mantenimiento
 
-Módulo en construcción, orientado al registro y seguimiento de las actividades de mantenimiento de las zonas comunes, equipos e instalaciones de las copropiedades.
+- Registro y consulta de solicitudes, asignación de responsables y programación de fechas.
+- Gestión de estados, resultados públicos e internos y finalización con evidencia documental aprobada.
+- Generación de mantenimiento desde una PQRS y consulta de los vínculos desde ambos módulos.
+- Evidencia fijada a una versión documental exacta y expediente integrado en PDF.
+
+El módulo fue completado en el Sprint 14 y su integración con PQRS y Documentos se cerró técnicamente en el Sprint 19. Ver [Integración de módulos](docs/avance2/integracion-de-modulos.md).
+
+### API REST v1
+
+Autenticación con Laravel Sanctum, selección de rol activo, cierre de sesión, listado y detalle contextual de PQRS y radicación. Son cinco endpoints bajo `/api/v1/`; los endpoints de PQRS revalidan usuario, membresía y permisos en cada petición. Los adjuntos en la radicación por API siguen pendientes. Ver [Contrato y alcance de la API](docs/07-api/estado-actual-api.md).
 
 ## Documentación
 
 - [Análisis del negocio y entrega académica](docs/integracion-academica.md)
 - [Documentación funcional y técnica](docs/README.md)
+- [Integración continua y resultados verificados](docs/08-despliegue/integracion-continua.md)
 - [Evidencias de la Clase 4](../Clase4/docs.md)
 
 ## Requisitos
@@ -108,6 +117,8 @@ Ejecutar las pruebas automatizadas:
 ```bash
 ./vendor/bin/sail artisan test
 ```
+
+La ejecución verificada del CI del PR #3 y sus advertencias están registradas en [Integración continua](docs/08-despliegue/integracion-continua.md). Los resultados locales de cada sprint se conservan en sus respectivas fichas.
 
 ## Seguridad
 

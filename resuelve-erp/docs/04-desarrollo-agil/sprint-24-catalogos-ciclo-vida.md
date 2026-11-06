@@ -4,8 +4,8 @@
 
 - **Estado:** Completado. HU-CONF-03 implementada de principio a fin para las
   cuatro entidades y verificada localmente el 5 de noviembre de 2026 (incluida
-  la extensión aprobada de Tipos de PQRS, §5). La ejecución real de GitHub
-  Actions queda **pendiente** y fuera de esta verificación.
+  la extensión aprobada de Tipos de PQRS, §5). La comprobación posterior
+  en GitHub Actions se registra en §3, con sus advertencias.
 - **Fecha de cierre técnico:** 5 de noviembre de 2026.
 - **Origen:** HU-CONF-03 (Product Backlog, Épica 10 — Configuración),
   incorporada y aprobada por el Product Owner el 5 de noviembre de 2026 para el
@@ -55,9 +55,16 @@ Organización/Copropiedad.
 | Suite completa (configuración aislada, SQLite en memoria) | **780 pruebas: 771 aprobadas y 9 omitidas (MySQL)**, 3715 aserciones, sin regresiones |
 | `vendor/bin/pint --test` | **Aprobado** |
 
-**Ámbito:** verificación **local**. La **ejecución real de GitHub Actions no
-está verificada** (el workflow activo se ejecuta con un `pull_request` hacia
-`main`); resultado, fecha y revisión siguen pendientes. La migración
+**Ámbito:** verificación **local** histórica.
+
+**Verificación posterior en GitHub Actions:** el CI del PR #3 terminó con
+resultado satisfactorio el 5 de noviembre de 2026, con advertencias en
+las pruebas. Evidencia, revisión y resultados en
+[Integración continua](../08-despliegue/integracion-continua.md).
+Las cifras locales anteriores se conservan como registro histórico
+de la verificación de este sprint.
+
+En la verificación local del sprint, la migración
 `add_desactivada_at_to_tipo_pqrs_table` **no se ejecutó sobre la base de datos
 local** (se aplicará con el flujo de migraciones del entorno).
 
@@ -111,6 +118,6 @@ restaurar se limpia), que completa el ciclo de la cuarta entidad:
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Fecha de creación:** 5 de noviembre de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026

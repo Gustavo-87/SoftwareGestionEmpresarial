@@ -3,8 +3,8 @@
 ## Estado y control documental
 
 - **Estado:** Completado. HU-PQRS-04 implementada de principio a fin y
-  verificada localmente el 5 de noviembre de 2026. La ejecución real de GitHub
-  Actions queda **pendiente** y fuera de esta verificación.
+  verificada localmente el 5 de noviembre de 2026. La comprobación posterior
+  en GitHub Actions se registra en §3, con sus advertencias.
 - **Fecha de cierre técnico:** 5 de noviembre de 2026.
 - **Origen:** HU-PQRS-04 (Product Backlog, Épica 5 — PQRS), incorporada y
   aprobada por el Product Owner el 5 de noviembre de 2026 para el componente de
@@ -65,8 +65,14 @@ sigue siendo una acción distinta (prec-comunicación).
 | `vendor/bin/pint --test` | **Aprobado** |
 | Migración en base local (Sail, `resuelve_erp`) | **Aplicada** (`2026_11_05_220000`, 104.60 ms; única pendiente antes de aplicar; 0 pendientes tras) |
 
-**Ámbito:** verificación **local**. La **ejecución real de GitHub Actions no
-está verificada** (el workflow se ejecuta con un `pull_request` hacia `main`).
+**Ámbito:** verificación **local** histórica.
+
+**Verificación posterior en GitHub Actions:** el CI del PR #3 terminó con
+resultado satisfactorio el 5 de noviembre de 2026, con advertencias en
+las pruebas. Evidencia, revisión y resultados en
+[Integración continua](../08-despliegue/integracion-continua.md).
+Las cifras locales anteriores se conservan como registro histórico
+de la verificación de este sprint.
 
 ## 4. Decisiones y notas
 
@@ -99,6 +105,6 @@ guía comercial queda registrada por decisión del Product Owner y no requiere a
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Fecha de creación:** 5 de noviembre de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026

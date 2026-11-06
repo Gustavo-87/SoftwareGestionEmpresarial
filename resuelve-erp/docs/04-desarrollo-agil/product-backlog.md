@@ -272,7 +272,7 @@ Personas, vínculos, compras, inventario ni entidades nuevas.
 **Estado (Sprint 22, completado):** HU-RYP-03 quedó implementada de principio a
 fin y cerrada el 5 de noviembre de 2026, con verificación local (13 pruebas de
 importación, suite completa de 761: 752 aprobadas y 9 omitidas por MySQL, Pint
-aprobado) y ejecución real de GitHub Actions pendiente (ver
+aprobado) y CI posterior del PR #3 satisfactorio con advertencias (ver
 [Sprint 22 — Importación masiva de Unidades Privadas](sprint-22-importacion-unidades-privadas.md)).
 
 # 5. Épica: PQRS
@@ -331,7 +331,7 @@ incorpora kardex, inventario ni anulación de la PQR.
 **Estado (Sprint 25, completado):** HU-PQRS-04 quedó implementada de principio
 a fin y cerrada el 5 de noviembre de 2026, con verificación local (6 pruebas de
 anulación, suite completa de 786: 777 aprobadas y 9 omitidas por MySQL, Pint
-aprobado) y ejecución real de GitHub Actions pendiente (ver
+aprobado) y CI posterior del PR #3 satisfactorio con advertencias (ver
 [Sprint 25 — Anulación trazable de respuestas oficiales](sprint-25-anulacion-respuestas.md)).
 
 # 6. Épica: Gestión Documental
@@ -410,8 +410,8 @@ scheduler ni el flujo de respuestas.
 **Estado (Sprint 23, completado):** HU-NOT-03 quedó implementada de principio a
 fin y cerrada el 5 de noviembre de 2026, con verificación local (3 pruebas de
 eventos más las 8 de emisión existentes sin modificaciones, suite completa de
-764: 755 aprobadas y 9 omitidas por MySQL, Pint aprobado) y ejecución real de
-GitHub Actions pendiente (ver
+764: 755 aprobadas y 9 omitidas por MySQL, Pint aprobado) y CI posterior del PR #3
+satisfactorio con advertencias (ver
 [Sprint 23 — Eventos de dominio con listeners](sprint-23-eventos-listeners.md)).
 
 # 8. Épica: Inteligencia Artificial
@@ -513,7 +513,7 @@ físicamente.
 fin y cerrada el 5 de noviembre de 2026, con verificación local (15 pruebas de
 ciclo de vida, suite completa de 779: 770 aprobadas y 9 omitidas por MySQL,
 Pint aprobado), bloqueo documentado para la baja lógica de Tipos de PQRS (sin
-columnas de estado) y ejecución real de GitHub Actions pendiente (ver
+columnas de estado) y CI posterior del PR #3 satisfactorio con advertencias (ver
 [Sprint 24 — Catálogos maestros con ciclo de vida completo](sprint-24-catalogos-ciclo-vida.md)).
 
 **Extensión aprobada (5 de noviembre de 2026):** el Product Owner autorizó una
@@ -579,7 +579,7 @@ arquitectura.
 bloques —autenticación con Sanctum y consulta, detalle y radicación de PQRS— y
 cerrada el 5 de noviembre de 2026, con verificación local (15 pruebas API,
 suite completa de 748: 739 aprobadas y 9 omitidas por MySQL, Pint aprobado) y
-ejecución real de GitHub Actions pendiente (ver
+CI posterior del PR #3 satisfactorio con advertencias (ver
 [Sprint 21 — API REST v1](sprint-21-api-rest-v1.md)).
 
 Las integraciones específicas adicionales permanecen pendientes de definición y
@@ -609,6 +609,11 @@ Quiero que las acciones importantes conserven su responsable y contexto
 Para contar con trazabilidad sobre la operación de las Copropiedades.
 
 # Evolución del Product Backlog
+
+La comprobación posterior del CI del PR #3 fue satisfactoria el 5 de
+noviembre de 2026, con advertencias en las pruebas. Las cifras locales de cada
+historia se conservan como registro histórico. Ver
+[Integración continua](../08-despliegue/integracion-continua.md).
 
 ## Incorporación aprobada — Gestión de mantenimiento
 
@@ -655,8 +660,8 @@ Historias propuestas el 21 de octubre de 2026 para el segundo corte académico
 el Product Owner el mismo día con tres ajustes obligatorios (idempotencia,
 autorización sobre ambos recursos y separación público/interno sin filtrado de
 metadatos). **Estado: Completada — cierre técnico aprobado el 22 de octubre de
-2026** (video académico pendiente de grabación y versionado pendiente de
-autorización). Su detalle completo, decisiones,
+2026** (video académico y capturas pendientes; implementación versionada en
+`ce18d1b`, presente en `main` en la revisión `a8d8166`). Su detalle completo, decisiones,
 reglas y registro de implementación se encuentran en
 [Sprint 19 — Integración de PQRS, mantenimiento y documentos](sprint-19-integracion-pqrs-mantenimiento-documentos.md).
 

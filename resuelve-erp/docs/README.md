@@ -21,10 +21,13 @@ el 30 de julio de 2026. En esta fase:
   documentación;
 - no se presentan funcionalidades futuras como parte del sistema actual.
 
-La implementación inspeccionada es una aplicación web monolítica construida
-con Laravel para gestionar PQR de una copropiedad configurable. El repositorio
-no contiene actualmente una API de aplicación ni una implementación de Agente
-IA. Estas ausencias se documentarán expresamente en sus secciones respectivas.
+La línea base inicial describía una aplicación web Laravel sin API de
+aplicación ni Agente IA. Al 5 de noviembre de 2026, el repositorio integra
+PQRS, Mantenimiento y Gestión Documental con autorización por Organización y
+Copropiedad, y dispone de una [API REST v1 con Sanctum](07-api/estado-actual-api.md)
+para autenticación, consulta y radicación de PQRS. La implementación de IA
+continúa pausada. La [integración continua](08-despliegue/integracion-continua.md)
+registra el CI satisfactorio del PR #3 y las advertencias de su ejecución.
 
 ## Cómo consultar esta documentación
 
@@ -112,13 +115,13 @@ Los estados utilizados en este índice son:
 | [Sprint 16 — Administración funcional de roles y permisos](04-desarrollo-agil/sprint-16-administracion-roles-permisos.md) | Completado | Catálogo de roles vivo (base globales y personalizados por Copropiedad), matriz de permisos por módulo, asignación/revocación segura con anti-escalada y protección de la última capacidad de administración, interfaz condicionada por permisos, 403 y auditoría (HU-USR-03 y refinamiento de HU-USR-02). Cierre el 3 de octubre de 2026: 65 pruebas específicas, concurrencia MySQL aprobada, suite de 540 (534 aprobadas, 6 omitidas, 2450 aserciones) y diagnóstico RBAC en 0 divergencias. Ver [ADR-012](10-adr/ADR-012-administracion-dinamica-roles-permisos.md). |
 | [Sprint 17 — Eliminación segura de Copropiedades](04-desarrollo-agil/sprint-17-eliminacion-copropiedades.md) | Completado | HU-ORG-03: eliminación segura de Copropiedades sin información operativa (autoridad de plataforma, bloqueo por dependencias, limpieza de auxiliares, auditoría, 403 e interfaz con confirmación). Cierre formal el 17 de octubre de 2026: condiciones 1–6 cumplidas y verificación re-ejecutada el mismo día (suite completa: 588 aprobadas, 6 omitidas, 2698 aserciones, sin regresiones); el diagnóstico RBAC detectó deriva de datos en la BD local de desarrollo (hallazgo no bloqueante documentado en el acta; resincronización pendiente de autorización). La transferencia entre Organizaciones fue descartada por incompatibilidad referencial. |
 | [Sprint 18 — Seguridad de acceso: rol activo, permisos directos y ciclo de vida de usuarios](04-desarrollo-agil/sprint-18-seguridad-acceso.md) | Completado | Rol activo con segregación de funciones, permisos directos por usuario con origen visible, matriz global de permisos "ver como usuario", administración de permisos, usuarios inactivos y endurecimiento de reglas de roles (HU-USR-04 a HU-USR-09, Épica Usuarios y Seguridad). Aprobado el 17 de octubre de 2026; alcance, ampliaciones (experiencia de inicio de sesión y reactivación de Membresías) y aceptación visual aprobados por el Product Owner el 21 de octubre de 2026, con cierre formal registrado: 88 pruebas específicas del sprint y suite completa de 699 (0 fallos); diagnóstico RBAC con 3 errores y 6 avisos conocidos pendientes de saneamiento y entrega real de recuperación de contraseña pendiente de proveedor de correo. Ver [ADR-013](10-adr/ADR-013-rol-activo-segregacion-funciones.md). |
-| [Sprint 19 — Integración de PQRS, mantenimiento y documentos](04-desarrollo-agil/sprint-19-integracion-pqrs-mantenimiento-documentos.md) | Cierre técnico aprobado (22 oct 2026) | Integración de los tres módulos operativos mediante un proceso completo (PQRS → mantenimiento vinculado → resultado con evidencia documental → respuesta y cierre de PQRS → expediente integrado y PDF → indicadores compactos), adaptado a la autorización académica del 21 de octubre de 2026 (sin ventas, compras ni inventario). Historias HU-PQRS-03, HU-MAN-03/04, HU-DOC-03 y HU-REP-03/04/05 con los tres ajustes aprobados (idempotencia estricta, autorización sobre ambos recursos y separación público/interno sin filtrado de metadatos): suite completa en verde (719 pruebas: 710 en verde, 9 omitidas por MySQL), concurrencia real verificada en MySQL con dos conexiones simultáneas y flujo completo + visibilidad del residente verificados en navegador sobre la base aislada. Entregables académicos en [docs/avance2](avance2/README.md); MER en PNG regenerado desde su fuente editable. Cierre técnico aprobado por el Product Owner el 22 de octubre de 2026. **Pendiente: grabación del video académico (solo guion), capturas de aceptación y ejecución del versionado preparado.** |
+| [Sprint 19 — Integración de PQRS, mantenimiento y documentos](04-desarrollo-agil/sprint-19-integracion-pqrs-mantenimiento-documentos.md) | Cierre técnico aprobado (22 oct 2026) | Integración de los tres módulos operativos mediante un proceso completo (PQRS → mantenimiento vinculado → resultado con evidencia documental → respuesta y cierre de PQRS → expediente integrado y PDF → indicadores compactos), adaptado a la autorización académica del 21 de octubre de 2026 (sin ventas, compras ni inventario). Historias HU-PQRS-03, HU-MAN-03/04, HU-DOC-03 y HU-REP-03/04/05 con los tres ajustes aprobados (idempotencia estricta, autorización sobre ambos recursos y separación público/interno sin filtrado de metadatos): suite completa en verde (719 pruebas: 710 en verde, 9 omitidas por MySQL), concurrencia real verificada en MySQL con dos conexiones simultáneas y flujo completo + visibilidad del residente verificados en navegador sobre la base aislada. Entregables académicos en [docs/avance2](avance2/README.md); MER en PNG regenerado desde su fuente editable. Cierre técnico aprobado por el Product Owner el 22 de octubre de 2026. **Pendiente: grabación del video académico (solo guion) y capturas de aceptación.** Implementación versionada en `ce18d1b`, presente en `main` (`a8d8166`). |
 | [Sprint 20 — Residentes, Unidades y Auditoría](04-desarrollo-agil/sprint-20-residentes-unidades-auditoria.md) | Plan presentado — pendiente de aprobación | Plan del siguiente sprint sobre HU pendientes del backlog: HU-RYP-01 (gestión visible de Unidades Privadas y vínculos), HU-RYP-02 (consulta de residencia en el perfil del residente) y HU-AUD-01 (consulta contextual del historial de auditoría), reutilizando el backend de Sprint 6 y `management.audit`, con la regla de dominio de separar vínculos residenciales de Membresías y permisos de acceso. HU-CONF-02 fuera de alcance por decisión del Product Owner. |
-| [Sprint 21 — API REST v1](04-desarrollo-agil/sprint-21-api-rest-v1.md) | Completado | HU-API-01 (Épica 11 — Integraciones): API REST v1 con Sanctum sobre el modelo residencial (login con rol activo, logout, consulta y detalle contextual de PQRS y radicación por escritura), reutilizando casos de uso y autorización contextual. Cierre técnico el 5 de noviembre de 2026 con verificación local: 15 pruebas API, suite completa de 748 (739 aprobadas, 9 omitidas por MySQL) y Pint aprobado; la ejecución real de GitHub Actions y los adjuntos en la radicación quedan pendientes y fuera del alcance aprobado. |
-| [Sprint 22 — Importación masiva de Unidades Privadas](04-desarrollo-agil/sprint-22-importacion-unidades-privadas.md) | Completado | HU-RYP-03 (Épica 4): importación de Unidades Privadas desde XLSX (máximo 2 MB y 1000 filas de datos) con validación por fila, duplicados omitidos y reportados, contexto fijado en backend, reporte descargable de errores en XLSX y auditoría; solo altas. Cierre técnico el 5 de noviembre de 2026 con verificación local: 13 pruebas de importación, suite completa de 761 (752 aprobadas, 9 omitidas por MySQL) y Pint aprobado; la ejecución real de GitHub Actions sigue pendiente. |
-| [Sprint 23 — Eventos de dominio con listeners](04-desarrollo-agil/sprint-23-eventos-listeners.md) | Completado | HU-NOT-03 (Épica 7): patrón Laravel Event/Listener para la emisión de Notificaciones (PqrRadicada y PqrEstadoActualizado con listeners síncronos que reutilizan `EmitirNotificacionPqrs`), con sustitución 1:1 de las invocaciones directas tras el commit y efectos idénticos. Cierre técnico el 5 de noviembre de 2026 con verificación local: 3 pruebas de eventos más las 8 de emisión sin modificaciones, suite completa de 764 (755 aprobadas, 9 omitidas por MySQL) y Pint aprobado; la ejecución real de GitHub Actions sigue pendiente. |
-| [Sprint 24 — Catálogos maestros con ciclo de vida completo](04-desarrollo-agil/sprint-24-catalogos-ciclo-vida.md) | Completado | HU-CONF-03 (Épica 10): Form Requests para alta y edición de Tipos de PQRS, Etiquetas, Unidades Privadas y Personas (reglas reutilizadas sin duplicar; autorización antes de la validación) y ciclo de alta, consulta, edición, baja lógica, papelera y restauración con los campos existentes, incluida la extensión aprobada de Tipos de PQRS (columna `desactivada_at` por migración autorizada). Cierre técnico el 5 de noviembre de 2026 con verificación local: 20 pruebas del ciclo (15 de catálogos y 5 del catálogo de tipos), suite completa de 780 (771 aprobadas, 9 omitidas por MySQL) y Pint aprobado; la ejecución real de GitHub Actions sigue pendiente. |
-| [Sprint 25 — Anulación trazable de respuestas oficiales](04-desarrollo-agil/sprint-25-anulacion-respuestas.md) | Completado | HU-PQRS-04 (Épica 5): anulación comunicada y trazable de respuestas oficiales (motivo obligatorio, contenido inmutable, ledger `annul_reply`, actuación pública, auditoría y notificación al radicador), con retiro de borrador como acción distinta y decisión del Product Owner registrada (adaptación de «anulación» aprobada por el Product Owner; no requiere aprobación docente para continuar). Cierre técnico el 5 de noviembre de 2026 con verificación local: 6 pruebas de anulación, suite completa de 786 (777 aprobadas, 9 omitidas por MySQL), Pint aprobado y migración aplicada en la base local; la ejecución real de GitHub Actions sigue pendiente. |
+| [Sprint 21 — API REST v1](04-desarrollo-agil/sprint-21-api-rest-v1.md) | Completado | HU-API-01 (Épica 11 — Integraciones): API REST v1 con Sanctum sobre el modelo residencial (login con rol activo, logout, consulta y detalle contextual de PQRS y radicación por escritura), reutilizando casos de uso y autorización contextual. Cierre técnico el 5 de noviembre de 2026 con verificación local: 15 pruebas API, suite completa de 748 (739 aprobadas, 9 omitidas por MySQL) y Pint aprobado; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md); los adjuntos en la radicación siguen fuera del alcance aprobado. |
+| [Sprint 22 — Importación masiva de Unidades Privadas](04-desarrollo-agil/sprint-22-importacion-unidades-privadas.md) | Completado | HU-RYP-03 (Épica 4): importación de Unidades Privadas desde XLSX (máximo 2 MB y 1000 filas de datos) con validación por fila, duplicados omitidos y reportados, contexto fijado en backend, reporte descargable de errores en XLSX y auditoría; solo altas. Cierre técnico el 5 de noviembre de 2026 con verificación local: 13 pruebas de importación, suite completa de 761 (752 aprobadas, 9 omitidas por MySQL) y Pint aprobado; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md). |
+| [Sprint 23 — Eventos de dominio con listeners](04-desarrollo-agil/sprint-23-eventos-listeners.md) | Completado | HU-NOT-03 (Épica 7): patrón Laravel Event/Listener para la emisión de Notificaciones (PqrRadicada y PqrEstadoActualizado con listeners síncronos que reutilizan `EmitirNotificacionPqrs`), con sustitución 1:1 de las invocaciones directas tras el commit y efectos idénticos. Cierre técnico el 5 de noviembre de 2026 con verificación local: 3 pruebas de eventos más las 8 de emisión sin modificaciones, suite completa de 764 (755 aprobadas, 9 omitidas por MySQL) y Pint aprobado; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md). |
+| [Sprint 24 — Catálogos maestros con ciclo de vida completo](04-desarrollo-agil/sprint-24-catalogos-ciclo-vida.md) | Completado | HU-CONF-03 (Épica 10): Form Requests para alta y edición de Tipos de PQRS, Etiquetas, Unidades Privadas y Personas (reglas reutilizadas sin duplicar; autorización antes de la validación) y ciclo de alta, consulta, edición, baja lógica, papelera y restauración con los campos existentes, incluida la extensión aprobada de Tipos de PQRS (columna `desactivada_at` por migración autorizada). Cierre técnico el 5 de noviembre de 2026 con verificación local: 20 pruebas del ciclo (15 de catálogos y 5 del catálogo de tipos), suite completa de 780 (771 aprobadas, 9 omitidas por MySQL) y Pint aprobado; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md). |
+| [Sprint 25 — Anulación trazable de respuestas oficiales](04-desarrollo-agil/sprint-25-anulacion-respuestas.md) | Completado | HU-PQRS-04 (Épica 5): anulación comunicada y trazable de respuestas oficiales (motivo obligatorio, contenido inmutable, ledger `annul_reply`, actuación pública, auditoría y notificación al radicador), con retiro de borrador como acción distinta y decisión del Product Owner registrada (adaptación de «anulación» aprobada por el Product Owner; no requiere aprobación docente para continuar). Cierre técnico el 5 de noviembre de 2026 con verificación local: 6 pruebas de anulación, suite completa de 786 (777 aprobadas, 9 omitidas por MySQL), Pint aprobado y migración aplicada en la base local; CI posterior del PR #3 satisfactorio, con advertencias registradas en [Integración continua](08-despliegue/integracion-continua.md). |
 | [Pruebas automatizadas](04-desarrollo-agil/pruebas-automatizadas.md) | Pendiente | Inventariar la cobertura existente y sus límites. |
 
 ### 05. Arquitectura
@@ -139,7 +142,7 @@ Los estados utilizados en este índice son:
 
 | Documento | Estado | Propósito |
 | --- | --- | --- |
-| [Estado actual de la API](07-api/estado-actual-api.md) | Completado | Registrar el alcance verificable actual de interfaces API: autenticación con Sanctum (HU-API-01) y componentes pendientes. |
+| [Estado actual de la API](07-api/estado-actual-api.md) | Completado | Registrar autenticación con rol activo, cierre de sesión, listado, detalle y radicación de PQRS con Sanctum (HU-API-01), y los componentes pendientes. |
 
 ### 08. Despliegue
 
@@ -247,20 +250,18 @@ antes de avanzar a capacidades nuevas:
 5. Informes e indicadores
 6. Configuración de la copropiedad
 7. Herramientas operativas
-8. Gestión de residentes
-9. Archivos y almacenamiento
-10. Auditoría y trazabilidad
-11. Dependencias
-12. Configuración técnica
-13. Entorno local
-14. Túnel de demostración
-15. Pruebas automatizadas
-16. Hallazgos de la línea base
-17. Estado actual de API
-18. Estado actual de IA
+8. Archivos y almacenamiento
+9. Auditoría y trazabilidad
+10. Dependencias
+11. Configuración técnica
+12. Entorno local
+13. Túnel de demostración
+14. Pruebas automatizadas
+15. Hallazgos de la línea base
+16. Estado actual de IA
 
 ## Control documental
 
-- **Versión:** v1.51
+- **Versión:** v1.52
 - **Fecha de creación:** 30 de julio de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026

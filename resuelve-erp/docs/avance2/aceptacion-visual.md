@@ -90,7 +90,7 @@ Ingresar como `andrea.ruiz@example.com` y abrir `/pqrs/13`:
   para personal autorizado» **sin título, versión, archivo ni fechas**;
 - el título interno del mantenimiento no se expone en el expediente.
 
-## 5. Verificación ya realizada (automatizada)
+## 5. Verificación registrada para el cierre del Sprint 19
 
 | Verificación | Resultado |
 | --- | --- |
@@ -102,7 +102,8 @@ Ingresar como `andrea.ruiz@example.com` y abrir `/pqrs/13`:
 | Suite completa | 719 pruebas: 710 en verde, 9 omitidas por requerir MySQL, 3.304 assertions |
 | MER en PNG | Regenerado desde `erDiagram.mmd` (incluye `fija_version_exacta`) |
 
-Pendiente de aceptación del Product Owner: capturas de pantalla y video (guion
-disponible en [guion-video.md](guion-video.md)); las capturas requieren una
-ventana de escritorio visible, por lo que se solicitan como parte de esta
-aceptación visual.
+El cierre técnico fue aprobado por el Product Owner el 22 de octubre de
+2026, según el [acta del Sprint 19](../04-desarrollo-agil/sprint-19-integracion-pqrs-mantenimiento-documentos.md).
+Las verificaciones anteriores son el registro de ese cierre. Continúan
+pendientes las capturas de aceptación y la grabación del video (guion en
+[guion-video.md](guion-video.md)); su entrega no se marca como completada.

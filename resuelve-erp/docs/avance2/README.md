@@ -33,6 +33,18 @@ como expediente integrado en PDF.**
 
 | Tipo | Entregable | Estado |
 | --- | --- | --- |
-| Software | Historias HU-PQRS-03, HU-MAN-03/04, HU-DOC-03, HU-REP-03/04/05 | Implementadas; cierre formal pendiente de aprobación |
-| Académico | Este directorio (`docs/avance2/`), MER y diccionario actualizados, fixture de datos, guion de video | Listos para revisión |
+| Software | Historias HU-PQRS-03, HU-MAN-03/04, HU-DOC-03, HU-REP-03/04/05 | Implementadas; cierre técnico aprobado por el Product Owner el 22 de octubre de 2026 |
+| Académico | Este directorio (`docs/avance2/`), MER y diccionario actualizados, fixture de datos, guion de video | Documentación disponible; video y capturas pendientes |
 | Separado | Pendientes del Sprint 18 (envío real de correos, saneamiento de datos RBAC) | No se mezclan con el alcance del corte; ver sprint-18 |
+
+## Estado documental al 5 de noviembre de 2026
+
+El [cierre técnico del Sprint 19](../04-desarrollo-agil/sprint-19-integracion-pqrs-mantenimiento-documentos.md)
+fue aprobado el 22 de octubre de 2026. La implementación está versionada en
+`ce18d1b` y presente en `main` (`a8d8166`). La grabación del video y las
+capturas de aceptación continúan pendientes.
+
+La retroalimentación escrita original del avance 2 y una relación de cada
+observación con su corrección y evidencia no se localizaron en el repositorio
+durante la auditoría. Por ello, la atención completa del requisito 17 de la
+guía final sigue sin acreditarse con la documentación disponible.

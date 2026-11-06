@@ -6,7 +6,7 @@ Registrar el alcance verificable actual de la API REST de Resuelve: lo
 implementado, su contrato y lo que todavía no existe. Este documento describe
 solo comportamiento implementado y verificado.
 
-## 2. Alcance implementado (HU-API-01, bloque de autenticación)
+## 2. Alcance implementado (HU-API-01: autenticación, consulta y radicación)
 
 La API REST v1 se expone bajo `/api/v1/` con autenticación mediante tokens
 personales de Laravel Sanctum (rutas en `routes/api.php`, registrado en
@@ -130,6 +130,6 @@ parte del sistema actual:
 
 ## Control documental
 
-- **Versión:** v1.1
+- **Versión:** v1.2
 - **Fecha de creación:** 5 de noviembre de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026

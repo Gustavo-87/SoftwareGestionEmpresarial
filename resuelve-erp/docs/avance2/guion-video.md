@@ -14,7 +14,7 @@ Demostración del segundo corte: un proceso completo que atraviesa tres módulos
 | 6:00–7:00 | Finalización | Finalizar el mantenimiento con la confirmación que advierte: **«La PQRS no se cierra automáticamente»**. Volver al expediente PQRS y mostrar que la PQRS sigue abierta: la respuesta y el cierre son operaciones explícitas del gestor. |
 | 7:00–8:00 | Vista del residente | Ingresar con el usuario residente radicador: en su PQRS se ven los mantenimientos con estado, fechas y **resultado público**; el resultado interno no aparece y la evidencia restringida se muestra sin metadatos («Evidencia documental disponible solo para personal autorizado») (HU-REP-05). |
 | 8:00–9:00 | Expediente PDF | Volver al gestor y descargar «Expediente PDF» (HU-REP-03): PQRS, mantenimientos, evidencia visible y respuestas oficiales con la identidad institucional. Mencionar que el PDF se construye sobre la misma consulta autorizada. |
-| 9:00–10:00 | Cierre | Resumen de la integración (tres módulos, un proceso), reglas clave (idempotencia, autorización doble, separación público/interno) y estado del cierre formal pendiente de aprobación. |
+| 9:00–10:00 | Cierre | Resumen de la integración (tres módulos, un proceso), reglas clave (idempotencia, autorización doble, separación público/interno) y cierre técnico aprobado por el Product Owner el 22 de octubre de 2026, distinguiéndolo de la entrega de evidencias académicas. |
 
 ## Notas de grabación
 

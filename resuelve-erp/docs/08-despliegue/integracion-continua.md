@@ -66,7 +66,7 @@ php artisan test
 git diff --check -- ':(top,exclude)resuelve-erp/docs/04-desarrollo-agil/product-backlog.md'
 ```
 
-### Resultado local (5 de noviembre de 2026)
+### Resultado local previo (5 de noviembre de 2026)
 
 Ejecutado sobre el árbol de trabajo con la configuración aislada de pruebas
 (`phpunit.xml`: SQLite en memoria):
@@ -80,10 +80,33 @@ Ejecutado sobre el árbol de trabajo con la configuración aislada de pruebas
 - `npm run build` y `php artisan view:cache`/`view:clear`: verificados en la
   corrección del flujo CI.
 
-Estos resultados son **verificación local**; la ejecución real de GitHub
-Actions sigue **pendiente** de confirmar con un `pull_request` hacia `main`.
+Estos resultados conservan la **verificación local previa**. La ejecución
+posterior en GitHub Actions se registra por separado a continuación.
 
-## 6. Evidencia
+## 6. Ejecución verificada en GitHub Actions
+
+- **Fecha:** 5 de noviembre de 2026, entre las 20:46 y las 20:47
+  (America/Bogota).
+- **Solicitud:** [PR #3 — Panel y bloqueo de acceso](https://github.com/Gustavo-87/SoftwareGestionEmpresarial/pull/3),
+  revisión de origen `4ff5e5d735c1a0b96147a57abf7dd65b67f1f375`; fusionada
+  en `main` como `a8d8166eea20f63cc24c58713208d47cbc8e8ba1`. La ejecución
+  corresponde a la comprobación del PR.
+- **Ejecución:** [CI #5, 42146003145](https://github.com/Gustavo-87/SoftwareGestionEmpresarial/actions/runs/42146003145),
+  tarea `test` con conclusión `success` (resultado satisfactorio).
+- **Pint:** aprobado sobre **411 archivos**.
+- **Pruebas:** el resumen del registro distingue **24 aprobadas y 762 con
+  advertencias**, con **3.763 aserciones** y duración de 28,73 segundos.
+  El resultado satisfactorio del CI no acredita una suite libre de
+  advertencias; su diagnóstico y corrección quedan pendientes.
+- **Otros pasos:** instalación de dependencias, compilación de Vite,
+  comprobación del diff y compilación/limpieza de vistas Blade satisfactorias.
+
+Las cifras de cada sprint corresponden a sus verificaciones locales
+históricas; no se sustituyen por este resultado posterior. La ejecución usa
+SQLite en memoria y correo de pruebas: no acredita entrega real de correo
+ni una ejecución de concurrencia sobre MySQL.
+
+## 7. Evidencia
 
 - Workflow activo: `.github/workflows/ci.yml` (raíz del repositorio).
 - Workflow anterior conservado: `resuelve-erp/.github/workflows/ci.yml`.
@@ -93,6 +116,6 @@ Actions sigue **pendiente** de confirmar con un `pull_request` hacia `main`.
 
 ## Control documental
 
-- **Versión:** v1.1
+- **Versión:** v1.2
 - **Fecha de creación:** 5 de noviembre de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026
