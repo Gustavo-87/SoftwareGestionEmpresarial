@@ -22,6 +22,7 @@ final class EmitirNotificacionPqrs
         'pqr_estado_actualizado',
         'pqr_asignada',
         'pqr_respuesta_enviada',
+        'pqr_respuesta_anulada',
         'pqr_recordatorio_vencimiento',
     ];
 
@@ -95,6 +96,7 @@ final class EmitirNotificacionPqrs
             'pqr_estado_actualizado' => ['Estado de solicitud actualizado', "La {$numero} ahora está {$pqr->estado_label}."],
             'pqr_asignada' => ['Solicitud asignada', "Te asignaron la {$numero}."],
             'pqr_respuesta_enviada' => ['Tu solicitud fue respondida', "La solicitud {$numero} tiene una nueva respuesta."],
+            'pqr_respuesta_anulada' => ['Una respuesta fue anulada', "Se anuló una respuesta de la solicitud {$numero}. Consulta el expediente para más detalles."],
             'pqr_recordatorio_vencimiento' => ['Solicitud próxima a vencer', "La {$numero} vence el {$pqr->fecha_limite_respuesta->format('d/m/Y')}."],
         };
     }

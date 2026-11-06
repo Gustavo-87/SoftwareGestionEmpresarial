@@ -37,6 +37,24 @@ Los estados persistidos son:
 
 La base de datos restringe el estado a estos cuatro valores.
 
+## Anulación de respuesta oficial (HU-PQRS-04, Sprint 25)
+
+Retirar un borrador y anular una respuesta oficial son acciones distintas:
+
+- **Retirar borrador:** la comunicación aún no ocurrió; el borrador se elimina
+  lógicamente sin restauración y queda en la auditoría.
+- **Anular respuesta oficial:** la comunicación ya se efectuó; la respuesta
+  **permanece visible** en el expediente marcada como anulada, con motivo,
+  actor y fecha. Su contenido, adjuntos, fecha de envío, PQR y autor no
+  cambian; no se edita, elimina, reactiva ni reenvía. Para corregirla se emite
+  una respuesta oficial nueva.
+
+La anulación exige gestión efectiva (misma autorización que el envío; los
+residentes no pueden anular), motivo obligatorio y queda registrada en el
+ledger de comunicaciones (`annul_reply`), como actuación pública
+(`annulled_reply`), en `AuditLog` (`pqr.respuesta.anular`) y se comunica al
+radicador (evento `pqr_respuesta_anulada`). La PQR conserva su estado.
+
 ## 4. Radicación
 
 ### 4.1 Acceso

@@ -11,4 +11,5 @@ enum PqrCommunicationOperation: string
     case SendDraft = 'send_draft';
     case DeleteDraft = 'delete_draft';
     case SendReply = 'send_reply';
+    case AnnulReply = 'annul_reply';
 }

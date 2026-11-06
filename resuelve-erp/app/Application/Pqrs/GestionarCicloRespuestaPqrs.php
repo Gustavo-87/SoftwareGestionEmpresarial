@@ -4,6 +4,7 @@ namespace App\Application\Pqrs;
 
 use App\Application\Autorizacion\AutorizacionContextual;
 use App\Application\Contexto\ContextoOperativo;
+use App\Application\Notificaciones\EmitirNotificacionPqrs;
 use App\Application\Notificaciones\ReconciliarNotificacionRespuestaPqrs;
 use App\Application\Pqrs\Idempotency\PqrCommunicationOperationRepository;
 use App\Enums\PqrCommunicationCleanupStatus;
@@ -11,6 +12,7 @@ use App\Enums\PqrCommunicationNotificationStatus;
 use App\Enums\PqrCommunicationOperation;
 use App\Enums\PqrCommunicationOperationStatus;
 use App\Enums\PqrCommunicationResultCode;
+use App\Models\AuditLog;
 use App\Models\Pqr;
 use App\Models\PqrCommunicationOperation as OperationModel;
 use App\Models\PqrReply;
@@ -30,6 +32,7 @@ final class GestionarCicloRespuestaPqrs
         private readonly RegistrarActuacionPqrs $actuaciones,
         private readonly PqrCommunicationOperationRepository $operations,
         private readonly ReconciliarNotificacionRespuestaPqrs $notificaciones,
+        private readonly EmitirNotificacionPqrs $emisor,
     ) {}
 
     public function autorizarCreacion(ContextoOperativo $contexto, Pqr $pqr): Pqr
@@ -82,13 +85,26 @@ final class GestionarCicloRespuestaPqrs
         return $this->mutate($contexto, $actor, $pqr, $reply, [], [], $key, PqrCommunicationOperation::DeleteDraft, PqrCommunicationResultCode::DraftDeleted);
     }
 
+    /**
+     * Anulación trazable de una respuesta oficial (HU-PQRS-04): deja la
+     * comunicación sin efecto sin editarla ni borrarla, registrándola en el
+     * ledger y notificando al radicador. Es idempotente por clave.
+     */
+    public function annul(ContextoOperativo $contexto, User $actor, Pqr $pqr, PqrReply $reply, string $motivo, string $key): PqrReply
+    {
+        return $this->mutate(
+            $contexto, $actor, $pqr, $reply, ['motivo_anulacion' => $motivo], [], $key,
+            PqrCommunicationOperation::AnnulReply, PqrCommunicationResultCode::ReplyAnnulled,
+        );
+    }
+
     public function lookup(Pqr $pqr, User $actor, PqrCommunicationOperation $operation, string $key): ?OperationModel
     {
         return $this->operations->lookupScope($pqr, $actor, $operation, $key);
     }
 
     /** @param list<UploadedFile> $files */
-    public static function fingerprint(PqrCommunicationOperation $operation, int $pqrId, ?int $replyId, ?string $body, array $files, array $persistedAttachments = []): string
+    public static function fingerprint(PqrCommunicationOperation $operation, int $pqrId, ?int $replyId, ?string $body, array $files, array $persistedAttachments = [], ?string $motivoAnulacion = null): string
     {
         $normalize = static fn (?string $value): ?string => $value === null ? null : preg_replace('/\R/u', "\n", trim($value));
         $newAttachments = collect($files)->values()->map(function (object $file, int $position): array {
@@ -116,10 +132,15 @@ final class GestionarCicloRespuestaPqrs
             }
         }
 
-        return PqrCommunicationOperationRepository::fingerprint([
+        $payload = [
             'operation' => $operation->value, 'pqr_id' => $pqrId, 'reply_id' => $replyId,
             'body' => $normalize($body), 'attachments' => $newAttachments !== [] ? $newAttachments : $persisted,
-        ]);
+        ];
+        if ($operation === PqrCommunicationOperation::AnnulReply) {
+            $payload['motivo_anulacion'] = $normalize($motivoAnulacion);
+        }
+
+        return PqrCommunicationOperationRepository::fingerprint($payload);
     }
 
     /** @param list<UploadedFile> $files */
@@ -134,7 +155,7 @@ final class GestionarCicloRespuestaPqrs
                 $lockedReply = $reply ? PqrReply::withTrashed()->lockForUpdate()->where('pqr_id', $lockedPqr->id)->findOrFail($reply->id) : null;
                 $persisted = $lockedReply ? $this->ensureDurableAttachmentHashes($lockedReply) : [];
                 $body = $operation === PqrCommunicationOperation::UpdateDraft ? ($data['body'] ?? null) : ($lockedReply?->body ?? ($data['body'] ?? null));
-                $fingerprint = self::fingerprint($operation, $lockedPqr->id, $lockedReply?->id, $body, $files, $persisted);
+                $fingerprint = self::fingerprint($operation, $lockedPqr->id, $lockedReply?->id, $body, $files, $persisted, $data['motivo_anulacion'] ?? null);
                 $claim = $this->operations->claim(
                     $lockedPqr, $actor, $operation, $key, $fingerprint, null,
                     in_array($operation, [PqrCommunicationOperation::SendDraft, PqrCommunicationOperation::SendReply], true)
@@ -151,7 +172,14 @@ final class GestionarCicloRespuestaPqrs
                 if (! $this->autorizacion->puedeGestionarPqr($contexto, $lockedPqr)) {
                     throw new AuthorizationException;
                 }
-                if ($lockedReply && (! $lockedReply->is_draft || $lockedReply->trashed() || $lockedReply->user_id !== $actor->id)) {
+                if ($operation === PqrCommunicationOperation::AnnulReply) {
+                    if ($lockedReply->is_draft || $lockedReply->trashed() || $lockedReply->sent_at === null) {
+                        throw ValidationException::withMessages(['reply' => 'Solo se puede anular una respuesta oficial ya enviada.']);
+                    }
+                    if ($lockedReply->anulada_at !== null) {
+                        throw ValidationException::withMessages(['reply' => 'La respuesta ya está anulada.']);
+                    }
+                } elseif ($lockedReply && (! $lockedReply->is_draft || $lockedReply->trashed() || $lockedReply->user_id !== $actor->id)) {
                     throw ValidationException::withMessages(['reply' => 'El borrador ya no admite esta operación.']);
                 }
                 $sending = in_array($operation, [PqrCommunicationOperation::SendDraft, PqrCommunicationOperation::SendReply], true);
@@ -184,6 +212,11 @@ final class GestionarCicloRespuestaPqrs
                 $cleanupManifest = [];
                 if (! $lockedReply) {
                     $lockedReply = $lockedPqr->replies()->create(['user_id' => $actor->id, 'body' => $data['body'], 'is_draft' => ! $sending, 'attachments' => $attachments, 'sent_at' => $sending ? now() : null]);
+                } elseif ($operation === PqrCommunicationOperation::AnnulReply) {
+                    $lockedReply->anulada_at = now();
+                    $lockedReply->anulada_por_user_id = $actor->id;
+                    $lockedReply->motivo_anulacion = $data['motivo_anulacion'];
+                    $lockedReply->save();
                 } elseif ($operation === PqrCommunicationOperation::DeleteDraft) {
                     $lockedReply->delete();
                 } else {
@@ -203,10 +236,13 @@ final class GestionarCicloRespuestaPqrs
                 }
                 $this->actuaciones->registrar($lockedPqr, $actor, match ($operation) {
                     PqrCommunicationOperation::CreateDraft => 'drafted_reply', PqrCommunicationOperation::UpdateDraft => 'updated_draft',
-                    PqrCommunicationOperation::DeleteDraft => 'deleted_draft', default => 'sent_reply',
+                    PqrCommunicationOperation::DeleteDraft => 'deleted_draft', PqrCommunicationOperation::AnnulReply => 'annulled_reply',
+                    default => 'sent_reply',
                 }, match ($operation) {
                     PqrCommunicationOperation::CreateDraft => 'Guardó un borrador de respuesta.', PqrCommunicationOperation::UpdateDraft => 'Actualizó un borrador de respuesta.',
-                    PqrCommunicationOperation::DeleteDraft => 'Eliminó un borrador de respuesta.', default => 'Envió una respuesta al residente.',
+                    PqrCommunicationOperation::DeleteDraft => 'Eliminó un borrador de respuesta.',
+                    PqrCommunicationOperation::AnnulReply => 'Anuló una respuesta oficial. Motivo: '.((string) ($data['motivo_anulacion'] ?? '')),
+                    default => 'Envió una respuesta al residente.',
                 });
                 if ($cleanupManifest !== []) {
                     $this->operations->scheduleCleanup($claim->operation, $cleanupManifest);
@@ -225,7 +261,25 @@ final class GestionarCicloRespuestaPqrs
         if ($operationRecord instanceof OperationModel && $operationRecord->cleanup_status === PqrCommunicationCleanupStatus::Pending) {
             $this->reconcileCleanup($pqr, $operationRecord);
         }
-        if ($operationRecord instanceof OperationModel && in_array($operation, [PqrCommunicationOperation::SendDraft, PqrCommunicationOperation::SendReply], true)) {
+        if ($operation === PqrCommunicationOperation::AnnulReply) {
+            // Trazabilidad explícita de la anulación (HU-PQRS-04).
+            AuditLog::create([
+                'user_id' => $actor->id,
+                'action' => 'pqr.respuesta.anular',
+                'auditable_type' => PqrReply::class,
+                'auditable_id' => $answer->id,
+                'ip_address' => request()->ip(),
+                'metadata' => [
+                    'pqr_id' => $pqr->id,
+                    'motivo_anulacion' => (string) ($data['motivo_anulacion'] ?? ''),
+                    'contexto' => ['organizacion_id' => $contexto->organizacion->id, 'copropiedad_id' => $contexto->copropiedad->id],
+                ],
+            ]);
+
+            // La anulación se comunica al radicador (HU-PQRS-04): lo comunicado
+            // nunca cambia en silencio.
+            $this->emisor->ejecutar($contexto, $pqr, 'pqr_respuesta_anulada');
+        } elseif ($operationRecord instanceof OperationModel && in_array($operation, [PqrCommunicationOperation::SendDraft, PqrCommunicationOperation::SendReply], true)) {
             $this->notificaciones->ejecutar($operationRecord);
         }
 

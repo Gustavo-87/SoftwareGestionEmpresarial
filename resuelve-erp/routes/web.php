@@ -88,6 +88,7 @@ Route::middleware(['auth', 'acceso.pendiente'])->group(function () {
     Route::post('/pqrs/{pqr}/respuestas', [PqrReplyController::class, 'store'])->name('pqrs.replies.store');
     Route::put('/pqrs/{pqr}/respuestas/{reply}', [PqrReplyController::class, 'update'])->name('pqrs.replies.update');
     Route::post('/pqrs/{pqr}/respuestas/{reply}/enviar', [PqrReplyController::class, 'send'])->name('pqrs.replies.send');
+    Route::post('/pqrs/{pqr}/respuestas/{reply}/anular', [PqrReplyController::class, 'anular'])->name('pqrs.replies.annul');
     Route::delete('/pqrs/{pqr}/respuestas/{reply}', [PqrReplyController::class, 'destroy'])->name('pqrs.replies.destroy');
     Route::post('/pqrs/{pqr}/comentarios-internos', [PqrInternalCommentController::class, 'store'])->name('pqrs.comments.store');
     Route::patch('/pqrs/{pqr}/accion-rapida', [PqrQuickActionController::class, 'update'])->name('pqrs.quick-update');
