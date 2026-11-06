@@ -31,7 +31,7 @@ final class AuthController extends Controller
 
     private const INTENTOS_IP = 20;
 
-    private const BLOQUEO_SEGUNDOS = 900;
+    private const BLOQUEO_SEGUNDOS = 300;
 
     public function login(
         Request $request,

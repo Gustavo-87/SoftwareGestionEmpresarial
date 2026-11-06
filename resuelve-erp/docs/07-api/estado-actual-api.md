@@ -29,7 +29,7 @@ compras ni inventario).
 Cuerpo: `email`, `password` y, opcionales, `membresia_id` y `rol_id`.
 
 - Normaliza el correo (minúsculas y recorte) y aplica el mismo límite de
-  intentos que el login web (3 por cuenta, 20 por IP, bloqueo de 900
+  intentos que el login web (3 por cuenta, 20 por IP, bloqueo de 300
   segundos; las claves de límite son compartidas entre canales). La respuesta
   de exceso de intentos es `429`.
 - Credenciales inválidas: `401` con el mismo mensaje del login web, sin

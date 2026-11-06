@@ -664,6 +664,22 @@ Evidencia: `resources/views/pqrs/panel.blade.php`,
 `resources/css/app.css`, `tests/Feature/PanelIndicadoresTest.php`,
 `tests/Feature/PanelPresentacionTest.php` y `tests/Feature/PanelOperativoTest.php`.
 
+## Panel operativo — tabla de PQRS recientes (5 de noviembre de 2026)
+
+Se añadió al panel una tabla compacta con las cinco PQRS más recientes,
+junto al Top 5 por tipo ya existente. La consulta parte de `ConsultaPqrsContextuales`
+y aplica el límite de registros propios cuando el rol no tiene `pqrs.ver_todas`.
+Cada fila muestra radicado, asunto, tipo, estado y fecha; el acceso al expediente
+solo aparece cuando `PqrPolicy` autoriza la consulta. En móvil, la tabla se
+presenta como tarjetas; el enlace «Ver bandeja» lleva al listado completo.
+
+La vista se comprobó en el navegador local con datos de la Copropiedad activa.
+La sintaxis PHP, la compilación de Vite y `git diff --check` pasaron. No se
+ejecutó la suite automatizada ni se verificaron tamaños móviles en esta tarea.
+
+Evidencia: `app/Http/Controllers/PqrController.php`,
+`resources/views/pqrs/panel.blade.php` y `resources/css/app.css`.
+
 ## Ajuste visual previo al cierre del Sprint 19 — rol activo y enlaces
 
 El selector nativo de rol activo del contexto operativo usa la paleta y el

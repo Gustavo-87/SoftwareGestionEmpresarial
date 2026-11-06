@@ -30,8 +30,11 @@ class AuthController extends Controller
     /** Solicitudes de recuperación de contraseña permitidas por IP. */
     private const SOLICITUDES_CONTRASENA_IP = 10;
 
-    /** Duración del bloqueo temporal: 15 minutos. */
-    private const BLOQUEO_SEGUNDOS = 900;
+    /** Duración del bloqueo de inicio de sesión: 5 minutos. */
+    private const BLOQUEO_LOGIN_SEGUNDOS = 300;
+
+    /** Ventana de limitación para solicitudes de recuperación: 15 minutos. */
+    private const BLOQUEO_RECUPERACION_SEGUNDOS = 900;
 
     public function create(): View
     {
@@ -67,8 +70,8 @@ class AuthController extends Controller
         }
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            RateLimiter::hit($claveCuenta, self::BLOQUEO_SEGUNDOS);
-            RateLimiter::hit($claveIp, self::BLOQUEO_SEGUNDOS);
+            RateLimiter::hit($claveCuenta, self::BLOQUEO_LOGIN_SEGUNDOS);
+            RateLimiter::hit($claveIp, self::BLOQUEO_LOGIN_SEGUNDOS);
 
             return back()
                 ->withErrors(['email' => 'El correo o la contraseña no son correctos.'])
@@ -176,8 +179,8 @@ class AuthController extends Controller
 
         if (! RateLimiter::tooManyAttempts($claveCuenta, self::SOLICITUDES_CONTRASENA)
             && ! RateLimiter::tooManyAttempts($claveIp, self::SOLICITUDES_CONTRASENA_IP)) {
-            RateLimiter::hit($claveCuenta, self::BLOQUEO_SEGUNDOS);
-            RateLimiter::hit($claveIp, self::BLOQUEO_SEGUNDOS);
+            RateLimiter::hit($claveCuenta, self::BLOQUEO_RECUPERACION_SEGUNDOS);
+            RateLimiter::hit($claveIp, self::BLOQUEO_RECUPERACION_SEGUNDOS);
             Password::sendResetLink($request->only('email'));
         }
 

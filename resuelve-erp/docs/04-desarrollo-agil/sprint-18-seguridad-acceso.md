@@ -449,6 +449,11 @@ curso y su cierre formal aguarda la aprobación del Product Owner.**
   N minutos») y es idéntico exista o no la cuenta.
 - Verificado mediante solicitudes HTTP directas al endpoint (sin interfaz).
 
+**Ajuste posterior (5 de noviembre de 2026):** el Product Owner redujo a 5
+minutos el bloqueo del inicio de sesión web y API. Se mantienen los límites de
+3 intentos por cuenta y 20 por IP. La recuperación de contraseña conserva su
+ventana de 15 minutos (3 solicitudes por cuenta y 10 por IP).
+
 ### 3. Recuperación de contraseña
 
 - Se reutiliza el broker de contraseñas de Laravel (`Password::sendResetLink`
