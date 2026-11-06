@@ -305,7 +305,7 @@ componente de anulación del proceso de salida de la guía final. La decisión d
 adaptar «anulación» al dominio residencial está aprobada por el Product Owner
 como **anulación comunicada y trazable de la respuesta oficial** (el documento
 de salida del proceso PQRS→respuesta); su validación como equivalencia con la
-guía queda pendiente de confirmación del docente. Alcance aprobado:
+guía. Esta adaptación está aprobada por el Product Owner para Resuelve ERP y no requiere aprobación docente para continuar. Alcance aprobado:
 
 - anular solo una respuesta oficial ya enviada (retirar un borrador sigue
   siendo una acción distinta: prec-comunicación);

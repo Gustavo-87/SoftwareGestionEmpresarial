@@ -11,8 +11,8 @@
   anulación del proceso de salida de la guía final.
 - **Decisión registrada:** la adaptación de «anulación» al dominio residencial
   está **aprobada por el Product Owner** como anulación comunicada y trazable de
-  la respuesta oficial. La validación de esta equivalencia con el docente queda
-  **pendiente** (no se afirma su aprobación).
+  la respuesta oficial. La adaptación está aprobada por el Product Owner para
+  Resuelve ERP y no requiere aprobación docente para continuar.
 - **Base:** cierre del Sprint 24 (HU-CONF-03).
 - **Número de sprint:** 25 (siguiente disponible tras el Sprint 24).
 - **Rama:** `sprint25-anulacion-respuestas` desde `main` (`4981638`).
@@ -84,7 +84,7 @@ está verificada** (el workflow se ejecuta con un `pull_request` hacia `main`).
 
 Kardex, inventario, ventas/compras, anulación de la PQR como entidad y
 reapertura automática. La validación de la equivalencia «anulación» con la
-guía comercial queda pendiente de confirmación del docente.
+guía comercial queda registrada por decisión del Product Owner y no requiere aprobación docente para continuar.
 
 ## 6. Evidencia
 
