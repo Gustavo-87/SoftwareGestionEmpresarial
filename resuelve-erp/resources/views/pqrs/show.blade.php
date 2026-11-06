@@ -107,7 +107,39 @@
     @endif
 </section>
 
-            <section class="expediente-section" aria-labelledby="respuestas-oficiales-title"><div class="expediente-section-heading"><div><p class="eyebrow">Comunicación con el radicador</p><h2 id="respuestas-oficiales-title">Respuestas oficiales</h2></div><span>{{ $respuestasEnviadas }} {{ $respuestasEnviadas === 1 ? 'enviada' : 'enviadas' }}</span></div>@php($oficiales = $respuestasVisibles->where('is_draft', false))@forelse($oficiales as $reply)<article class="reply-card official" aria-label="Respuesta oficial enviada"><div class="reply-heading"><span class="avatar small" aria-hidden="true">{{ Str::upper(Str::substr($reply->user?->name ?? 'NA', 0, 2)) }}</span><div><strong>{{ $reply->user?->name ?? 'Usuario' }}</strong><small>{{ $reply->sent_at?->locale('es')->diffForHumans() }}</small></div><span class="official-badge" aria-label="Respuesta oficial, inmutable">Respuesta oficial</span></div><p>{{ $reply->body }}</p>@if($reply->attachments)<div class="reply-files" role="list" aria-label="Archivos adjuntos de la respuesta oficial">@foreach($reply->attachments as $index => $file)<a href="{{ route('pqrs.replies.download', [$pqr, $reply, $index]) }}" role="listitem">Descargar {{ $file['name'] }}</a>@endforeach</div>@endif</article>@empty<div class="expediente-empty" role="status"><p>Aún no se han enviado respuestas oficiales al radicador.</p></div>@endforelse</section>
+            <section class="expediente-section" aria-labelledby="respuestas-oficiales-title"><div class="expediente-section-heading"><div><p class="eyebrow">Comunicación con el radicador</p><h2 id="respuestas-oficiales-title">Respuestas oficiales</h2></div><span>{{ $respuestasEnviadas }} {{ $respuestasEnviadas === 1 ? 'enviada' : 'enviadas' }}</span></div>@php($oficiales = $respuestasVisibles->where('is_draft', false))@forelse($oficiales as $reply)<article class="reply-card official" aria-label="Respuesta oficial enviada">
+                    <div class="reply-heading">
+                        <span class="avatar small" aria-hidden="true">{{ Str::upper(Str::substr($reply->user?->name ?? 'NA', 0, 2)) }}</span>
+                        <div><strong>{{ $reply->user?->name ?? 'Usuario' }}</strong><small>{{ $reply->sent_at?->locale('es')->diffForHumans() }}</small></div>
+                        @if($reply->estaAnulada())
+                            <span class="draft-badge" aria-label="Respuesta anulada">Respuesta anulada</span>
+                        @else
+                            <span class="official-badge" aria-label="Respuesta oficial, inmutable">Respuesta oficial</span>
+                        @endif
+                    </div>
+                    <p>{{ $reply->body }}</p>
+                    @if($reply->estaAnulada())
+                        <p class="section-help" role="note"><strong>Comunicación anulada</strong> el {{ $reply->anulada_at?->format('d/m/Y H:i') }} por {{ $reply->anuladaPor?->name ?? 'usuario' }}. Motivo: {{ $reply->motivo_anulacion }}. El contenido original se conserva íntegro por trazabilidad y no puede editarse ni reenviarse.</p>
+                    @endif
+                    @if($reply->attachments)
+                        <div class="reply-files" role="list" aria-label="Archivos adjuntos de la respuesta oficial">
+                            @foreach($reply->attachments as $index => $file)
+                                <a href="{{ route('pqrs.replies.download', [$pqr, $reply, $index]) }}" role="listitem">Descargar {{ $file['name'] }}</a>
+                            @endforeach
+                        </div>
+                    @endif
+                    @if($puedeGestionar && ! $reply->estaAnulada() && isset($replyOperationKeys['annul'][$reply->id]))
+                        <form method="POST" action="{{ route('pqrs.replies.annul', [$pqr, $reply]) }}">
+                            @csrf
+                            <input type="hidden" name="idempotency_key" value="{{ $replyOperationKeys['annul'][$reply->id] }}">
+                            <div class="field">
+                                <label for="motivo-anulacion-{{ $reply->id }}">Motivo de la anulación</label>
+                                <input id="motivo-anulacion-{{ $reply->id }}" name="motivo_anulacion" required maxlength="500" placeholder="Por qué se anula esta comunicación">
+                            </div>
+                            <button class="button subtle danger" data-confirm="Anular respuesta" data-confirm-message="La respuesta quedará marcada como anulada con tu motivo, pero permanecerá visible en el expediente por trazabilidad. Para corregirla deberás enviar una nueva respuesta oficial.">Anular respuesta</button>
+                        </form>
+                    @endif
+                </article>@empty<div class="expediente-empty" role="status"><p>Aún no se han enviado respuestas oficiales al radicador.</p></div>@endforelse</section>
 
             @php($borradoresPropios = $respuestasVisibles->where('is_draft', true)->where('user_id', auth()->id()))@if($puedeGestionar && $borradoresPropios->isNotEmpty())<section class="expediente-section" aria-labelledby="borradores-title"><div class="expediente-section-heading"><div><p class="eyebrow">Solo equipo autorizado</p><h2 id="borradores-title">Borradores propios</h2></div><span>{{ $borradoresPropios->count() }} {{ $borradoresPropios->count() === 1 ? 'borrador' : 'borradores' }}</span></div><p class="section-help">Estos borradores son internos y no han sido enviados al radicador.</p>@foreach($borradoresPropios as $reply)<article class="reply-card draft" aria-label="Borrador propio, no enviado"><div class="reply-heading"><span class="avatar small" aria-hidden="true">{{ Str::upper(Str::substr($reply->user?->name ?? 'NA', 0, 2)) }}</span><div><strong>{{ $reply->user?->name ?? 'Usuario' }}</strong><small>Borrador interno · No enviado</small></div><span class="draft-badge" aria-label="Borrador interno, no enviado al radicador">Borrador interno</span></div><p>{{ $reply->body }}</p>@if($reply->attachments)<div class="reply-files" role="list" aria-label="Archivos adjuntos del borrador">@foreach($reply->attachments as $index => $file)<a href="{{ route('pqrs.replies.download', [$pqr, $reply, $index]) }}" role="listitem">Descargar {{ $file['name'] }}</a>@endforeach</div>@endif<form method="POST" action="{{ route('pqrs.replies.update', [$pqr, $reply]) }}" enctype="multipart/form-data">@csrf @method('PUT')<input type="hidden" name="idempotency_key" value="{{ $replyOperationKeys['drafts'][$reply->id]['update_draft'] }}"><div class="field"><label for="draft-body-{{ $reply->id }}">Editar borrador</label><textarea id="draft-body-{{ $reply->id }}" name="body" rows="5" required>{{ $reply->body }}</textarea><input name="attachments[]" type="file" multiple></div><button class="button subtle">Actualizar borrador</button></form><div class="reply-actions"><form method="POST" action="{{ route('pqrs.replies.send', [$pqr, $reply]) }}">@csrf<input type="hidden" name="idempotency_key" value="{{ $replyOperationKeys['drafts'][$reply->id]['send_draft'] }}"><button class="button primary" data-confirm="Enviar borrador" data-confirm-message="El borrador se enviará como respuesta oficial al radicador.">Enviar borrador</button></form><form method="POST" action="{{ route('pqrs.replies.destroy', [$pqr, $reply]) }}">@csrf @method('DELETE')<input type="hidden" name="idempotency_key" value="{{ $replyOperationKeys['drafts'][$reply->id]['delete_draft'] }}"><button class="button subtle">Eliminar borrador</button></form></div></article>@endforeach</section>@endif
 

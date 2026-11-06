@@ -2,7 +2,7 @@
 
 ## Control documental
 
-- **Versión:** v1.11
+- **Versión:** v1.12
 - **Estado:** En construcción
 - **Fecha de creación:** 31 de julio de 2026
 - **Última actualización:** 5 de noviembre de 2026
@@ -297,6 +297,42 @@ Para comunicar formalmente una petición, queja, reclamo o sugerencia.
 Como Administrador  
 Quiero gestionar las PQRS de una Copropiedad y conservar su Historial  
 Para darles atención con trazabilidad.
+
+## Historia incorporada — Anulación trazable de respuestas oficiales
+
+El Product Owner aprobó el 5 de noviembre de 2026 incorporar HU-PQRS-04 para el
+componente de anulación del proceso de salida de la guía final. La decisión de
+adaptar «anulación» al dominio residencial está aprobada por el Product Owner
+como **anulación comunicada y trazable de la respuesta oficial** (el documento
+de salida del proceso PQRS→respuesta); su validación como equivalencia con la
+guía queda pendiente de confirmación del docente. Alcance aprobado:
+
+- anular solo una respuesta oficial ya enviada (retirar un borrador sigue
+  siendo una acción distinta: prec-comunicación);
+- conservar intactos cuerpo, adjuntos, fecha de envío, PQR y autor; exigir
+  motivo; la respuesta anulada no se edita, elimina, reactiva ni reenvía;
+- mostrar la respuesta en el expediente marcada como anulada, con trazabilidad
+  (ledger de operaciones, actuación pública y auditoría) y notificación al
+  residente;
+- reutilizar la autorización contextual de gestión efectiva del envío;
+- la PQR conserva su estado.
+
+### HU-PQRS-04 — Anulación de respuesta oficial
+
+Como Administrador  
+Quiero anular una respuesta oficial ya comunicada, dejando constancia del motivo  
+Para corregir comunicaciones erróneas sin que desaparezcan ni cambien sin
+trazabilidad.
+
+La implementación conserva las invariantes del ciclo de respuestas (una
+respuesta oficial es inmutable salvo la transición única de anulación) y no
+incorpora kardex, inventario ni anulación de la PQR.
+
+**Estado (Sprint 25, completado):** HU-PQRS-04 quedó implementada de principio
+a fin y cerrada el 5 de noviembre de 2026, con verificación local (6 pruebas de
+anulación, suite completa de 786: 777 aprobadas y 9 omitidas por MySQL, Pint
+aprobado) y ejecución real de GitHub Actions pendiente (ver
+[Sprint 25 — Anulación trazable de respuestas oficiales](sprint-25-anulacion-respuestas.md)).
 
 # 6. Épica: Gestión Documental
 

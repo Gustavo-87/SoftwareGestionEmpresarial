@@ -12,4 +12,5 @@ enum PqrCommunicationResultCode: string
     case DraftSent = 'draft_sent';
     case DraftDeleted = 'draft_deleted';
     case ReplySent = 'reply_sent';
+    case ReplyAnnulled = 'reply_annulled';
 }

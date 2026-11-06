@@ -74,6 +74,24 @@ class PqrReplyController extends Controller
         return back()->with('success', 'Borrador eliminado.');
     }
 
+    /** Anulación trazable de una respuesta oficial (HU-PQRS-04). */
+    public function anular(Request $request, Pqr $pqr, int $reply, ContextoOperativo $contexto, GestionarCicloRespuestaPqrs $ciclo): RedirectResponse
+    {
+        [$pqr, $respuesta] = $ciclo->autorizarMutacion($contexto, $pqr, $reply);
+        $datos = $request->validate(
+            ['motivo_anulacion' => ['required', 'string', 'max:500'], 'idempotency_key' => ['required', 'uuid']],
+            ['motivo_anulacion.required' => 'El motivo de la anulación es obligatorio.',
+                'motivo_anulacion.max' => 'El motivo no puede exceder 500 caracteres.'],
+        );
+        $request->session()->put($this->sessionKey('annul_reply', $reply), $datos['idempotency_key']);
+        $ciclo->lookup($pqr, $request->user(), PqrCommunicationOperation::AnnulReply, $datos['idempotency_key']);
+        $ciclo->annul($contexto, $request->user(), $pqr, $respuesta, $datos['motivo_anulacion'], $datos['idempotency_key']);
+        $request->session()->forget($this->sessionKey('annul_reply', $reply));
+        $request->attributes->set('auditoria_especifica_registrada', true);
+
+        return back()->with('success', 'Respuesta anulada. La comunicación original permanece en el expediente marcada como anulada.');
+    }
+
     public function download(Request $request, Pqr $pqr, PqrReply $reply, int $file, ContextoOperativo $contexto, ConsultaPqrsContextuales $consultaPqrs, VisibilidadBorradoresPqrs $visibilidadBorradores): StreamedResponse
     {
         $pqr = $consultaPqrs->resolver($contexto, $pqr->getKey());

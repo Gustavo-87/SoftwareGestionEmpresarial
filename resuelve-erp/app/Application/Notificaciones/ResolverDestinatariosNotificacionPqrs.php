@@ -19,7 +19,7 @@ final class ResolverDestinatariosNotificacionPqrs
         $candidatos = match ($event) {
             'pqr_creada' => User::query()->whereHas('membresiasCopropiedad', fn ($q) => $q->where('organizacion_id', $contexto->organizacion->id)->where('copropiedad_id', $contexto->copropiedad->id))->get(),
             'pqr_asignada' => collect([$pqr->assignee]),
-            'pqr_estado_actualizado', 'pqr_respuesta_enviada' => collect([$pqr->user]),
+            'pqr_estado_actualizado', 'pqr_respuesta_enviada', 'pqr_respuesta_anulada' => collect([$pqr->user]),
             'pqr_recordatorio_vencimiento' => collect([$pqr->user, $pqr->assignee]),
             default => collect(),
         };

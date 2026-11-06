@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PqrActivity extends Model
 {
-    public const PUBLIC_ACTIONS = ['created', 'updated', 'quick_action', 'sent_reply', 'tags_updated'];
+    public const PUBLIC_ACTIONS = ['created', 'updated', 'quick_action', 'sent_reply', 'tags_updated', 'annulled_reply'];
 
     protected $fillable = ['pqr_id', 'user_id', 'action', 'description', 'metadata'];
 

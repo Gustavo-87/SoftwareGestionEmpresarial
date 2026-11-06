@@ -79,6 +79,9 @@ patrón Laravel Event/Listener, sin cambiar sus efectos:
   descubrimiento automático (sin `EventServiceProvider`).
 - Un rollback de la transacción no dispara el evento ni sus efectos: el
   despacho ocurre solo tras el commit.
+- El evento `pqr_respuesta_anulada` (HU-PQRS-04) se añade a los cinco
+  aprobados y se comunica al radicador con la misma regla de destinatarios de
+  la respuesta enviada.
 - Quedan fuera de este patrón `pqr_asignada`, recordatorios y respuestas
   (flujo B-3), que conservan su invocación directa actual. No se modifican
   `PqrEventNotification`, el job de correo ni el scheduler.

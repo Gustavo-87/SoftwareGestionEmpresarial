@@ -424,6 +424,9 @@ class PqrController extends Controller
                 'send_draft' => $operationKey('send_draft', $reply->id),
                 'delete_draft' => $operationKey('delete_draft', $reply->id),
             ]])->all(),
+            'annul' => $pqr->replies->where('is_draft', false)->whereNull('anulada_at')->mapWithKeys(
+                fn (PqrReply $reply) => [$reply->id => $operationKey('annul_reply', $reply->id)],
+            )->all(),
         ] : [];
 
         $proximoPaso = match ($pqr->estado) {
