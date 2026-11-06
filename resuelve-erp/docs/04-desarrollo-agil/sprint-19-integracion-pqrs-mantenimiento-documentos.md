@@ -5,7 +5,8 @@
 - **Estado:** Cierre técnico aprobado por el Product Owner el 22 de octubre de
   2026. Condiciones 1–6 verificadas; la grabación del video académico queda
   **pendiente y fuera del cierre técnico**, con constancia explícita. El
-  versionado está preparado y pendiente de autorización para ejecutarse.
+  desarrollo quedó versionado en `ce18d1b` y está presente en `main`
+  (`a8d8166`), según la revisión del 5 de noviembre de 2026.
 - **Ajustes obligatorios aprobados:**
   1. **Idempotencia:** generar o vincular mantenimiento debe evitar duplicados
      por doble clic, reenvío o concurrencia mediante una operación idempotente
@@ -479,7 +480,11 @@ la PQRS**, que permaneció `radicada`; expediente PDF servido como
 `application/pdf`) y **cero entradas nuevas en `storage/logs/laravel.log`** tras
 la migración (las últimas son las del propio incidente, previas a ella).
 
-**Pendientes reales del Sprint 19:**
+**Estado previo al cierre técnico (registro histórico):**
+
+El siguiente listado corresponde al estado anterior a la aprobación del
+22 de octubre de 2026. El cierre aprobado y los pendientes que permanecen se
+registran en la sección siguiente; la implementación ya está versionada.
 
 1. **Cierre formal del sprint:** pendiente de aprobación del Product Owner; no
    se ha realizado commit, push ni acta de cierre.
@@ -504,10 +509,14 @@ pendiente; existe únicamente el guion aprobado como material fuente
 Quedan igualmente pendientes las capturas de aceptación visual del Product
 Owner. Estos pendientes no afectan el cierre técnico ni bloquean el Sprint 20.
 
-## Plan de versionado (preparado, pendiente de autorización)
+## Plan de versionado del cierre (registro histórico)
 
-Tres grupos separados; **no se ejecuta commit ni push hasta autorización
-expresa**:
+La implementación quedó versionada en `ce18d1b` y está presente en `main`
+(`a8d8166`), verificado el 5 de noviembre de 2026. El plan siguiente conserva
+la separación propuesta entonces; su ejecución requería autorización expresa.
+No representa un pendiente actual de integración de la implementación.
+
+El plan original distinguía tres grupos:
 
 1. **Commit funcional — `feat(sprint19): integración de PQRS, mantenimiento y
    documentos`:** casos de uso `app/Application/{Mantenimiento,Documentos,Pqrs}`,

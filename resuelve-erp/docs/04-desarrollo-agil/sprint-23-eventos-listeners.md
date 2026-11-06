@@ -3,8 +3,8 @@
 ## Estado y control documental
 
 - **Estado:** Completado. HU-NOT-03 implementada de principio a fin y
-  verificada localmente el 5 de noviembre de 2026. La ejecución real de
-  GitHub Actions queda **pendiente** y fuera de esta verificación.
+  verificada localmente el 5 de noviembre de 2026. La comprobación posterior
+  en GitHub Actions se registra en §4, con sus advertencias.
 - **Fecha de cierre técnico:** 5 de noviembre de 2026.
 - **Origen:** HU-NOT-03 (Product Backlog, Épica 7 — Notificaciones),
   incorporada y aprobada por el Product Owner el 5 de noviembre de 2026 para el
@@ -55,9 +55,14 @@ respuestas.
 | Suite completa (configuración aislada, SQLite en memoria) | **764 pruebas: 755 aprobadas y 9 omitidas (MySQL)**, 3624 aserciones, sin regresiones |
 | `vendor/bin/pint --test` | **Aprobado** |
 
-**Ámbito:** verificación **local**. La **ejecución real de GitHub Actions no
-está verificada** (el workflow activo se ejecuta con un `pull_request` hacia
-`main`); resultado, fecha y revisión siguen pendientes.
+**Ámbito:** verificación **local** histórica.
+
+**Verificación posterior en GitHub Actions:** el CI del PR #3 terminó con
+resultado satisfactorio el 5 de noviembre de 2026, con advertencias en
+las pruebas. Evidencia, revisión y resultados en
+[Integración continua](../08-despliegue/integracion-continua.md).
+Las cifras locales anteriores se conservan como registro histórico
+de la verificación de este sprint.
 
 ## 5. Evidencia
 
@@ -75,6 +80,6 @@ está verificada** (el workflow activo se ejecuta con un `pull_request` hacia
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Fecha de creación:** 5 de noviembre de 2026
 - **Fecha de última actualización:** 5 de noviembre de 2026
