@@ -122,7 +122,7 @@ Ejecutar las pruebas automatizadas:
 ./vendor/bin/sail artisan test
 ```
 
-La ejecución verificada del CI del PR #3 y sus advertencias están registradas en [Integración continua](docs/08-despliegue/integracion-continua.md). Los resultados locales de cada sprint se conservan en sus respectivas fichas.
+Las ejecuciones verificadas del CI, sus resultados y advertencias están registradas en [Integración continua](docs/08-despliegue/integracion-continua.md). Los resultados locales de cada sprint se conservan en sus respectivas fichas.
 
 ## Correo de demostración
 

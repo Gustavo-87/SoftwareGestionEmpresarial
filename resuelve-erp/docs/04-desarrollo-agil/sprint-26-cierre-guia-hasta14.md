@@ -34,6 +34,9 @@ final, video o etiqueta de entrega.
    seguridad detectados: Laravel 13.40.0, PhpSpreadsheet 5.10.0 y dependencias
    transitivas; `composer audit` queda sin avisos. PHP mínimo 8.3 conservado
    mediante `config.platform.php`; Activitylog 4.12.3 es compatible con él.
+   El cierre incluye las correcciones de desarrollo frontend detectadas al
+   revisar el CI: Vite 8.3.6, concurrently 9.2.5, shell-quote 1.12.0,
+   source-map-js 1.2.2 y PostCSS 8.5.32; `npm audit` reporta cero vulnerabilidades.
 7. El CI prepara un `.env` temporal desde el ejemplo, conservando las variables
    aisladas de pruebas y su `APP_KEY` efímera. El registro histórico del PR #3
    con advertencias se conserva y la siguiente ejecución se evalúa por separado.
@@ -82,7 +85,7 @@ cuando se indica la raíz del repositorio. No se declara instalado Breeze.
 ## Verificación
 
 - Suite local completa: **802 pruebas; 793 aprobadas, 9 omitidas por MySQL;
-  3.860 aserciones**, sin fallos ni advertencias de pruebas.
+  3.860 aserciones**, sin fallos ni advertencias de configuración.
 - `vendor/bin/pint --test`, `composer validate`, `composer audit` y compilación
   Vite satisfactorios; sin avisos de vulnerabilidades conocidas en Composer.
 - Interfaz de auditoría comprobada en escritorio y móvil, temas claro/oscuro,
@@ -95,6 +98,10 @@ cuando se indica la raíz del repositorio. No se declara instalado Breeze.
 
 ## Límites y continuación
 
+Este cierre no marca completada la HU-AUD-01 refinada del plan del Sprint 20:
+sus filtros separados por acción y recurso siguen pendientes. HU-AUD-02 y
+el mínimo técnico del requisito 10 sí quedan cubiertos por este bloque.
+
 La autenticación equivalente existente no satisface literalmente la mención
 de Breeze. La baja lógica de maestros usa la solución documentada del dominio.
 La recepción externa en Gmail necesita una credencial válida; no puede
@@ -104,5 +111,5 @@ Los datos de prueba por rol (16) y la retroalimentación original del avance 2
 
 ## Control documental
 
-- **Versión:** v1.0
+- **Versión:** v1.1
 - **Fecha:** 6 de noviembre de 2026 (America/Bogota)

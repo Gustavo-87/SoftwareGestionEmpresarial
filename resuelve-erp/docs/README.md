@@ -27,7 +27,8 @@ PQRS, Mantenimiento y Gestión Documental con autorización por Organización y
 Copropiedad, y dispone de una [API REST v1 con Sanctum](07-api/estado-actual-api.md)
 para autenticación, consulta y radicación de PQRS. La implementación de IA
 continúa pausada. La [integración continua](08-despliegue/integracion-continua.md)
-registra el CI satisfactorio del PR #3 y las advertencias de su ejecución.
+registra las ejecuciones verificadas de los PR, incluida la corrección de
+configuración de las pruebas y el cierre técnico del PR #5.
 
 ## Cómo consultar esta documentación
 

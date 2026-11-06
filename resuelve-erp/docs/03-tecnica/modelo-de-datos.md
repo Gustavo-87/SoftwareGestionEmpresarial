@@ -522,12 +522,14 @@ registros reales en los módulos principales: PQRS, mantenimientos y documentos.
 - `database/migrations/2026_08_20_180000_add_prioridad_to_pqrs_table.php`
 - `database/migrations/2026_08_21_180000_add_es_administrador_sistema_to_users_table.php`
 - `database/migrations/2026_08_22_140000_add_estado_to_users_table.php`
+- `database/migrations/2026_11_05_230000_create_activity_log_and_scope_audit_logs.php`
+- `app/Models/Activity.php`
 - `database/seeders/OrganizacionSeeder.php`
 - `database/seeders/CopropiedadSeeder.php`
 - `database/seeders/PersonaSeeder.php`
 
 ## Control documental
 
-- **Versión:** v1.5
+- **Versión:** v1.6
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 23 de septiembre de 2026
+- **Fecha de última actualización:** 6 de noviembre de 2026
