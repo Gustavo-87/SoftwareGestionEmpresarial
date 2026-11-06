@@ -8,14 +8,14 @@ use Tests\TestCase;
 
 /**
  * Protección contra intentos fallidos de inicio de sesión (ampliación del
- * Sprint 18): tres intentos fallidos y bloqueo temporal de 15 minutos, con
+ * Sprint 18): tres intentos fallidos y bloqueo temporal de 5 minutos, con
  * control combinado por cuenta e IP, sin limitar los ingresos correctos.
  */
 class AccesoIntentosFallidosTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_el_bloqueo_expira_a_los_quince_minutos(): void
+    public function test_el_bloqueo_expira_a_los_cinco_minutos(): void
     {
         User::factory()->create(['email' => 'bloqueo@example.com', 'password' => 'clave-correcta']);
         $incorrectas = ['email' => 'bloqueo@example.com', 'password' => 'incorrecta'];
@@ -30,7 +30,7 @@ class AccesoIntentosFallidosTest extends TestCase
         ])->assertSessionHasErrors('email');
         $this->assertGuest();
 
-        $this->travel(15)->minutes();
+        $this->travel(5)->minutes();
 
         $this->post(route('login.store'), [
             'email' => 'bloqueo@example.com',

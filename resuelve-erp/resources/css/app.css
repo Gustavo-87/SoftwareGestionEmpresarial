@@ -1252,6 +1252,33 @@ td small {
 .panel-page .stats-bar-track{height:12px}
 .panel-page :is(.stats-bar-label,.stats-bar-value){font-size:14px}
 
+/* Análisis y bandeja de PQRS recientes en una fila compacta. */
+.dashboard-insights-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);gap:12px;margin-top:12px}
+.dashboard-insights-grid>.panel{min-width:0;margin:0}
+.dashboard-recent-pqrs .panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
+.dashboard-recent-pqrs .panel-header h2{font-size:20px;line-height:1.3;margin:0}
+.dashboard-view-all{color:var(--green);font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap}
+.dashboard-view-all:hover,.dashboard-view-all:focus-visible{text-decoration:underline}
+.dashboard-pqrs-table{width:100%;min-width:0;border-collapse:collapse}
+.dashboard-pqrs-table th,.dashboard-pqrs-table td{padding:8px 10px;font-size:13px;vertical-align:middle}
+.dashboard-pqrs-table th{color:var(--muted);font-weight:700;text-align:left;white-space:nowrap}
+.dashboard-pqrs-table td small{display:block;margin-top:2px;color:var(--muted);font-size:12px}
+.dashboard-pqrs-subject{display:block;font-weight:700;overflow-wrap:anywhere}
+.dashboard-pqrs-table .status{font-size:12px;white-space:nowrap}
+.dashboard-open-pqrs{color:var(--green);font-weight:700;text-decoration:none}
+.dashboard-pqrs-mobile{display:none}
+@media(max-width:1024px){.dashboard-insights-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){
+    .dashboard-pqrs-table-wrap{display:none}
+    .dashboard-pqrs-mobile{display:grid;gap:8px;padding:0 12px 12px}
+    .dashboard-pqrs-card{display:grid;gap:6px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+    .dashboard-pqrs-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .dashboard-pqrs-card strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+    .dashboard-pqrs-card-type{font-size:13px;color:var(--muted)}
+.dashboard-pqrs-card-date{font-size:12px;color:var(--muted)}
+    .dashboard-pqrs-card a{font-size:14px;font-weight:700;text-decoration:none;min-height:40px;display:flex;align-items:center}
+}
+
 /* Identidad visual por módulo. */
 .modulo-pqrs-accent{border-left:4px solid var(--modulo-pqrs)}
 .modulo-mantenimiento-accent{border-left:4px solid var(--modulo-mantenimiento)}

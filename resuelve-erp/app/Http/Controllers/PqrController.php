@@ -44,12 +44,20 @@ class PqrController extends Controller
         $puedeConsultarDocumentos = $request->user()->can('viewAny', Documento::class);
         $puedeConsultarNotificaciones = $autorizacion->tienePermiso($contexto, 'notificaciones.consultar');
         $resumen = null;
+        $pqrsRecientes = collect();
 
         if ($puedeConsultarPqrs) {
             $baseQuery = $consultaPqrs->para($contexto);
             if (! $autorizacion->tienePermiso($contexto, 'pqrs.ver_todas')) {
                 $baseQuery->where('user_id', $request->user()->id);
             }
+
+            $pqrsRecientes = (clone $baseQuery)
+                ->with('tipoPqr')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->limit(5)
+                ->get();
 
             $hoy = app(CalendarioLaboralColombia::class)->hoy();
 
@@ -238,6 +246,7 @@ class PqrController extends Controller
 
         return view('pqrs.panel', [
             'resumen' => $resumen,
+            'pqrsRecientes' => $pqrsRecientes,
             'estadisticasEstados' => $estadisticasEstados ?? [],
             'estadisticasTipos' => $estadisticasTipos ?? [],
             'indicadores' => $indicadores,

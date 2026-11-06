@@ -78,22 +78,70 @@
             @endisset
         </section>
 
-        {{-- Top 5 de PQRS por tipo: bloque compacto exigido por la rúbrica. --}}
-        <section class="panel stats-panel modulo-pqrs-accent top-tipos">
-            <div class="panel-header"><h2>Top 5 de PQRS por tipo</h2></div>
-            <div class="stats-bars-container">
-                @forelse($estadisticasTipos as $tipo)
-                    <div class="stats-bar-row">
-                        <div class="stats-bar-label">{{ Str::limit($tipo['nombre'], 20) }}</div>
-                        <div class="stats-bar-track"><div class="stats-bar-fill" style="width:{{ $tipo['porcentaje'] }}%"></div></div>
-                        <div class="stats-bar-value">{{ $tipo['cantidad'] }}</div>
-                    </div>
-                @empty
-                    <div class="empty-state" style="padding:12px">
-                        <p>Sin tipos registrados</p>
-                    </div>
-                @endforelse
-            </div>
+        <section class="dashboard-insights-grid" aria-label="Análisis y solicitudes recientes">
+            {{-- Top 5 de PQRS por tipo: se conserva el indicador existente. --}}
+            <section class="panel stats-panel modulo-pqrs-accent top-tipos">
+                <div class="panel-header"><h2>Top 5 de PQRS por tipo</h2></div>
+                <div class="stats-bars-container">
+                    @forelse($estadisticasTipos as $tipo)
+                        <div class="stats-bar-row">
+                            <div class="stats-bar-label">{{ Str::limit($tipo['nombre'], 20) }}</div>
+                            <div class="stats-bar-track"><div class="stats-bar-fill" style="width:{{ $tipo['porcentaje'] }}%"></div></div>
+                            <div class="stats-bar-value">{{ $tipo['cantidad'] }}</div>
+                        </div>
+                    @empty
+                        <div class="empty-state" style="padding:12px">
+                            <p>Sin tipos registrados</p>
+                        </div>
+                    @endforelse
+                </div>
+            </section>
+
+            <section class="panel dashboard-recent-pqrs" aria-labelledby="pqrs-recientes-titulo">
+                <div class="panel-header">
+                    <h2 id="pqrs-recientes-titulo">PQRS recientes</h2>
+                    <a href="{{ route('pqrs.index') }}" class="dashboard-view-all">Ver bandeja <span aria-hidden="true">›</span></a>
+                </div>
+
+                <div class="table-wrap dashboard-pqrs-table-wrap">
+                    <table class="dashboard-pqrs-table">
+                        <thead><tr><th>Radicado</th><th>Solicitud</th><th>Estado</th><th>Fecha</th><th><span class="sr-only">Acción</span></th></tr></thead>
+                        <tbody>
+                            @forelse($pqrsRecientes as $pqr)
+                                <tr>
+                                    <td><span class="radicado">PQR-{{ str_pad($pqr->id, 4, '0', STR_PAD_LEFT) }}</span></td>
+                                    <td>
+                                        <span class="dashboard-pqrs-subject">{{ Str::limit($pqr->asunto, 48) }}</span>
+                                        <small>{{ $pqr->tipoPqr?->nombre ?? 'Sin tipo' }}</small>
+                                    </td>
+                                    <td><span class="status {{ $pqr->estado }}"><i aria-hidden="true"></i>{{ $pqr->estado_label }}</span></td>
+                                    <td>{{ $pqr->created_at->format('d/m/Y') }}</td>
+                                    <td>@can('view', $pqr)<a class="dashboard-open-pqrs" href="{{ route('pqrs.show', $pqr) }}" aria-label="Abrir expediente {{ $pqr->asunto }}">Abrir</a>@endcan</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5"><x-empty-state title="Sin PQRS recientes" description="No hay solicitudes autorizadas para mostrar en este contexto." /></td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-pqrs-mobile" aria-label="PQRS recientes">
+                    @forelse($pqrsRecientes as $pqr)
+                        <article class="dashboard-pqrs-card">
+                            <div class="dashboard-pqrs-card-top">
+                                <span class="radicado">PQR-{{ str_pad($pqr->id, 4, '0', STR_PAD_LEFT) }}</span>
+                                <span class="status {{ $pqr->estado }}"><i aria-hidden="true"></i>{{ $pqr->estado_label }}</span>
+                            </div>
+                            <strong>{{ Str::limit($pqr->asunto, 72) }}</strong>
+                            <span class="dashboard-pqrs-card-type">{{ $pqr->tipoPqr?->nombre ?? 'Sin tipo' }}</span>
+                            <span class="dashboard-pqrs-card-date">Radicada {{ $pqr->created_at->format('d/m/Y') }}</span>
+                            @can('view', $pqr)<a href="{{ route('pqrs.show', $pqr) }}" aria-label="Abrir expediente {{ $pqr->asunto }}">Abrir expediente <span aria-hidden="true">→</span></a>@endcan
+                        </article>
+                    @empty
+                        <x-empty-state title="Sin PQRS recientes" description="No hay solicitudes autorizadas para mostrar en este contexto." />
+                    @endforelse
+                </div>
+            </section>
         </section>
     @else
         <section class="panel"><x-empty-state title="No tienes acceso a PQRS" description="Tu acceso actual no permite consultar solicitudes en esta Copropiedad." /></section>
