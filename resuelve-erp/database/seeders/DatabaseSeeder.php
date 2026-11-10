@@ -98,6 +98,22 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(), 'password' => $demoPassword,
         ]);
 
+        foreach ([
+            'gestor' => 'Gestor de demostración',
+            'auditor' => 'Auditor de demostración',
+            'apoyo' => 'Apoyo de demostración',
+        ] as $rol => $nombre) {
+            User::firstOrCreate(
+                ['email' => "demo.{$rol}@example.test"],
+                [
+                    'name' => $nombre,
+                    'role' => $rol,
+                    'email_verified_at' => now(),
+                    'password' => $demoPassword,
+                ],
+            );
+        }
+
         if (Artisan::call('resuelve:crear-identidad-contextual-inicial') !== 0) {
             throw new RuntimeException('No fue posible sincronizar la identidad contextual de los usuarios de demostración.');
         }
