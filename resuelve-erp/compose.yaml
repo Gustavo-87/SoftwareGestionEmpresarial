@@ -56,6 +56,19 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    cola:
+        image: sail-8.5/app
+        working_dir: /var/www/html
+        entrypoint: ['php', 'artisan']
+        command: ['queue:work', 'database', '--queue=default', '--tries=3', '--timeout=60']
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mysql:
+                condition: service_healthy
+        restart: unless-stopped
 networks:
     sail:
         driver: bridge

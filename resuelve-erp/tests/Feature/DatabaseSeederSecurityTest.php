@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\SiteSetting;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -66,5 +67,32 @@ class DatabaseSeederSecurityTest extends TestCase
         $this->assertSame('Usuario externo', $unrelated->name);
         $this->assertSame('auditor', $unrelated->role);
         $this->assertSame($originalPasswordHash, $unrelated->password);
+    }
+
+    public function test_la_instalacion_de_demostracion_asigna_una_cuenta_por_rol_en_spatie(): void
+    {
+        $password = 'ClaveDemoSegura2026';
+        config(['resuelve.demo_password' => $password]);
+        $equipoAnterior = getPermissionsTeamId();
+
+        try {
+            $this->seed(DatabaseSeeder::class);
+            $this->artisan('resuelve:migrar-rbac-spatie')->assertSuccessful();
+            setPermissionsTeamId(SiteSetting::current()->copropiedad_id);
+
+            foreach ([
+                'admin' => 'gestionpqrs7@gmail.com',
+                'gestor' => 'demo.gestor@example.test',
+                'auditor' => 'demo.auditor@example.test',
+                'apoyo' => 'demo.apoyo@example.test',
+                'residente' => 'residentepqrs@gmail.com',
+            ] as $rol => $email) {
+                $usuario = User::query()->where('email', $email)->firstOrFail();
+                $this->assertSame([$rol], $usuario->getRoleNames()->all(), $email);
+                $this->assertTrue(Hash::check($password, $usuario->password), $email);
+            }
+        } finally {
+            setPermissionsTeamId($equipoAnterior);
+        }
     }
 }

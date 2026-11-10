@@ -102,17 +102,38 @@ Asignar también a `RESUELVE_DEMO_PASSWORD` una contraseña de demostración de 
 
 ### 3. Iniciar la aplicación
 
+Para preparar una base de demostración nueva:
+
 ```bash
 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail artisan resuelve:migrar-rbac-spatie
 ./vendor/bin/sail npm install
 ./vendor/bin/sail npm run build
 ```
 
+El seeder crea las cuentas y sus membresías. El comando siguiente a la siembra
+carga sus roles y permisos efectivos en Spatie. Usa esta secuencia en una base
+de demostración nueva. El seeder actualiza datos y contraseñas de las cuentas
+de demostración existentes.
+
 ### 4. Acceder
 
 Abrir [Resuelve ERP](http://localhost:8083) en el navegador.
+
+| Rol | Cuenta de demostración |
+| --- | --- |
+| Administrador | `gestionpqrs7@gmail.com` |
+| Gestor | `demo.gestor@example.test` |
+| Auditor | `demo.auditor@example.test` |
+| Apoyo | `demo.apoyo@example.test` |
+| Residente | `residentepqrs@gmail.com` |
+
+En una base nueva, las cinco cuentas usan la contraseña que hayas configurado
+en `RESUELVE_DEMO_PASSWORD`. Las direcciones `example.test` sirven para
+iniciar sesión y probar permisos. Para probar notificaciones de esas cuentas,
+usa el [buzón local Mailpit](docs/08-despliegue/correo-y-automatizacion.md).
 
 ## Pruebas
 
