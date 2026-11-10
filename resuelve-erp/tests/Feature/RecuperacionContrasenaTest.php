@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -17,6 +18,27 @@ use Tests\TestCase;
 class RecuperacionContrasenaTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_el_correo_de_recuperacion_se_renderiza_en_espanol(): void
+    {
+        app()->setLocale('en');
+        config(['mail.default' => 'array']);
+        $user = User::factory()->create();
+
+        $this->post(route('password.email'), ['email' => $user->email])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $mail = Mail::mailer('array')->getSymfonyTransport()->messages()->sole()->getOriginalMessage();
+        $this->assertSame('Restablece tu contraseña', $mail->getSubject());
+        foreach ([$mail->getHtmlBody(), $mail->getTextBody()] as $body) {
+            $this->assertStringContainsString('Restablecer contraseña', $body);
+            $this->assertStringContainsString('Este enlace vence en', $body);
+            $this->assertStringContainsString('Si el botón', $body);
+            $this->assertStringContainsString('Todos los derechos reservados.', $body);
+            $this->assertStringContainsString('/restablecer-contrasena/', $body);
+        }
+    }
 
     public function test_la_solicitud_es_neutra_exista_o_no_la_cuenta(): void
     {
