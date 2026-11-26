@@ -18,7 +18,7 @@ use Tests\TestCase;
 /**
  * Dashboard del administrador de organización: encabezado de una fila,
  * prioridades compactas, resumen por módulo con barras por estados y
- * Top 5 de PQRS por tipo. Actividad reciente y accesos rápidos no se
+ * PQRS por tipo. Actividad reciente y accesos rápidos no se
  * presentan en esta vista; sus capacidades siguen disponibles en el producto.
  */
 class PanelIndicadoresTest extends TestCase
@@ -79,7 +79,7 @@ class PanelIndicadoresTest extends TestCase
         $this->assertStringContainsString('PQRS vencidas', $contenido);
         $this->assertStringContainsString('Próximas a vencer', $contenido);
         $this->assertStringContainsString('PQRS pendientes', $contenido);
-        $this->assertStringContainsString('Top 5 de PQRS por tipo', $contenido);
+        $this->assertStringContainsString('PQRS por tipo', $contenido);
 
         // Módulos: total y distribución por estados con cantidades legibles.
         $this->assertMatchesRegularExpression('/operativo-total-pqrs">3 solicitudes</', $contenido);

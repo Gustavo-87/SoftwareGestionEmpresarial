@@ -47,7 +47,7 @@ class SettingsController extends Controller
             'logo_scale' => ['nullable', 'numeric', 'min:0.75', 'max:2.0'],
             'logo_offset_x' => ['nullable', 'integer', 'min:-50', 'max:50'],
             'logo_offset_y' => ['nullable', 'integer', 'min:-50', 'max:50'],
-        ]);
+        ], trans('formularios.mensajes', [], 'es'), trans('formularios.campos', [], 'es'));
         $data['color_principal'] = SiteSetting::COLOR_INSTITUCIONAL;
         $data['logo_scale'] = $data['logo_scale'] ?? 1.0;
         $data['logo_offset_x'] = $data['logo_offset_x'] ?? 0;

@@ -47,7 +47,7 @@
             @isset($indicadores['pqrs'])
                 <div class="panel stats-panel operativo-pqrs-panel">
                     <div class="panel-header">
-                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon blue">✉</span><h2>PQRS</h2></div>
+                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon blue">@include('admin.partials.navigation-icon', ['icon' => 'pqrs'])</span><h2>PQRS</h2></div>
                         <span class="operativo-total operativo-total-pqrs">{{ $indicadores['pqrs']['total'] }} solicitudes</span>
                     </div>
                     <p class="modulo-integracion">{{ $indicadores['pqrs']['con_mantenimiento'] ?? 0 }} con mantenimiento vinculado</p>
@@ -58,7 +58,7 @@
             @isset($indicadores['mantenimiento'])
                 <div class="panel stats-panel operativo-mantenimiento-panel">
                     <div class="panel-header">
-                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon mint">⚙</span><h2>Mantenimiento</h2></div>
+                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon mint">@include('admin.partials.navigation-icon', ['icon' => 'mantenimiento'])</span><h2>Mantenimiento</h2></div>
                         <span class="operativo-total operativo-total-mantenimiento">{{ $indicadores['mantenimiento']['total'] }} registros</span>
                     </div>
                     <p class="modulo-integracion">{{ $indicadores['mantenimiento']['vinculados'] ?? 0 }} vinculados · {{ $indicadores['mantenimiento']['abiertos'] ?? 0 }} abiertos · {{ $indicadores['mantenimiento']['con_evidencia'] ?? 0 }} con evidencia</p>
@@ -69,7 +69,7 @@
             @isset($indicadores['documentos'])
                 <div class="panel stats-panel operativo-documentos-panel">
                     <div class="panel-header">
-                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon violet">▤</span><h2>Documentos</h2></div>
+                        <div class="dashboard-heading-info"><span class="dashboard-section-icon metric-icon violet">@include('admin.partials.navigation-icon', ['icon' => 'documentos'])</span><h2>Documentos</h2></div>
                         <span class="operativo-total operativo-total-documentos">{{ $indicadores['documentos']['total'] }} documentos</span>
                     </div>
                     <x-modulo-estados :estados="$indicadores['documentos']['estados']" :total="$indicadores['documentos']['total']" vacio="Sin documentos en este contexto." />
@@ -79,23 +79,38 @@
         </section>
 
         <section class="dashboard-insights-grid" aria-label="Análisis y solicitudes recientes">
-            {{-- Top 5 de PQRS por tipo: se conserva el indicador existente. --}}
-            <section class="panel stats-panel modulo-pqrs-accent top-tipos">
-                <div class="panel-header"><h2>Top 5 de PQRS por tipo</h2></div>
-                <div class="stats-bars-container">
-                    @forelse($estadisticasTipos as $tipo)
-                        <div class="stats-bar-row">
-                            <div class="stats-bar-label">{{ Str::limit($tipo['nombre'], 20) }}</div>
-                            <div class="stats-bar-track"><div class="stats-bar-fill" style="width:{{ $tipo['porcentaje'] }}%"></div></div>
-                            <div class="stats-bar-value">{{ $tipo['cantidad'] }}</div>
-                        </div>
-                    @empty
-                        <div class="empty-state" style="padding:12px">
-                            <p>Sin tipos registrados</p>
-                        </div>
-                    @endforelse
-                </div>
-            </section>
+            <div class="dashboard-analysis">
+                <section class="panel stats-panel modulo-pqrs-accent top-tipos">
+                    <div class="panel-header"><h2>PQRS por tipo</h2></div>
+                    <div class="stats-bars-container">
+                        @forelse($estadisticasTipos as $tipo)
+                            <div class="stats-bar-row">
+                                <div class="stats-bar-label">{{ Str::limit($tipo['nombre'], 20) }}</div>
+                                <div class="stats-bar-track"><div class="stats-bar-fill" style="width:{{ $tipo['porcentaje'] }}%"></div></div>
+                                <div class="stats-bar-value">{{ $tipo['cantidad'] }}</div>
+                            </div>
+                        @empty
+                            <div class="empty-state" style="padding:12px">
+                                <p>Sin tipos registrados</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </section>
+
+                <section class="panel dashboard-monthly" aria-labelledby="pqrs-mensuales-titulo">
+                    <div class="panel-header"><h2 id="pqrs-mensuales-titulo">PQRS radicadas por mes</h2></div>
+                    @php($maximoMensual = max(1, max(array_column($radicacionesMensuales, 'total'))))
+                    <ul class="dashboard-monthly-bars">
+                        @foreach($radicacionesMensuales as $mes)
+                            <li>
+                                <strong>{{ $mes['total'] }}</strong>
+                                <span class="dashboard-monthly-track" aria-hidden="true"><span style="height:{{ round(100 * $mes['total'] / $maximoMensual) }}%"></span></span>
+                                <span>{{ $mes['etiqueta'] }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            </div>
 
             <section class="panel dashboard-recent-pqrs" aria-labelledby="pqrs-recientes-titulo">
                 <div class="panel-header">

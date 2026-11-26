@@ -53,7 +53,7 @@ class PanelPresentacionTest extends TestCase
 
         $this->actingAsContextual($user)->get(route('panel'))
             ->assertOk()
-            ->assertSee('Top 5 de PQRS por tipo')
+            ->assertSee('PQRS por tipo')
             ->assertSee('Ir a PQRS')
             ->assertDontSee('Actividad reciente')
             ->assertDontSee('Accesos rápidos')

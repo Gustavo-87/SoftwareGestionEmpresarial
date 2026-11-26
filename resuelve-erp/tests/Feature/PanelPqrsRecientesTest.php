@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Copropiedad;
 use App\Models\Pqr;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesInstitutionalContext;
 use Tests\TestCase;
@@ -32,14 +33,16 @@ class PanelPqrsRecientesTest extends TestCase
 
     public function test_sin_ver_todas_se_muestran_solo_las_propias(): void
     {
+        $this->travelTo(Carbon::parse('2026-11-10 12:00:00', 'America/Bogota'));
         [$org, $cop] = $this->createInstitutionalContext();
         $user = User::factory()->create(['role' => 'residente']);
         $otro = User::factory()->create();
         $this->createContextualIdentity($user, $org, $cop, 'residente', ['pqrs.listar', 'pqrs.ver_propias']);
-        $propia = Pqr::factory()->paraContexto($org, $cop)->create(['user_id' => $user->id, 'asunto' => 'Solicitud propia']);
-        Pqr::factory()->paraContexto($org, $cop)->create(['user_id' => $otro->id, 'asunto' => 'AJENA_NO_VISIBLE']);
+        $propia = Pqr::factory()->paraContexto($org, $cop)->create(['user_id' => $user->id, 'asunto' => 'Solicitud propia', 'fecha_radicacion' => '2026-11-09']);
+        Pqr::factory()->paraContexto($org, $cop)->create(['user_id' => $otro->id, 'asunto' => 'AJENA_NO_VISIBLE', 'fecha_radicacion' => '2026-11-09']);
         $this->actingAsContextual($user)->get(route('panel'))->assertOk()->assertSee('Solicitud propia')->assertDontSee('AJENA_NO_VISIBLE')
-            ->assertViewHas('pqrsRecientes', fn ($registros) => $registros->modelKeys() === [$propia->id]);
+            ->assertViewHas('pqrsRecientes', fn ($registros) => $registros->modelKeys() === [$propia->id])
+            ->assertViewHas('radicacionesMensuales', fn ($meses) => array_column($meses, 'total') === [0, 0, 0, 0, 0, 1]);
     }
 
     public function test_listar_no_concede_enlace_a_un_expediente_sin_permiso_de_ver(): void

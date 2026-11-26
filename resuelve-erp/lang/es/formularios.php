@@ -1,0 +1,40 @@
+<?php
+
+return [
+    'mensajes' => [
+        'required' => 'Completa el campo :attribute.',
+        'string' => 'El campo :attribute debe contener texto.',
+        'integer' => 'Introduce un número entero para :attribute.',
+        'numeric' => 'Introduce un número para :attribute.',
+        'email' => 'Introduce una dirección válida en :attribute.',
+        'in' => 'Selecciona una opción válida para :attribute.',
+        'file' => 'Selecciona un archivo válido.',
+        'image' => 'Selecciona una imagen válida.',
+        'mimes' => 'Selecciona un archivo de uno de estos formatos: :values.',
+        'max' => [
+            'string' => 'El campo :attribute admite hasta :max caracteres.',
+            'numeric' => 'El valor máximo de :attribute es :max.',
+            'file' => 'El archivo supera el límite de :max KB.',
+        ],
+        'min' => ['numeric' => 'El valor mínimo de :attribute es :min.'],
+        'between' => ['numeric' => 'Introduce un valor entre :min y :max para :attribute.'],
+    ],
+    'campos' => [
+        'titulo' => 'título',
+        'descripcion' => 'descripción',
+        'tipo' => 'tipo de documento',
+        'categoria' => 'categoría',
+        'nivel_acceso' => 'nivel de acceso',
+        'propietario_documental_user_id' => 'propietario documental',
+        'nombre_conjunto' => 'nombre del conjunto',
+        'nit' => 'NIT',
+        'representante_legal' => 'representante legal',
+        'direccion' => 'dirección',
+        'telefono' => 'teléfono',
+        'email' => 'correo institucional',
+        'dias_respuesta' => 'plazo de respuesta',
+        'logo_scale' => 'zoom del logo',
+        'logo_offset_x' => 'desplazamiento horizontal del logo',
+        'logo_offset_y' => 'desplazamiento vertical del logo',
+    ],
+];

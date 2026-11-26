@@ -1,6 +1,7 @@
 /* Menús desplegables de navegación superior — event delegation. */
 const mainNav = document.querySelector('#mainNav');
 const navToggle = document.querySelector('#navToggle');
+const mobileProfile = document.querySelector('.navbar-mobile-profile');
 
 function closeAllDropdowns() {
     document.querySelectorAll('.nav-dropdown.open').forEach((d) => {
@@ -40,6 +41,11 @@ mainNav?.addEventListener('click', (event) => {
 /* Teclado: Enter/Space en trigger, Escape global. */
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
+        if (mobileProfile?.open) {
+            mobileProfile.open = false;
+            mobileProfile.querySelector('summary')?.focus();
+            return;
+        }
         const activeAdminDropdown = document.activeElement?.closest('.admin-navigation .nav-dropdown.open');
         closeAllDropdowns();
         if (mainNav?.classList.contains('open')) {
@@ -64,6 +70,7 @@ mainNav?.addEventListener('keydown', (event) => {
 /* Click fuera cierra dropdowns. */
 document.addEventListener('click', (event) => {
     if (!event.target.closest('.nav-dropdown')) closeAllDropdowns();
+    if (mobileProfile?.open && !mobileProfile.contains(event.target)) mobileProfile.open = false;
     if (!event.target.closest('#navbar') && mainNav?.classList.contains('open')) {
         mainNav.classList.remove('open');
         navToggle?.setAttribute('aria-expanded', 'false');
@@ -72,6 +79,7 @@ document.addEventListener('click', (event) => {
 
 /* Menú móvil: toggle. */
 navToggle?.addEventListener('click', () => {
+    if (mobileProfile?.open) mobileProfile.open = false;
     const isOpen = mainNav?.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', String(isOpen));
     if (isOpen) mainNav?.querySelector('a, button')?.focus();

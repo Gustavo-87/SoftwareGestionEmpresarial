@@ -706,3 +706,22 @@ Owner. **Cierre formal y aceptación visual aún pendientes.**
 Evidencia de código: `resources/css/app.css`,
 `resources/views/mantenimiento/index.blade.php` y
 `tests/Feature/MantenimientoTest.php`.
+
+## Ajustes visuales de noviembre de 2026
+
+El panel dedica dos tercios del espacio de análisis de escritorio a PQRS
+recientes. La distribución por tipo y las radicaciones de los últimos seis
+meses usan las mismas reglas de visibilidad que los indicadores. En móvil,
+los expedientes recientes preceden a las gráficas.
+
+La cabecera móvil concentra menú, campana, tema y perfil en una fila. El perfil
+contiene la acción de cierre de sesión. El Centro de Reportes usa márgenes
+comunes para filtros, indicadores y descargas. Los formularios de radicación,
+mantenimiento, documentos e identidad comparten estilos de foco y muestran
+los errores de validación junto al campo correspondiente.
+
+El logo y los colores institucionales conservan la configuración vigente.
+
+Herramientas del equipo presenta Reportes como un acceso compacto, separa
+el formulario de las plantillas guardadas y usa texto legible en las ayudas
+y el catálogo de etiquetas.

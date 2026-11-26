@@ -8,7 +8,7 @@
     ];
 @endphp
 
-<form method="POST" action="{{ route('pqrs.store') }}" class="form-panel pqr-create-form" enctype="multipart/form-data" data-pqr-create-form @if($errors->any()) data-has-errors @endif>
+<form method="POST" action="{{ route('pqrs.store') }}" class="form-panel pqr-create-form visual-form" enctype="multipart/form-data" data-pqr-create-form @if($errors->any()) data-has-errors @endif>
     @csrf
 
     <div class="form-intro pqr-create-intro">

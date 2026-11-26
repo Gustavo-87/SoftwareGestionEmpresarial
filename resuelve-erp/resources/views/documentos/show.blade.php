@@ -148,7 +148,7 @@
                     <summary class="button subtle">Cargar nueva versión</summary>
                     <form method="POST" action="{{ route('documentos.versions.store',$documento) }}" enctype="multipart/form-data" class="document-upload-form">
                         @csrf
-                        <div class="field"><label>Archivo<input type="file" name="archivo" required></label>@error('archivo')<small class="field-error">{{ $message }}</small>@enderror</div>
+                        <div class="field"><label>Archivo<input type="file" name="archivo" required @error('archivo') aria-invalid="true" aria-describedby="archivo-error" @enderror></label><x-field-error field="archivo" /></div>
                         <div class="field"><label>Versión sustituida (opcional)<select name="sustituye_version_id"><option value="">No sustituye una versión</option>@foreach($versiones as $version)<option value="{{ $version->id }}">Versión {{ $version->numero }} · {{ $estadoVersion[$version->estado->value] ?? $version->estado->value }}</option>@endforeach</select></label><small class="field-help">Solo se muestran versiones de este Documento.</small></div>
                         <button class="button primary">Cargar versión</button>
                     </form>

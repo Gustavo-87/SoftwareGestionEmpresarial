@@ -1,8 +1,20 @@
 # MER Resuelve ERP
-[Ver imagen del MER](diagrama_mer.png)
-[Fuente editable del MER](erDiagram.mmd)
 
-El modelo representa las entidades y relaciones de la plataforma para la administración de copropiedades. El avance de implementación se documenta por separado.
+## Figura para el informe
+
+La [imagen resumida para Word](mer-resumen-informe.png) muestra las relaciones principales de organización y comunidad, atención de PQRS y mantenimiento con evidencia documental. A un ancho de 15,5 cm conserva las proporciones y cabe en una página vertical. El esquema físico completo puede citarse como anexo.
+
+## Esquema físico implementado
+
+[Abrir el diagrama completo como imagen ampliable](mer-fisico.svg)
+
+El [MER físico editable en Mermaid](mer-fisico.mmd) reúne las 50 tablas resultantes de aplicar las [migraciones del proyecto](../../database/migrations/) en una base SQLite temporal. Incluye las 467 columnas y las 81 claves foráneas declaradas. En Visual Studio Code, abre el archivo y ejecuta `Mermaid: Preview Diagram` para ver el diagrama.
+
+Cada línea lleva los nombres de las columnas de la tabla hija que forman la clave foránea. Por ejemplo, `mantenimientos.pqr_id` es opcional y permite asociar varios mantenimientos a una PQRS. Las claves compuestas se representan con una sola línea. Las asociaciones polimórficas, como el destinatario de una notificación, se reconocen por sus columnas de tipo e identificador. Los tipos de columna corresponden a SQLite. El [modelo de datos](modelo-de-datos.md) detalla reglas de integridad y particularidades de MySQL.
+
+## Modelo conceptual del negocio
+
+El diagrama siguiente resume la administración de copropiedades y sus procesos. También se puede consultar como [imagen](diagrama_mer.png) o abrir su [fuente editable en Mermaid](erDiagram.mmd).
 
 > **Implementación física (Sprint 19).** La integración operativa usa las
 > tablas `mantenimientos` (con `pqr_id` para la PQRS de origen,
