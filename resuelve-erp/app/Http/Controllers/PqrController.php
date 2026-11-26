@@ -59,6 +59,7 @@ class PqrController extends Controller implements HasMiddleware
         $puedeConsultarNotificaciones = $autorizacion->tienePermiso($contexto, 'notificaciones.consultar');
         $resumen = null;
         $pqrsRecientes = collect();
+        $radicacionesMensuales = [];
 
         if ($puedeConsultarPqrs) {
             $baseQuery = $consultaPqrs->para($contexto);
@@ -74,6 +75,20 @@ class PqrController extends Controller implements HasMiddleware
                 ->get();
 
             $hoy = app(CalendarioLaboralColombia::class)->hoy();
+            $primerMes = $hoy->startOfMonth()->subMonths(5);
+            $totalesPorMes = (clone $baseQuery)
+                ->whereBetween('fecha_radicacion', [$primerMes->toDateString(), $hoy->toDateString()])
+                ->selectRaw('SUBSTR(fecha_radicacion, 1, 7) as mes, COUNT(*) as total')
+                ->groupByRaw('SUBSTR(fecha_radicacion, 1, 7)')
+                ->pluck('total', 'mes');
+
+            foreach (range(0, 5) as $indice) {
+                $mes = $primerMes->addMonths($indice)->locale('es');
+                $radicacionesMensuales[] = [
+                    'etiqueta' => $mes->isoFormat('MMM YY'),
+                    'total' => (int) $totalesPorMes->get($mes->format('Y-m'), 0),
+                ];
+            }
 
             $resumen = [
                 'total' => (clone $baseQuery)->count(),
@@ -261,6 +276,7 @@ class PqrController extends Controller implements HasMiddleware
         return view('pqrs.panel', [
             'resumen' => $resumen,
             'pqrsRecientes' => $pqrsRecientes,
+            'radicacionesMensuales' => $radicacionesMensuales,
             'estadisticasEstados' => $estadisticasEstados ?? [],
             'estadisticasTipos' => $estadisticasTipos ?? [],
             'indicadores' => $indicadores,
@@ -381,13 +397,15 @@ class PqrController extends Controller implements HasMiddleware
             'descripcion.required' => 'La descripción es obligatoria.',
             'tipo_pqr_id.required' => 'El tipo de solicitud es obligatorio.',
             'string' => 'El :attribute debe ser texto.',
-            'max.string' => 'El :attribute no debe superar :max caracteres.',
+            'max' => [
+                'string' => 'El :attribute no debe superar :max caracteres.',
+                'array' => 'No puedes adjuntar más de :max archivos.',
+                'file' => 'Cada :attribute no debe superar 10 MB.',
+            ],
             'date' => 'La :attribute debe ser una fecha válida.',
             'exists' => 'El :attribute seleccionado no es válido.',
             'array' => 'Los :attribute deben enviarse como una lista.',
-            'max.array' => 'No puedes adjuntar más de :max archivos.',
             'file' => 'Cada :attribute debe ser un archivo válido.',
-            'max.file' => 'Cada :attribute no debe superar 10 MB.',
             'mimes' => 'Cada :attribute debe tener un formato permitido.',
         ], [
             'asunto' => 'asunto',

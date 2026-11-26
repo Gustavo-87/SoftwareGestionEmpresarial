@@ -66,7 +66,7 @@ class DocumentoController extends Controller implements HasMiddleware
 
     public function store(Request $request, ContextoOperativo $contexto, CrearDocumento $crear, CargarVersionDocumento $cargar): RedirectResponse
     {
-        $data = $request->validate(['tipo' => ['required', Rule::in(['documento_general', 'reglamento', 'manual_convivencia', 'acta'])], 'categoria' => ['required', Rule::in(['normativo', 'administrativo', 'gobierno_copropiedad', 'contractual', 'financiero', 'comunicaciones', 'otro'])], 'titulo' => ['required', 'string', 'max:180'], 'descripcion' => ['nullable', 'string'], 'nivel_acceso' => ['required', Rule::in(['administrativo', 'interno', 'comunidad'])], 'propietario_documental_user_id' => ['required', 'integer'], 'archivo' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,docx']]);
+        $data = $request->validate(['tipo' => ['required', Rule::in(['documento_general', 'reglamento', 'manual_convivencia', 'acta'])], 'categoria' => ['required', Rule::in(['normativo', 'administrativo', 'gobierno_copropiedad', 'contractual', 'financiero', 'comunicaciones', 'otro'])], 'titulo' => ['required', 'string', 'max:180'], 'descripcion' => ['nullable', 'string'], 'nivel_acceso' => ['required', Rule::in(['administrativo', 'interno', 'comunidad'])], 'propietario_documental_user_id' => ['required', 'integer'], 'archivo' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,docx']], trans('formularios.mensajes', [], 'es'), trans('formularios.campos', [], 'es'));
         $archivo = $data['archivo'] ?? null;
         unset($data['archivo']);
         $documento = DB::transaction(function () use ($request, $contexto, $crear, $cargar, $data, $archivo): Documento {

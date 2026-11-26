@@ -46,7 +46,19 @@
             @endif
             <button class="theme-toggle" id="themeToggle" type="button" aria-label="Activar modo oscuro"><span class="sun">☀</span><span class="moon">☾</span></button>
             <span class="avatar navbar-avatar" title="{{ auth()->user()->name }}">{{ Str::upper(Str::substr(auth()->user()->name, 0, 2)) }}</span>
-            <form method="POST" action="{{ route('logout') }}" class="logout-form">@csrf<button class="logout-text" type="submit">Cerrar sesión</button></form>
+            <details class="navbar-mobile-profile">
+                <summary aria-label="Menú de perfil">
+                    @include('admin.partials.navigation-icon', ['icon' => 'users'])
+                </summary>
+                <div class="navbar-mobile-profile-menu">
+                    <strong>{{ auth()->user()->name }}</strong>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="button subtle">Cerrar sesión</button>
+                    </form>
+                </div>
+            </details>
+            <form method="POST" action="{{ route('logout') }}" class="logout-form navbar-desktop-logout">@csrf<button class="logout-text" type="submit">Cerrar sesión</button></form>
         </div>
     </div>
 </header>

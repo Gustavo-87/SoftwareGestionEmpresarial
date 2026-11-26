@@ -91,7 +91,7 @@ Los estados utilizados en este índice son:
 | [IA — Asistencia documental con revisión humana](03-tecnica/ia-asistencia-documental.md) | Aprobado | Formalizar el Diseño Técnico Definitivo de HU-IA-01, sus contratos, procesamiento, trazabilidad, seguridad y separación académica. |
 | [Dependencias](03-tecnica/dependencias.md) | Pendiente | Registrar paquetes de backend y frontend y su uso verificable. |
 | [Configuración técnica](03-tecnica/configuracion-tecnica.md) | Pendiente | Describir base de datos, sesión, caché, colas, correo y filesystem. |
-| [MER Resuelve ERP](03-tecnica/mer-resuelve-erp.md) | Completado | Presentar el diagrama entidad-relación integral de Resuelve ERP, con [diagrama_mer.png](03-tecnica/diagrama_mer.png) (imagen del MER) y [erDiagram.mmd](03-tecnica/erDiagram.mmd) (fuente editable) como recursos asociados. |
+| [MER Resuelve ERP](03-tecnica/mer-resuelve-erp.md) | Completado | Consultar el [esquema físico de las migraciones](03-tecnica/mer-fisico.mmd) y el modelo conceptual del negocio en [imagen](03-tecnica/diagrama_mer.png) o [fuente editable](03-tecnica/erDiagram.mmd). |
 
 ### 04. Desarrollo ágil
 
@@ -264,6 +264,6 @@ antes de avanzar a capacidades nuevas:
 
 ## Control documental
 
-- **Versión:** v1.53
+- **Versión:** v1.54
 - **Fecha de creación:** 30 de julio de 2026
-- **Fecha de última actualización:** 6 de noviembre de 2026
+- **Fecha de última actualización:** 25 de noviembre de 2026

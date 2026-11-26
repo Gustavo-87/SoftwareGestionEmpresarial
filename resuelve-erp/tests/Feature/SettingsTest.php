@@ -58,6 +58,25 @@ class SettingsTest extends TestCase
         $this->assertSame(12, $settings->copropiedad->configuracion->dias_respuesta);
     }
 
+    public function test_el_error_de_longitud_del_nit_se_muestra_junto_al_campo_en_espanol(): void
+    {
+        $manager = User::factory()->create(['role' => 'gestor']);
+        [$organizacion, $copropiedad] = $this->createInstitutionalContext();
+        $this->createContextualIdentity($manager, $organizacion, $copropiedad, 'gestor', ['configuracion.gestionar']);
+
+        $this->actingAsContextual($manager)
+            ->from(route('settings.edit'))
+            ->followingRedirects()
+            ->put(route('settings.update'), [
+                'nombre_conjunto' => 'Conjunto Los Robles',
+                'nit' => str_repeat('9', 41),
+                'dias_respuesta' => 15,
+            ])
+            ->assertOk()
+            ->assertSee('aria-describedby="nit-error"', false)
+            ->assertSee('El campo NIT admite hasta 40 caracteres.');
+    }
+
     public function test_manager_can_upload_an_institutional_logo(): void
     {
         Storage::fake('public');

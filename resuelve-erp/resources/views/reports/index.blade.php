@@ -10,7 +10,7 @@
         description="Indicadores de la copropiedad activa y descarga de los informes autorizados."
     />
 
-    <section class="panel" aria-labelledby="reportes-pqrs">
+    <section class="panel reports-section" aria-labelledby="reportes-pqrs">
         <div class="panel-header">
             <div>
                 <h2 id="reportes-pqrs">PQRS</h2>
@@ -39,7 +39,7 @@
         </div>
     </section>
 
-    <section class="panel" aria-labelledby="reportes-mantenimiento">
+    <section class="panel reports-section" aria-labelledby="reportes-mantenimiento">
         <div class="panel-header">
             <div>
                 <h2 id="reportes-mantenimiento">Mantenimiento</h2>
@@ -78,7 +78,7 @@
         @endif
     </section>
 
-    <section class="panel" aria-labelledby="reportes-documentos">
+    <section class="panel reports-section" aria-labelledby="reportes-documentos">
         <div class="panel-header">
             <div>
                 <h2 id="reportes-documentos">Documentos</h2>
@@ -120,7 +120,7 @@
         @endif
     </section>
 
-    <section class="panel" aria-labelledby="reportes-consolidado">
+    <section class="panel reports-section" aria-labelledby="reportes-consolidado">
         <div class="panel-header">
             <div>
                 <h2 id="reportes-consolidado">Consolidado General</h2>

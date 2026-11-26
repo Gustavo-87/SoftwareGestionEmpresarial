@@ -20,7 +20,7 @@ class DocumentoVersionController extends Controller
 {
     public function store(Request $request, Documento $documento, ContextoOperativo $contexto, CargarVersionDocumento $cargar): RedirectResponse
     {
-        $data = $request->validate(['archivo' => ['required', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,docx']]);
+        $data = $request->validate(['archivo' => ['required', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,docx']], trans('formularios.mensajes', [], 'es'), trans('formularios.campos', [], 'es'));
         $sustituye = $request->filled('sustituye_version_id') ? app(ConsultaDocumentosContextuales::class)->resolverVersion($contexto, $documento, $request->integer('sustituye_version_id')) : null;
         $cargar->ejecutar($contexto, $request->user(), $documento, $data['archivo'], 'usuario', $sustituye);
 

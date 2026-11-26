@@ -1,0 +1,765 @@
+erDiagram
+    %% Resuelve ERP. Esquema físico obtenido al ejecutar las migraciones en SQLite.
+    %% Cada línea representa una clave foránea. Su etiqueta identifica las columnas de la tabla hija.
+    %% PK = clave primaria, FK = clave foránea, UK = columna con unicidad individual.
+    %% Las restricciones únicas compuestas se anotan junto a cada entidad.
+
+    %% Organización y comunidad
+    organizaciones {
+        integer id PK
+        varchar nombre
+        varchar identificacion_tributaria UK
+        varchar email
+        varchar telefono
+        varchar estado
+        datetime desactivada_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en copropiedades(id, organizacion_id).
+    %% Unicidad conjunta en copropiedades(organizacion_id, nit).
+    copropiedades {
+        integer id PK
+        integer organizacion_id FK
+        varchar nombre
+        varchar nit
+        varchar representante_legal
+        varchar direccion
+        varchar ciudad
+        varchar telefono
+        varchar email
+        varchar estado
+        datetime desactivada_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    configuraciones_organizacion {
+        integer id PK
+        integer organizacion_id FK, UK
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en configuraciones_copropiedad(copropiedad_id, organizacion_id).
+    configuraciones_copropiedad {
+        integer id PK
+        integer organizacion_id FK
+        integer copropiedad_id FK, UK
+        varchar color_principal
+        varchar logo_path
+        integer dias_respuesta
+        datetime created_at
+        datetime updated_at
+    }
+
+    site_settings {
+        integer id PK
+        varchar nombre_conjunto
+        varchar nit
+        varchar representante_legal
+        varchar direccion
+        varchar ciudad
+        varchar telefono
+        varchar email
+        varchar color_principal
+        integer dias_respuesta
+        datetime created_at
+        datetime updated_at
+        varchar logo_path
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        numeric logo_scale
+        integer logo_offset_x
+        integer logo_offset_y
+    }
+
+    users {
+        integer id PK
+        varchar name
+        varchar email UK
+        datetime email_verified_at
+        varchar password
+        varchar remember_token
+        datetime created_at
+        datetime updated_at
+        varchar role
+        varchar tower
+        varchar unit
+        tinyint(1) es_administrador_sistema
+        varchar estado
+        datetime desactivado_at
+    }
+
+    %% Unicidad conjunta en personas(id, organizacion_id).
+    %% Unicidad conjunta en personas(organizacion_id, identificacion).
+    personas {
+        integer id PK
+        integer organizacion_id FK
+        integer usuario_id FK
+        varchar tipo_persona
+        varchar nombre_razon_social
+        varchar identificacion
+        varchar email
+        varchar telefono
+        varchar estado
+        datetime desactivada_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en unidades_privadas(copropiedad_id, codigo).
+    %% Unicidad conjunta en unidades_privadas(id, organizacion_id, copropiedad_id).
+    unidades_privadas {
+        integer id PK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        varchar codigo
+        varchar numero_nombre
+        varchar torre_bloque
+        varchar tipo
+        varchar estado
+        datetime desactivada_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en vinculos_unidad(persona_id, unidad_privada_id, tipo_vinculo, vigente_desde).
+    vinculos_unidad {
+        integer id PK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        integer persona_id FK
+        integer unidad_privada_id FK
+        varchar tipo_vinculo
+        varchar estado
+        date vigente_desde
+        date vigente_hasta
+        varchar fuente
+        text observacion
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% site_settings(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades |o..o{ site_settings : "copropiedad_id, organizacion_id"
+    %% unidades_privadas(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades ||..o{ unidades_privadas : "copropiedad_id, organizacion_id"
+    %% configuraciones_copropiedad(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades ||..o| configuraciones_copropiedad : "copropiedad_id, organizacion_id"
+    organizaciones |o..o{ site_settings : "organizacion_id"
+    organizaciones ||..o{ copropiedades : "organizacion_id"
+    organizaciones ||..o{ personas : "organizacion_id"
+    organizaciones ||..o| configuraciones_organizacion : "organizacion_id"
+    %% vinculos_unidad(persona_id, organizacion_id) → personas(id, organizacion_id).
+    personas ||..o{ vinculos_unidad : "persona_id, organizacion_id"
+    %% vinculos_unidad(unidad_privada_id, organizacion_id, copropiedad_id) → unidades_privadas(id, organizacion_id, copropiedad_id).
+    unidades_privadas ||..o{ vinculos_unidad : "unidad_privada_id, organizacion_id, copropiedad_id"
+    users |o..o{ personas : "usuario_id"
+
+    %% Membresías y autorización contextual
+    %% Unicidad conjunta en membresias_organizacion(id, organizacion_id).
+    %% Unicidad conjunta en membresias_organizacion(usuario_id, organizacion_id).
+    membresias_organizacion {
+        integer id PK
+        integer usuario_id FK
+        integer organizacion_id FK
+        varchar estado
+        datetime vigente_desde
+        datetime vigente_hasta
+        integer creada_por FK
+        text motivo_terminacion
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en membresias_copropiedad(id, organizacion_id, copropiedad_id).
+    %% Unicidad conjunta en membresias_copropiedad(usuario_id, copropiedad_id).
+    membresias_copropiedad {
+        integer id PK
+        integer usuario_id FK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        varchar estado
+        datetime vigente_desde
+        datetime vigente_hasta
+        integer creada_por FK
+        text motivo_terminacion
+        datetime created_at
+        datetime updated_at
+        integer rol_activo_id FK
+    }
+
+    %% Unicidad conjunta en roles(copropiedad_id, name, guard_name).
+    roles {
+        integer id PK
+        integer copropiedad_id
+        varchar name
+        varchar guard_name
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en permissions(name, guard_name).
+    permissions {
+        integer id PK
+        varchar name
+        varchar guard_name
+        datetime created_at
+        datetime updated_at
+        varchar nombre
+        varchar modulo
+        text descripcion
+        varchar estado
+    }
+
+    role_has_permissions {
+        integer permission_id PK, FK
+        integer role_id PK, FK
+    }
+
+    model_has_roles {
+        integer role_id PK, FK
+        varchar model_type PK
+        integer model_id PK
+        integer copropiedad_id PK
+    }
+
+    model_has_permissions {
+        integer permission_id PK, FK
+        varchar model_type PK
+        integer model_id PK
+        integer copropiedad_id PK
+    }
+
+    %% Unicidad conjunta en roles_contextuales(id, ambito_aplicable).
+    roles_contextuales {
+        integer id PK
+        varchar clave UK
+        varchar nombre
+        text descripcion
+        varchar ambito_aplicable
+        varchar estado
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en permisos_contextuales(id, ambito_aplicable).
+    permisos_contextuales {
+        integer id PK
+        varchar clave UK
+        varchar modulo
+        varchar accion
+        text descripcion
+        varchar ambito_aplicable
+        varchar estado
+        datetime created_at
+        datetime updated_at
+    }
+
+    rol_permiso_contextual {
+        integer rol_id PK, FK
+        integer permiso_id PK, FK
+        varchar ambito_aplicable FK
+    }
+
+    membresia_organizacion_rol {
+        integer id PK
+        integer membresia_organizacion_id FK
+        integer rol_id FK
+        integer organizacion_id FK
+        varchar ambito_rol FK
+        varchar estado
+        datetime vigente_desde
+        datetime vigente_hasta
+        integer asignado_por FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    membresia_copropiedad_rol {
+        integer id PK
+        integer membresia_copropiedad_id FK
+        integer rol_id FK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        varchar ambito_rol FK
+        varchar estado
+        datetime vigente_desde
+        datetime vigente_hasta
+        integer asignado_por FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% membresias_copropiedad(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades ||..o{ membresias_copropiedad : "copropiedad_id, organizacion_id"
+    %% membresia_copropiedad_rol(membresia_copropiedad_id, organizacion_id, copropiedad_id) → membresias_copropiedad(id, organizacion_id, copropiedad_id).
+    membresias_copropiedad ||..o{ membresia_copropiedad_rol : "membresia_copropiedad_id, organizacion_id, copropiedad_id"
+    %% membresia_organizacion_rol(membresia_organizacion_id, organizacion_id) → membresias_organizacion(id, organizacion_id).
+    membresias_organizacion ||..o{ membresia_organizacion_rol : "membresia_organizacion_id, organizacion_id"
+    organizaciones ||..o{ membresias_organizacion : "organizacion_id"
+    %% rol_permiso_contextual(permiso_id, ambito_aplicable) → permisos_contextuales(id, ambito_aplicable).
+    permisos_contextuales ||..o{ rol_permiso_contextual : "permiso_id, ambito_aplicable"
+    permissions ||--o{ model_has_permissions : "permission_id"
+    permissions ||--o{ role_has_permissions : "permission_id"
+    roles |o..o{ membresias_copropiedad : "rol_activo_id"
+    roles ||--o{ model_has_roles : "role_id"
+    roles ||--o{ role_has_permissions : "role_id"
+    %% membresia_copropiedad_rol(rol_id, ambito_rol) → roles_contextuales(id, ambito_aplicable).
+    roles_contextuales ||..o{ membresia_copropiedad_rol : "rol_id, ambito_rol"
+    %% membresia_organizacion_rol(rol_id, ambito_rol) → roles_contextuales(id, ambito_aplicable).
+    roles_contextuales ||..o{ membresia_organizacion_rol : "rol_id, ambito_rol"
+    %% rol_permiso_contextual(rol_id, ambito_aplicable) → roles_contextuales(id, ambito_aplicable).
+    roles_contextuales ||..o{ rol_permiso_contextual : "rol_id, ambito_aplicable"
+    users |o..o{ membresia_copropiedad_rol : "asignado_por"
+    users |o..o{ membresia_organizacion_rol : "asignado_por"
+    users |o..o{ membresias_copropiedad : "creada_por"
+    users |o..o{ membresias_organizacion : "creada_por"
+    users ||..o{ membresias_copropiedad : "usuario_id"
+    users ||..o{ membresias_organizacion : "usuario_id"
+
+    %% Radicación y seguimiento de PQRS
+    tipo_pqrs {
+        integer id PK
+        varchar nombre
+        text descripcion
+        datetime created_at
+        datetime updated_at
+        datetime desactivada_at
+    }
+
+    %% Unicidad conjunta en pqrs(id, organizacion_id, copropiedad_id).
+    pqrs {
+        integer id PK
+        varchar asunto
+        text descripcion
+        date fecha_radicacion
+        date fecha_limite_respuesta
+        varchar estado
+        integer user_id FK
+        integer tipo_pqr_id FK
+        datetime created_at
+        datetime updated_at
+        integer assigned_to_id FK
+        datetime last_reminder_at
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        varchar prioridad
+    }
+
+    pqr_attachments {
+        integer id PK
+        integer pqr_id FK
+        varchar original_name
+        varchar path
+        varchar mime_type
+        integer size
+        datetime created_at
+        datetime updated_at
+    }
+
+    pqr_activities {
+        integer id PK
+        integer pqr_id FK
+        integer user_id FK
+        varchar action
+        varchar description
+        text metadata
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en pqr_replies(pqr_id, id).
+    %% Unicidad conjunta en pqr_replies(pqr_id, official_response_slot).
+    pqr_replies {
+        integer id PK
+        integer pqr_id FK
+        integer user_id FK
+        text body
+        integer is_draft
+        text attachments
+        datetime sent_at
+        datetime created_at
+        datetime updated_at
+        integer official_response_slot "calculada"
+        datetime deleted_at
+        datetime anulada_at
+        integer anulada_por_user_id
+        varchar motivo_anulacion
+    }
+
+    %% Unicidad conjunta en pqr_internal_comments(pqr_id, id).
+    pqr_internal_comments {
+        integer id PK
+        integer pqr_id FK
+        integer user_id FK
+        text body
+        datetime created_at
+        datetime updated_at
+    }
+
+    pqr_communication_operations {
+        integer id PK
+        integer pqr_id FK
+        integer actor_id FK
+        char(36) actor_uuid
+        varchar(50) operation
+        char(36) idempotency_key UK
+        char(64) payload_sha256
+        varchar(40) result_code
+        varchar(20) status
+        varchar(20) cleanup_status
+        text cleanup_manifest
+        varchar(20) notification_status
+        integer pqr_reply_id FK
+        integer pqr_internal_comment_id FK
+        datetime completed_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en pqr_tags(copropiedad_id, name).
+    %% Unicidad conjunta en pqr_tags(id, organizacion_id, copropiedad_id).
+    pqr_tags {
+        integer id PK
+        varchar name
+        varchar color
+        datetime created_at
+        datetime updated_at
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        tinyint(1) activo
+    }
+
+    pqr_pqr_tag {
+        integer pqr_id PK, FK
+        integer pqr_tag_id PK, FK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+    }
+
+    satisfaction_surveys {
+        integer id PK
+        integer pqr_id FK, UK
+        integer user_id FK
+        integer rating
+        text comment
+        datetime created_at
+        datetime updated_at
+    }
+
+    response_templates {
+        integer id PK
+        varchar name
+        varchar subject
+        text body
+        integer created_by FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    automation_rules {
+        integer id PK
+        varchar name
+        integer tipo_pqr_id FK
+        integer assign_to_id FK
+        varchar set_status
+        tinyint(1) active
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% pqr_tags(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades ||..o{ pqr_tags : "copropiedad_id, organizacion_id"
+    %% pqrs(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades ||..o{ pqrs : "copropiedad_id, organizacion_id"
+    organizaciones ||..o{ pqr_tags : "organizacion_id"
+    organizaciones ||..o{ pqrs : "organizacion_id"
+    %% pqr_communication_operations(pqr_id, pqr_internal_comment_id) → pqr_internal_comments(pqr_id, id).
+    pqr_internal_comments |o..o{ pqr_communication_operations : "pqr_id, pqr_internal_comment_id"
+    %% pqr_communication_operations(pqr_id, pqr_reply_id) → pqr_replies(pqr_id, id).
+    pqr_replies |o..o{ pqr_communication_operations : "pqr_id, pqr_reply_id"
+    pqr_tags ||--o{ pqr_pqr_tag : "pqr_tag_id"
+    %% pqr_pqr_tag(pqr_tag_id, organizacion_id, copropiedad_id) → pqr_tags(id, organizacion_id, copropiedad_id).
+    pqr_tags ||..o{ pqr_pqr_tag : "pqr_tag_id, organizacion_id, copropiedad_id"
+    pqrs ||--o{ pqr_pqr_tag : "pqr_id"
+    pqrs ||..o{ pqr_activities : "pqr_id"
+    pqrs ||..o{ pqr_attachments : "pqr_id"
+    pqrs ||..o{ pqr_communication_operations : "pqr_id"
+    pqrs ||..o{ pqr_internal_comments : "pqr_id"
+    %% pqr_pqr_tag(pqr_id, organizacion_id, copropiedad_id) → pqrs(id, organizacion_id, copropiedad_id).
+    pqrs ||..o{ pqr_pqr_tag : "pqr_id, organizacion_id, copropiedad_id"
+    pqrs ||..o{ pqr_replies : "pqr_id"
+    pqrs ||..o| satisfaction_surveys : "pqr_id"
+    tipo_pqrs |o..o{ automation_rules : "tipo_pqr_id"
+    tipo_pqrs ||..o{ pqrs : "tipo_pqr_id"
+    users |o..o{ automation_rules : "assign_to_id"
+    users |o..o{ pqr_activities : "user_id"
+    users |o..o{ pqr_communication_operations : "actor_id"
+    users |o..o{ pqr_internal_comments : "user_id"
+    users |o..o{ pqr_replies : "user_id"
+    users |o..o{ pqrs : "assigned_to_id"
+    users |o..o{ response_templates : "created_by"
+    users ||..o{ pqrs : "user_id"
+    users ||..o{ satisfaction_surveys : "user_id"
+
+    %% Mantenimiento y gestión documental
+    mantenimientos {
+        integer id PK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        integer solicitante_id FK
+        integer responsable_id FK
+        varchar titulo
+        text descripcion
+        date fecha_programada
+        varchar estado
+        datetime created_at
+        datetime updated_at
+        integer pqr_id FK
+        varchar idempotency_key UK
+        text resultado_publico
+        text resultado_interno
+        integer resultado_registrado_por_user_id FK
+        datetime resultado_registrado_at
+        datetime finalizado_at
+    }
+
+    %% Unicidad conjunta en documentos(id, organizacion_id, copropiedad_id).
+    documentos {
+        integer id PK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        varchar(20) ambito
+        integer propietario_documental_user_id FK
+        varchar(30) tipo
+        varchar(40) categoria
+        varchar(180) titulo
+        text descripcion
+        varchar(20) nivel_acceso
+        varchar(20) estado
+        integer creado_por_user_id FK
+        integer archivado_por_user_id FK
+        datetime archivado_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en documento_versiones(documento_id, hash_sha256).
+    %% Unicidad conjunta en documento_versiones(documento_id, numero).
+    %% Unicidad conjunta en documento_versiones(id, documento_id, organizacion_id, copropiedad_id).
+    documento_versiones {
+        integer id PK
+        integer documento_id FK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        integer numero
+        varchar(30) estado
+        varchar(20) origen
+        varchar(255) nombre_original
+        varchar(500) ruta_archivo
+        varchar(120) mime_type
+        varchar(20) extension
+        bigint tamano_bytes
+        char(64) hash_sha256
+        date vigente_desde
+        date vigente_hasta
+        integer sustituye_version_id FK, UK
+        integer cargada_por_user_id FK
+        varchar(180) nombre_cargador
+        integer sometida_por_user_id FK
+        varchar(180) nombre_sometedor
+        datetime sometida_at
+        integer aprobada_por_user_id FK
+        varchar(180) nombre_aprobador
+        datetime aprobada_at
+        integer rechazada_por_user_id FK
+        varchar(180) nombre_rechazador
+        datetime rechazada_at
+        text observacion_rechazo
+        integer pendiente_documento_id UK "calculada"
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% Unicidad conjunta en documento_actuaciones(id, documento_id, organizacion_id, copropiedad_id).
+    documento_actuaciones {
+        integer id PK
+        integer documento_id FK
+        integer documento_version_id FK
+        integer organizacion_id FK
+        integer copropiedad_id FK
+        varchar(80) accion
+        varchar(1000) detalle
+        integer actor_user_id FK
+        varchar(180) nombre_actor
+        datetime created_at
+    }
+
+    %% Unicidad conjunta en mantenimiento_documento_evidencia(mantenimiento_id, documento_version_id).
+    mantenimiento_documento_evidencia {
+        integer id PK
+        integer mantenimiento_id FK
+        integer documento_id FK
+        integer documento_version_id FK
+        integer vinculado_por_user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% documentos(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades |o..o{ documentos : "copropiedad_id, organizacion_id"
+    %% mantenimientos(copropiedad_id, organizacion_id) → copropiedades(id, organizacion_id).
+    copropiedades ||..o{ mantenimientos : "copropiedad_id, organizacion_id"
+    %% documento_actuaciones(documento_version_id, documento_id, organizacion_id, copropiedad_id) → documento_versiones(id, documento_id, organizacion_id, copropiedad_id).
+    documento_versiones |o..o{ documento_actuaciones : "documento_version_id, documento_id, organizacion_id, copropiedad_id"
+    %% documento_versiones(sustituye_version_id, documento_id, organizacion_id, copropiedad_id) → documento_versiones(id, documento_id, organizacion_id, copropiedad_id).
+    documento_versiones |o..o| documento_versiones : "sustituye_version_id, documento_id, organizacion_id, copropiedad_id"
+    documento_versiones ||..o{ mantenimiento_documento_evidencia : "documento_version_id"
+    %% documento_actuaciones(documento_id, organizacion_id, copropiedad_id) → documentos(id, organizacion_id, copropiedad_id).
+    documentos ||..o{ documento_actuaciones : "documento_id, organizacion_id, copropiedad_id"
+    %% documento_versiones(documento_id, organizacion_id, copropiedad_id) → documentos(id, organizacion_id, copropiedad_id).
+    documentos ||..o{ documento_versiones : "documento_id, organizacion_id, copropiedad_id"
+    documentos ||..o{ mantenimiento_documento_evidencia : "documento_id"
+    mantenimientos ||..o{ mantenimiento_documento_evidencia : "mantenimiento_id"
+    organizaciones ||..o{ documentos : "organizacion_id"
+    organizaciones ||..o{ mantenimientos : "organizacion_id"
+    pqrs |o..o{ mantenimientos : "pqr_id"
+    users |o..o{ documento_actuaciones : "actor_user_id"
+    users |o..o{ documento_versiones : "aprobada_por_user_id"
+    users |o..o{ documento_versiones : "cargada_por_user_id"
+    users |o..o{ documento_versiones : "rechazada_por_user_id"
+    users |o..o{ documento_versiones : "sometida_por_user_id"
+    users |o..o{ documentos : "archivado_por_user_id"
+    users |o..o{ documentos : "creado_por_user_id"
+    users |o..o{ mantenimiento_documento_evidencia : "vinculado_por_user_id"
+    users |o..o{ mantenimientos : "responsable_id"
+    users |o..o{ mantenimientos : "resultado_registrado_por_user_id"
+    users ||..o{ documentos : "propietario_documental_user_id"
+    users ||..o{ mantenimientos : "solicitante_id"
+
+    %% Auditoría, notificaciones e infraestructura
+    activity_log {
+        integer id PK
+        varchar log_name
+        text description
+        varchar subject_type
+        integer subject_id
+        varchar causer_type
+        integer causer_id
+        varchar event
+        varchar batch_uuid
+        text properties
+        integer organizacion_id
+        integer copropiedad_id
+        datetime created_at
+        datetime updated_at
+    }
+
+    audit_logs {
+        integer id PK
+        integer user_id FK
+        varchar action
+        varchar auditable_type
+        integer auditable_id
+        varchar ip_address
+        text metadata
+        datetime created_at
+        datetime updated_at
+        integer organizacion_id
+        integer copropiedad_id
+    }
+
+    notifications {
+        varchar id PK
+        varchar type
+        varchar notifiable_type
+        integer notifiable_id
+        text data
+        datetime read_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    personal_access_tokens {
+        integer id PK
+        varchar tokenable_type
+        integer tokenable_id
+        text name
+        varchar token UK
+        text abilities
+        datetime last_used_at
+        datetime expires_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    sessions {
+        varchar id PK
+        integer user_id
+        varchar ip_address
+        text user_agent
+        text payload
+        integer last_activity
+    }
+
+    password_reset_tokens {
+        varchar email PK
+        varchar token
+        datetime created_at
+    }
+
+    cache {
+        varchar key PK
+        text value
+        integer expiration
+    }
+
+    cache_locks {
+        varchar key PK
+        varchar owner
+        integer expiration
+    }
+
+    jobs {
+        integer id PK
+        varchar queue
+        text payload
+        integer attempts
+        integer reserved_at
+        integer available_at
+        integer created_at
+    }
+
+    job_batches {
+        varchar id PK
+        varchar name
+        integer total_jobs
+        integer pending_jobs
+        integer failed_jobs
+        text failed_job_ids
+        text options
+        integer cancelled_at
+        integer created_at
+        integer finished_at
+    }
+
+    failed_jobs {
+        integer id PK
+        varchar uuid UK
+        varchar connection
+        varchar queue
+        text payload
+        text exception
+        datetime failed_at
+    }
+
+    migrations {
+        integer id PK
+        varchar migration
+        integer batch
+    }
+
+    users |o..o{ audit_logs : "user_id"
